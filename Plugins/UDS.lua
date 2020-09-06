@@ -37,7 +37,7 @@ local sid_dict_description = {
     [0x3F] = "Negative Response" -- Masked Negative Response
 }
 
-local response_codes = {
+local nrcs = {
     [0x10] = "General reject",
     [0x11] = "Service or Subfunction not supported",
     [0x12] = "Service or Subfunction not supported",
@@ -60,11 +60,11 @@ local negative_response = 0x7F
 -- fields
 local length = ProtoField.new("Payload Length", "uds_vag.length", ftypes.UINT8,nil, base.DEC)
 local sid = ProtoField.uint8("uds_vag.sid", "Service ID", base.HEX, sid_dict_description)
-local sid_copy = ProtoField.uint8("uds_vag.sidcopy", "Service ID Copy", base.HEX, sid_dict_description)
+local sid_nrc = ProtoField.uint8("uds_vag.is_nrc", "Service ID", base.HEX, sid_dict_description)
 local pid = ProtoField.new("Parameter Identifier", "uds_vag.pid", ftypes.BYTES)
 local response = ProtoField.uint8("uds_vag.response","Response", base.HEX, sid_dict_description, 0xBF)
-local response_data = ProtoField.new("Reponse Data", "uds_vag.rdata", ftypes.BYTES)
-local response_code = ProtoField.uint8("uds_vag.rcode", "Response Code", base.HEX, response_codes)
+local prd = ProtoField.new("Postive Response Data", "uds_vag.rdata", ftypes.BYTES)
+local nrc = ProtoField.uint8("uds_vag.rcode", "Negative Response Code", base.HEX, nrcs)
 
 -- declare dissector
 local uds_dissector = Proto.new("uds_vag", "UDS (VAG)")
@@ -72,10 +72,10 @@ local uds_dissector = Proto.new("uds_vag", "UDS (VAG)")
 uds_dissector.fields = {
 	length,
     sid,
-    sid_copy,
+    sid_nrc,
     pid,
-    response_code,
-    response_data,
+    nrc,
+    prd,
     response,
 }
 
@@ -90,7 +90,7 @@ function uds_dissector.dissector(tvbuf,pktinfo,root)
 
     -- We can select predefined colors from here, or setup colors in coloring scheme using same conditions
     --pink 1
-	--set_color_filter_slot(1, "uds && uds_vag.sidcopy") --negative responses
+	--set_color_filter_slot(1, "uds && uds_vag.is_nrc") --negative responses
 
     --pink 2
     --purple 1
@@ -99,10 +99,10 @@ function uds_dissector.dissector(tvbuf,pktinfo,root)
     --green 2
 
     --green 3
-    --set_color_filter_slot(7, "uds && uds_vag.response && !uds_vag.sidcopy") --positive response
+    --set_color_filter_slot(7, "uds && uds_vag.response && !uds_vag.is_nrc") --positive response
 
     -- yellow 1
-    --set_color_filter_slot(8, "uds && !uds_vag.response && !uds_vag.sidcopy && uds_vag.length") --requests
+    --set_color_filter_slot(8, "uds && !uds_vag.response && !uds_vag.is_nrc && uds_vag.length") --requests
 
     --yellow 2
     --gray
@@ -114,8 +114,8 @@ function uds_dissector.dissector(tvbuf,pktinfo,root)
 
     if cur_sid == negative_response then    -- negative response
         tree:add(response, tvbuf:range(0,1))
-        tree:add(sid_copy, tvbuf:range(1,1))
-        tree:add(response_code, tvbuf:range(2,1))
+        tree:add(sid_nrc, tvbuf:range(1,1))
+        tree:add(nrc, tvbuf:range(2,1))
         pktinfo.cols.info = "NOK"
     elseif bit32.btest(cur_sid, positive_response_mask) then -- positive response (bit 6 is set)
         tree:add(response, tvbuf:range(0,1))
@@ -128,6 +128,6 @@ function uds_dissector.dissector(tvbuf,pktinfo,root)
     end
 end
 
---Asign to protocol 0x93: VWTP2.0
+--Asign to protocol 0x94: ISO15765
 local ipProtocol = DissectorTable.get("ip.proto")
 ipProtocol:add(0x94, uds_dissector)
