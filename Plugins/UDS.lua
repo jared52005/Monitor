@@ -18,7 +18,7 @@ local sid_dict_description = {
     [0x2c] = "Dynamically define Data Identifier",
     [0x2F] = "Input Output Control by Common ID",
     [0x30] = "Input Output Control by Local ID",
-    [0x31] = "Start Routine by Local Identifier",
+    [0x31] = "Routine Control",
     [0x34] = "Request Download",
     [0x35] = "Request Upload",
     [0x36] = "Transfer Data",
@@ -49,11 +49,28 @@ local nrc_description = {
     [0x7F] = "Service or Subfunction not supported",
 }
 
+-- UDS 10
+local sds_dict_description = {
+    ["01"] = "Default",
+    ["02"] = "Programming",
+    ["03"] = "Extended",
+}
+function SDS_InfoColumn(tvbuf, pktinfo)
+    -- `[1001] - Start Diagnostic Session; Default`
+    local preview = tostring(tvbuf:range(0,2))
+    local type = sds_dict_description[tostring(tvbuf:range(1,1))]
+    if type == nil then
+        type= "???"
+    end
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x10] .. "; " .. type
+end
+
+--UDS 22
 local rdbli_dict_description = {
-    ["f190"] = "VIN"
+    ["f190"] = "VIN",
 }
 
-function RDBLI_ReqRes_InfoColumn(tvbuf, pktinfo)
+function RDBLI_InfoColumn(tvbuf, pktinfo)
     -- `[22F190] - RDBLI; VIN` = First 3 bytes of request, Service ID (22 = RDBLI) Subfunciton ID (F190 = VIN)
     local preview = tostring(tvbuf:range(0,3))
     local type = rdbli_dict_description[tostring(tvbuf:range(1,2))]
@@ -63,8 +80,41 @@ function RDBLI_ReqRes_InfoColumn(tvbuf, pktinfo)
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x22] .. "; " .. type
 end
 
+--UDS 31
+local rc_dict_description = {
+    ["0203"] = "Programming Preconditions",
+}
+function RC_InfoColumn(tvbuf, pktinfo)
+    -- `[31010203] - Tester Present; Default`
+    local preview = tostring(tvbuf:range(0,2))
+    local type = rc_dict_description[tostring(tvbuf:range(2,2))]
+    if type == nil then
+        type= "???"
+    end
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x31] .. "; " .. type
+end
+
+--UDS 3E
+local tp_dict_description = {
+    ["00"] = "Default",
+    ["80"] = "Supres response",
+}
+
+function TP_InfoColumn(tvbuf, pktinfo)
+    -- `[3E00] - Tester Present; Default`
+    local preview = tostring(tvbuf:range(0,2))
+    local type = tp_dict_description[tostring(tvbuf:range(1,1))]
+    if type == nil then
+        type= "???"
+    end
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x3E] .. "; " .. type
+end
+
 local sid_dict_methods = {
-    [0x22] = RDBLI_ReqRes_InfoColumn,
+    [0x10] = SDS_InfoColumn,
+    [0x22] = RDBLI_InfoColumn,
+    [0x31] = RC_InfoColumn,
+    [0x3E] = TP_InfoColumn,
 }
 
 local positive_response_mask = 0x40
