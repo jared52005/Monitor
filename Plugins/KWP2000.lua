@@ -56,9 +56,11 @@ local nrc_description = {
     [0x33] = "Security access denied",
     [0x35] = "Invalid key",
     [0x36] = "Exceed attempts",
+    [0x75] = "Illegal Byte Count in block transfer",
     [0x78] = "Busy - Response pending",
     [0x7E] = "Service or Subfunction not supported",
     [0x7F] = "Service or Subfunction not supported",
+    [0x90] = "No Program",
 }
 
 function NegativeResponse_InfoColumn(tvbuf, pktinfo)
