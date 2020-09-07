@@ -33,11 +33,10 @@ local sid_dict_description = {
     [0x36] = "Transfer Data",
     [0x37] = "Request Transfer Exit",
 
-    [0x7F] = "Negative Response",
-    [0x3F] = "Negative Response" -- Masked Negative Response
+    [0x7F] = "", --Negative Response
 }
 
-local nrcs = {
+local nrc_description = {
     [0x10] = "General reject",
     [0x11] = "Service or Subfunction not supported",
     [0x12] = "Service or Subfunction not supported",
@@ -60,11 +59,10 @@ local negative_response = 0x7F
 -- fields
 local length = ProtoField.new("Payload Length", "uds_vag.length", ftypes.UINT8,nil, base.DEC)
 local sid = ProtoField.uint8("uds_vag.sid", "Service ID", base.HEX, sid_dict_description)
-local sid_nrc = ProtoField.uint8("uds_vag.is_nrc", "Service ID", base.HEX, sid_dict_description)
-local pid = ProtoField.new("Parameter Identifier", "uds_vag.pid", ftypes.BYTES)
-local response = ProtoField.uint8("uds_vag.response","Response", base.HEX, sid_dict_description, 0xBF)
-local prd = ProtoField.new("Postive Response Data", "uds_vag.rdata", ftypes.BYTES)
-local nrc = ProtoField.uint8("uds_vag.rcode", "Negative Response Code", base.HEX, nrcs)
+local sid_ispos = ProtoField.uint8("uds_vag.is_positive", "Pos. Res; Service ID", base.HEX, sid_dict_description)
+local sid_isneg = ProtoField.uint8("uds_vag.is_negative", "Negative Response", base.HEX, sid_dict_description)
+local data = ProtoField.new("Data", "uds_vag.data", ftypes.BYTES)
+local nrc = ProtoField.uint8("uds_vag.nrc", "Negative Response Code", base.HEX, nrc_description)
 
 -- declare dissector
 local uds_dissector = Proto.new("uds_vag", "UDS (VAG)")
@@ -72,14 +70,12 @@ local uds_dissector = Proto.new("uds_vag", "UDS (VAG)")
 uds_dissector.fields = {
 	length,
     sid,
-    sid_nrc,
-    pid,
+    sid_ispos,
+    sid_isneg,
     nrc,
-    prd,
-    response,
+    data,
 }
 
-local partialBuffer = nil
 pktState = {}
 
 function uds_dissector.dissector(tvbuf,pktinfo,root)
@@ -87,43 +83,23 @@ function uds_dissector.dissector(tvbuf,pktinfo,root)
     pktinfo.cols.protocol:set("UDS")
     local pktlen = tvbuf:reported_length_remaining()
     local tree = root:add(uds_dissector, tvbuf:range(0,pktlen))
-
-    -- We can select predefined colors from here, or setup colors in coloring scheme using same conditions
-    --pink 1
-	--set_color_filter_slot(1, "uds && uds_vag.is_nrc") --negative responses
-
-    --pink 2
-    --purple 1
-    --purple 2
-    --green 1
-    --green 2
-
-    --green 3
-    --set_color_filter_slot(7, "uds && uds_vag.response && !uds_vag.is_nrc") --positive response
-
-    -- yellow 1
-    --set_color_filter_slot(8, "uds && !uds_vag.response && !uds_vag.is_nrc && uds_vag.length") --requests
-
-    --yellow 2
-    --gray
-	
     tree:add(length, tvbuf:len())
 
     local cur_sid = tvbuf:range(0,1):uint()
     pktlen = tvbuf:len()
 
     if cur_sid == negative_response then    -- negative response
-        tree:add(response, tvbuf:range(0,1))
-        tree:add(sid_nrc, tvbuf:range(1,1))
+        tree:add(sid_isneg, tvbuf:range(0,1))
+        tree:add(sid, tvbuf:range(1,1))
         tree:add(nrc, tvbuf:range(2,1))
         pktinfo.cols.info = "NOK"
     elseif bit32.btest(cur_sid, positive_response_mask) then -- positive response (bit 6 is set)
-        tree:add(response, tvbuf:range(0,1))
-        tree:add(pid, tvbuf:range(1,pktlen-1))
-        pktinfo.cols.info = "OK"
+        tree:add(sid_ispos, tvbuf:range(0,1))
+        tree:add(data, tvbuf:range(0,pktlen))
+        pktinfo.cols.info = "OK" .. " " .. tostring(tvbuf:range(0,pktlen))
     elseif sid_dict_description[cur_sid] ~= nil then    -- normal request
         tree:add(sid, tvbuf:range(0,1))
-        tree:add(pid, tvbuf:range(1,pktlen-1))
+        tree:add(data, tvbuf:range(0,pktlen))
 		pktinfo.cols.info = sid_dict_description[cur_sid]
     end
 end
