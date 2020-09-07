@@ -8,7 +8,7 @@ local sid_dict_description = {
     [0x14] = "Clear Diagnostic Information",
     [0x17] = "Read Status of DTCs",
     [0x18] = "Read DTCs by Status",
-    [0x1A] = "Read ECU Identification",
+    [0x1A] = "Read Data By Local ID",
     [0x20] = "Stop Diagnostic Session",
     [0x21] = "Read Data by Local Identifier",
     [0x22] = "Read Data by Common Identifier",
@@ -90,7 +90,8 @@ end
 
 --KWP 1A
 local rdbci_dict_description = {
-    ["f190"] = "VIN",
+    ["90"] = "VIN",
+    ["9b"] = "ECU Identification",
 }
 
 function RDBCI_InfoColumn(tvbuf, pktinfo)
