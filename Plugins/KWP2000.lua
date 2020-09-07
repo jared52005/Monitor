@@ -43,15 +43,16 @@ local sid_dict_description = {
     [0x7F] = "Negative Response",
 }
 
-local response_codes = {
+local nrc_description = {
     [0x10] = "General reject",
-    [0x11] = "Service or Subfunction not supported",
-    [0x12] = "Service or Subfunction not supported",
+    [0x11] = "Service not supported",
+    [0x12] = "Subfunction not supported",
     [0x13] = "Message length or format incorrect",
     [0x21] = "Busy - Repeat request",
     [0x22] = "Conditions not correct",
+    [0x23] = "Routine not complete",
     [0x24] = "Request sentence error",
-    [0x31] = "Out of range",
+    [0x31] = "Request out of range",
     [0x33] = "Security access denied",
     [0x35] = "Invalid key",
     [0x36] = "Exceed attempts",
@@ -60,7 +61,18 @@ local response_codes = {
     [0x7F] = "Service or Subfunction not supported",
 }
 
--- UDS 10
+function NegativeResponse_InfoColumn(tvbuf, pktinfo)
+    -- `[7F2233] - RDBLI; Security Requested` = Service ID (22 = RDBLI) Negative Response code (33 = Security)
+    local preview = tostring(tvbuf:range(0,3))
+    local nrc = nrc_description[tvbuf:range(2,1):uint()]
+    local sid = tvbuf:range(1,1):uint()
+    if nrc == nil then
+        nrc= "???"
+    end
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[sid] .. "; " .. nrc
+end
+
+--KWP 10
 local sds_dict_description = {
     ["89"] = "Default",
     ["85"] = "Programming",
@@ -76,7 +88,7 @@ function SDS_InfoColumn(tvbuf, pktinfo)
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x10] .. "; " .. type
 end
 
---UDS 1A
+--KWP 1A
 local rdbci_dict_description = {
     ["f190"] = "VIN",
 }
@@ -88,40 +100,112 @@ function RDBCI_InfoColumn(tvbuf, pktinfo)
     if type == nil then
         type= "???"
     end
-    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x22] .. "; " .. type
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x1A] .. "; " .. type
 end
 
---UDS 31
+--KWP 20
+function EDS_InfoColumn(tvbuf, pktinfo)
+    -- `[20] - End Diagnostic Session`
+    local preview = tostring(tvbuf:range(0,1))
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x20]
+end
+
+--KWP 27
+function SA_InfoColumn(tvbuf, pktinfo)
+    -- `[2701] - Seceurity access`
+    local preview = tostring(tvbuf:range(0,2))
+    local type = "Level: " .. tostring(tvbuf:range(1,1))
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x27] .. "; " .. type
+end
+
+--KWP 31
 local rc_dict_description = {
-    ["0203"] = "Programming Preconditions",
+    ["c4"] = "Erase Flash",
+    ["c5"] = "Check Flash",
 }
 function RC_InfoColumn(tvbuf, pktinfo)
-    -- `[31010203] - Tester Present; Default`
+    -- `[31C4] - Tester Present; Default`
     local preview = tostring(tvbuf:range(0,2))
-    local type = rc_dict_description[tostring(tvbuf:range(2,2))]
+    local type = rc_dict_description[tostring(tvbuf:range(1,1))]
     if type == nil then
         type= "???"
     end
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x31] .. "; " .. type
 end
 
---UDS 3E
-local tp_dict_description = {
-    ["00"] = "Default",
-    ["80"] = "Supres response",
-}
+function RRRBLID_InfoColumn(tvbuf, pktinfo)
+    -- `[33C4] - RRRBLID; `
+    local preview = tostring(tvbuf:range(0,2))
+    local type = rc_dict_description[tostring(tvbuf:range(1,1))]
+    if type == nil then
+        type= "???"
+    end
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x33] .. "; " .. type
+end
 
+--KWP 34
+function RD_InfoColumn(tvbuf, pktinfo)
+    sid = tvbuf:range(0,1):uint()
+    if(sid == 0x34 ) then
+        -- `[34 1e c0 00 01 01 3e 00] - Request download <address> [<length>]`
+        local preview = tostring(tvbuf:range(0,1))
+        local address = tostring(tvbuf:range(1,3))
+        local length = tostring(tvbuf:range(5,3))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x34] .. "; " .. string.upper(address) .. " [" .. string.upper(length) .. "]"
+    else
+        local preview = tostring(tvbuf:range(0,1))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x34]
+    end
+end
+
+--KWP 36
+function T_InfoColumn(tvbuf, pktinfo)
+    -- `[36] - Request transfer exit
+    local preview = tostring(tvbuf:range(0,1))
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "...] - " ..  sid_dict_description[0x36]
+end
+
+--KWP 37
+function RTE_InfoColumn(tvbuf, pktinfo)
+    -- `[37] - Request transfer exit
+    local preview = tostring(tvbuf:range(0,1))
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x37]
+end
+
+--KWP 3E
 function TP_InfoColumn(tvbuf, pktinfo)
-    -- `[3E00] - Tester Present; Default`
+    -- `[3E] - Tester Present; Default`
     local preview = tostring(tvbuf:range(0,1))
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x3E]
+end
+
+--KWP 81
+function SC_InfoColumn(tvbuf, pktinfo)
+    -- `[81] - Start communication
+    local preview = tostring(tvbuf:range(0,1))
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x81]
+end
+
+--KWP 82
+function EC_InfoColumn(tvbuf, pktinfo)
+    -- `[82] - End communication
+    local preview = tostring(tvbuf:range(0,1))
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x82]
 end
 
 local sid_dict_methods = {
     [0x10] = SDS_InfoColumn,
     [0x1A] = RDBCI_InfoColumn,
+    [0x20] = EDS_InfoColumn,
+    [0x27] = SA_InfoColumn,
     [0x31] = RC_InfoColumn,
+    [0x33] = RRRBLID_InfoColumn,
+    [0x34] = RD_InfoColumn,
+    [0x36] = T_InfoColumn,
+    [0x37] = RTE_InfoColumn,
     [0x3E] = TP_InfoColumn,
+    [0x81] = SC_InfoColumn,
+    [0x82] = EC_InfoColumn,
 }
 
 local positive_response_mask = 0x40
@@ -165,7 +249,7 @@ function kwp2000_dissector.dissector(tvbuf,pktinfo,root)
         tree:add(sid_isneg, tvbuf:range(0,1))
         tree:add(sid, tvbuf:range(1,1))
         tree:add(nrc, tvbuf:range(2,1))
-        pktinfo.cols.info = "NOK"
+        NegativeResponse_InfoColumn(tvbuf, pktinfo)
     --Is positive response (SID | 0x40)?
     elseif bit32.btest(cur_sid, positive_response_mask) then
         tree:add(sid_ispos, tvbuf:range(0,1))
