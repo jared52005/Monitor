@@ -161,6 +161,21 @@ function RD_InfoColumn(tvbuf, pktinfo)
     end
 end
 
+--KWP 35
+function RU_InfoColumn(tvbuf, pktinfo)
+    sid = tvbuf:range(0,1):uint()
+    if(sid == 0x35 ) then
+        -- `[35 1e c0 00 01 01 3e 00] - Request upload <address> [<length>]`
+        local preview = tostring(tvbuf:range(0,1))
+        local address = tostring(tvbuf:range(1,3))
+        local length = tostring(tvbuf:range(5,3))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x35] .. "; " .. string.upper(address) .. " [" .. string.upper(length) .. "]"
+    else
+        local preview = tostring(tvbuf:range(0,1))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x35]
+    end
+end
+
 --KWP 36
 function T_InfoColumn(tvbuf, pktinfo)
     -- `[36] - Request transfer exit
@@ -204,6 +219,7 @@ local sid_dict_methods = {
     [0x31] = RC_InfoColumn,
     [0x33] = RRRBLID_InfoColumn,
     [0x34] = RD_InfoColumn,
+    [0x35] = RU_InfoColumn,
     [0x36] = T_InfoColumn,
     [0x37] = RTE_InfoColumn,
     [0x3E] = TP_InfoColumn,
