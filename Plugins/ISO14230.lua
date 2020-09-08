@@ -42,29 +42,26 @@ function iso14230_dissector.dissector(tvbuf,pktinfo,root)
     local addressing = bit32.rshift(bit32.band(fmt, 0xC0), 6)
     tree:add(iso_fmt_address, tvbuf:range(0,1))
     local fmt_len = bit32.band(fmt, 0x3F) --Get Length byte from FMT
-    local length
-    if(fmt_len == 0) then --If Length > 32 bytes, then it is secondary
-        tree:add(iso_length, tvbuf:range(1,1))
-        length = tvbuf:range(1,1):uint()
-    else
-        tree:add(iso_fmt_len, tvbuf:range(0,1))
-        length = fmt_len
-    end
 
     -- Parse physical addressing (if included)
     local parserPosition = 1
     if(addressing == 0x02) then
-        if (fmt_len == 0) then
-            parserPosition = parserPosition + 1
-        end
         tree:add(iso_tgt, tvbuf:range(parserPosition,1))
         parserPosition = parserPosition + 1
         tree:add(iso_src, tvbuf:range(parserPosition,1))
         parserPosition = parserPosition + 1
     end
 
-    -- Disect data for higher parser
-    tree:add(iso_data, tvbuf:range(parserPosition,length))
+    -- Parse length byte (if included)
+    local length
+    if(fmt_len == 0) then
+        tree:add(iso_length, tvbuf:range(parserPosition,1))
+        length = tvbuf:range(parserPosition,1):uint()
+        parserPosition = parserPosition + 1
+    else
+        tree:add(iso_fmt_len, tvbuf:range(0,1))
+        length = fmt_len
+    end
 
     -- calculate checksum
     local cs = 0
@@ -85,6 +82,8 @@ function iso14230_dissector.dissector(tvbuf,pktinfo,root)
     local kwp = Dissector.get("kwp2k")
     if kwp ~= nil then
         kwp:call(tvbuf:range(parserPosition,length):tvb(), pktinfo, root)
+    else
+        tree:add(iso_data, tvbuf:range(parserPosition,length))
     end
 end
 
