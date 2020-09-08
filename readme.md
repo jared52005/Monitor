@@ -82,7 +82,12 @@ ISO14230 = 1,
 KW1281 = 2,
 VWTP20 = 3,
 ISO15765 = 4,
+...
+Warning = 0x6B,
+Error = 0x6C,
 ```
+During preprocesing data in separated devices, we can encounter an error or warning. From this reason there is a simple mechanism to show this error to user via `ip.proto == 0xFC` for error or `ip.proto == 0xFB` for Warning. Preprocessing device will provide ASCII string describing the error, which will be shown in `Info` column of Wireshark with Error or Warning coloring rules.
+
 ### Example of whole communication
 ```
 Start packet: D4-C3-B2-A1-02-00-04-00-00-00-00-00-00-00-00-00-FF-FF-00-00-E3-00-00-00
