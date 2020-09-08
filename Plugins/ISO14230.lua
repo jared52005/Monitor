@@ -81,7 +81,11 @@ function iso14230_dissector.dissector(tvbuf,pktinfo,root)
         tree:add(iso_cs_valid, "Bad")
     end 
 
-    --pktinfo.cols.info = "CS = " .. cs .. " stored CS = " .. stored_cs
+    -- Call top level protocol. In this case KWP2000
+    local kwp = Dissector.get("kwp2k")
+    if kwp ~= nil then
+        kwp:call(tvbuf:range(parserPosition,length):tvb(), pktinfo, root)
+    end
 end
 
 --Asign to protocol 0x91: ISO14230
