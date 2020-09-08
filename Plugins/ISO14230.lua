@@ -7,11 +7,6 @@ local fmtbyte_addressing = {
     [0x03] = "Functional addressing",
 }
 
-local cs_valid = {
-    [0x00] = "Invalid CS",
-    [0x01] = "Valid CS",
-}
-
 -- fields
 local iso_fmt_address = ProtoField.uint8("iso14230.fmt.address", "Addressing mode", base.HEX, fmtbyte_addressing, 0xC0)
 local iso_fmt_len = ProtoField.uint8("iso14230.fmt.len", "Payload length", base.DEC, nil, 0x3F)
@@ -20,7 +15,7 @@ local iso_tgt = ProtoField.uint8("iso14230.tgt", "Target Address", base.HEX)
 local iso_src = ProtoField.uint8("iso14230.src", "Source Address", base.HEX)
 local iso_data = ProtoField.new("Data", "iso14230.data", ftypes.BYTES) --Data for next layer
 local iso_cs = ProtoField.uint8("iso14230.cs", "Checksum", base.HEX)
-local iso_cs_valid = ProtoField.uint8("iso14230.cs.valid", "Checksum state", base.HEX, cs_valid)
+local iso_cs_valid = ProtoField.string("iso14230.cs.status", "Checksum status")
 
 -- declare dissector
 local iso14230_dissector = Proto.new("iso14230", "ISO14230")
@@ -81,9 +76,9 @@ function iso14230_dissector.dissector(tvbuf,pktinfo,root)
     stored_cs = tvbuf:range(pktlen - 1,1):uint()
     tree:add(iso_cs, tvbuf:range(pktlen - 1,1))
     if cs == stored_cs then
-        tree:add(iso_cs_valid, 1)
+        tree:add(iso_cs_valid, "Good")
     else
-        tree:add(iso_cs_valid, 0)
+        tree:add(iso_cs_valid, "Bad")
     end 
 
     --pktinfo.cols.info = "CS = " .. cs .. " stored CS = " .. stored_cs
