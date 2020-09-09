@@ -83,6 +83,7 @@ KW1281 = 2,
 VWTP20 = 3,
 ISO15765 = 4,
 ...
+Debug = 0x6A,    //For Debug information (i.e. SWO output)
 Warning = 0x6B,
 Error = 0x6C,
 ```
