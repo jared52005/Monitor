@@ -129,9 +129,9 @@ uint8_t BSP_LCD_Init(void)
   uint8_t ret = LCD_ERROR;
   
   /* Default value for draw propriety */
-  DrawProp.BackColor = 0xFFFF;
-  DrawProp.pFont     = &Font24;
-  DrawProp.TextColor = 0x0000;
+  DrawProp.BackColor = 0x0000;
+  DrawProp.pFont     = &Font12;
+  DrawProp.TextColor = 0xFFFF;
   
   if(ili9325_drv.ReadID() == ILI9325_ID)
   {

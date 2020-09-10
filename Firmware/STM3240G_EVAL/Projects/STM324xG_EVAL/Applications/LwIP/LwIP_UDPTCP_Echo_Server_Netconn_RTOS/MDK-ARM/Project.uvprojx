@@ -781,9 +781,9 @@
           <GroupName>Application/Utilities</GroupName>
           <Files>
             <File>
-              <FileName>lcd_log.c</FileName>
+              <FileName>rtos_utils.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../../../../../../Utilities/Log/lcd_log.c</FilePath>
+              <FilePath>..\Src\rtos_utils.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -824,6 +824,16 @@
               <FileName>ethernetif.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/ethernetif.c</FilePath>
+            </File>
+            <File>
+              <FileName>Module_Lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Module_Lcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>System_stats.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\System_stats.c</FilePath>
             </File>
           </Files>
         </Group>

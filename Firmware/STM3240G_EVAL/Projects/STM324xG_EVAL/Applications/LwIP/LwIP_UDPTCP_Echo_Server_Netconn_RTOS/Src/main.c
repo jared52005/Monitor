@@ -53,7 +53,7 @@
 #include "lwip/tcpip.h"
 #include "app_ethernet.h"
 #ifdef USE_LCD
-#include "lcd_log.h"
+#include "Module_Lcd.h"
 #endif
 
 /* Private typedef -----------------------------------------------------------*/
@@ -69,7 +69,6 @@ struct link_str link_arg;
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 static void StartThread(void const * argument);
-static void ToggleLed4(void const * argument);
 static void BSP_Config(void);
 static void Netif_Config(void);
 extern void tcpecho_init(void);
@@ -144,10 +143,10 @@ static void StartThread(void const * argument)
   osThreadCreate (osThread(DHCP), &gnetif);
 #endif
   
-  /* Start toogleLed4 task : Toggle LED4  every 250ms */
-  osThreadDef(LED4, ToggleLed4, osPriorityLow, 0, configMINIMAL_STACK_SIZE);
-  osThreadCreate(osThread(LED4), NULL);
-  
+	/* Start LCD task : Write stat data on LCD ever 100ms */
+  osThreadDef(xLCD, Application_Lcd_Task, osPriorityLow, 0, configMINIMAL_STACK_SIZE);
+  osThreadCreate(osThread(xLCD), NULL);
+	
   for( ;; )
   {
     /* Delete the Init Thread */ 
@@ -251,34 +250,9 @@ static void BSP_Config(void)
 #ifdef USE_LCD
   
   /* Initialize the LCD */
-  BSP_LCD_Init();
-  
-  BSP_LCD_SetFont(&LCD_DEFAULT_FONT);
-  
-  /* Initialize LCD Log module */
-  LCD_LOG_Init();
-  
-  /* Show Header and Footer texts */
-  LCD_LOG_SetHeader((uint8_t *)"TCP UDP Server Application");
-  LCD_LOG_SetFooter((uint8_t *)"STM324xG-EVAL board");
-  
-  LCD_UsrLog("  State: Ethernet Initialization ...\n");
+	Application_Lcd_Init(); 
+  printf("  State: Ethernet Initialization ...\n");
 #endif
-}
-
-/**
-  * @brief  Toggle LED4 thread
-  * @param  pvParameters not used
-  * @retval None
-  */
-static void ToggleLed4(void const * argument)
-{
-  for( ;; )
-  {
-    /* Toggle LED4 each 250ms */
-    BSP_LED_Toggle(LED4);
-    osDelay(250);
-  }
 }
 
 /**
