@@ -100,7 +100,7 @@
 #if defined(__GNUC__)
 #define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 20 * 1024 ) )
 #else
-#define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 60 * 1024 ) ) //Increased heap 4 times, because there was no more space on new threads
+#define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 40 * 1024 ) ) //Increased heap, because there was no more space for new threads
 #endif
 #define configMAX_TASK_NAME_LEN			        16
 #define configUSE_TRACE_FACILITY		        1
@@ -132,7 +132,7 @@ to exclude the API function. */
 #define INCLUDE_vTaskDelete			1
 #define INCLUDE_vTaskCleanUpResources	        0
 #define INCLUDE_vTaskSuspend			0
-#define INCLUDE_vTaskDelayUntil			0
+#define INCLUDE_vTaskDelayUntil			1
 #define INCLUDE_vTaskDelay			1
 #define INCLUDE_xTaskGetSchedulerState          1
 
