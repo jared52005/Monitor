@@ -120,6 +120,9 @@ static void StartThread(void const * argument)
   /* Initialize LCD and LEDs */
   BSP_Config();
   
+	//Enable SWO output
+	DBGMCU->CR = 0x00000020;
+	
   /* Create tcp_ip stack thread */
   tcpip_init(NULL, NULL);
   
@@ -350,6 +353,26 @@ static void SystemClock_Config(void)
     /* Enable the Flash prefetch */
     __HAL_FLASH_PREFETCH_BUFFER_ENABLE();
   }
+}
+
+struct __FILE { int handle; /* Add whatever you need here */ };
+FILE __stdout;
+FILE __stdin;
+
+/**
+ * @brief this method is called from printf() to handle single chars
+ */
+int fputc(int ch, FILE *f) 
+{
+	if ((ITM->TCR & ITM_TCR_ITMENA_Msk) &&  // ITM enabled 
+  		(ITM->TER & (1UL << 0))					    // ITM Port #0 enabled  //???
+	     ) 
+	{
+		while (ITM->PORT[0].u32 == 0);			// Wait for available 
+		ITM->PORT[0].u8 = (uint8_t)ch;	  		// Send character 
+	}
+	
+  return(ch);
 }
 
 #ifdef  USE_FULL_ASSERT

@@ -43,12 +43,10 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
+#include <stdio.h>
 #include "main.h"
 #include "lwip/dhcp.h"
 #include "app_ethernet.h"
-#ifdef USE_LCD
-#include "lcd_log.h"
-#endif
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -77,7 +75,7 @@ void User_notification(struct netif *netif)
 #ifdef USE_LCD
     uint8_t iptxt[20];
     sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));
-    LCD_UsrLog ("Static IP address: %s\n", iptxt);
+    printf ("Static IP address: %s\n", iptxt);
 #else    
     /* Turn On LED 1 to indicate ETH and LwIP init success*/
     BSP_LED_On(LED1);
@@ -91,7 +89,7 @@ void User_notification(struct netif *netif)
     DHCP_state = DHCP_LINK_DOWN;
 #endif  /* USE_DHCP */
 #ifdef USE_LCD
-    LCD_UsrLog ("The network cable is not connected \n");
+    printf ("The network cable is not connected \n");
 #else    
     /* Turn On LED 2 to indicate ETH and LwIP init error */
     BSP_LED_On(LED2);
@@ -115,7 +113,7 @@ void ethernetif_notify_conn_changed(struct netif *netif)
   if(netif_is_link_up(netif))
   {
 #ifdef USE_LCD        
-    LCD_UsrLog ("The network cable is now connected \n");
+    printf ("The network cable is now connected \n");
 #else
     BSP_LED_Off(LED2);
     BSP_LED_On(LED1);
@@ -134,7 +132,7 @@ void ethernetif_notify_conn_changed(struct netif *netif)
 #ifdef USE_LCD        
     uint8_t iptxt[20];
     sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));
-    LCD_UsrLog ("Static IP address: %s\n", iptxt);
+    printf ("Static IP address: %s\n", iptxt);
 #endif /* USE_LCD */
 #endif /* USE_DHCP */   
     
@@ -152,7 +150,7 @@ void ethernetif_notify_conn_changed(struct netif *netif)
     netif_set_down(netif);
     
 #ifdef USE_LCD
-    LCD_UsrLog ("The network cable is not connected \n");
+    printf ("The network cable is not connected \n");
 #else
     BSP_LED_Off(LED1);
     BSP_LED_On(LED2);
@@ -189,7 +187,7 @@ void DHCP_thread(void const * argument)
         dhcp_start(netif);
         DHCP_state = DHCP_WAIT_ADDRESS;
 #ifdef USE_LCD
-        LCD_UsrLog ("  State: Looking for DHCP server ...\n");
+        printf ("  State: Looking for DHCP server ...\n");
 #endif
       }
       break;
@@ -202,7 +200,7 @@ void DHCP_thread(void const * argument)
          
 #ifdef USE_LCD 
           sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));   
-          LCD_UsrLog ("IP address assigned by a DHCP server: %s\n", iptxt);
+          printf ("IP address assigned by a DHCP server: %s\n", iptxt);
 #else
           BSP_LED_On(LED1);   
 #endif 
@@ -227,8 +225,8 @@ void DHCP_thread(void const * argument)
             
 #ifdef USE_LCD  
             sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));
-            LCD_UsrLog ("DHCP Timeout !! \n");
-            LCD_UsrLog ("Static IP address: %s\n", iptxt);  
+            printf ("DHCP Timeout !! \n");
+            printf ("Static IP address: %s\n", iptxt);  
 #else
             BSP_LED_On(LED1);  
 #endif
