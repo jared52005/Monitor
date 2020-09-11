@@ -178,7 +178,7 @@ static void Task_Stats(void const * argument)
   for(;;)
   {
     Stats_Update();
-    BSP_LED_Toggle(LED4);
+    //BSP_LED_Toggle(LED4);
     osDelay(1000);
   }
 }
