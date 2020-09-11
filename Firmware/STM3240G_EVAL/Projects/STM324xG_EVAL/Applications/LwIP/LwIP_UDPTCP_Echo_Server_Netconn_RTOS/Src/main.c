@@ -55,6 +55,8 @@
 #ifdef USE_LCD
 #include "Task_Lcd.h"
 #endif
+#include "System_stats.h"
+#include "rtos_utils.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -69,6 +71,7 @@ struct link_str link_arg;
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 static void StartThread(void const * argument);
+static void Task_Stats(void const * argument);
 static void BSP_Config(void);
 static void Netif_Config(void);
 extern void tcpecho_init(void);
@@ -122,6 +125,9 @@ static void StartThread(void const * argument)
 	//Enable SWO output
 	DBGMCU->CR = 0x00000020;
 	
+  //Reset System stats
+  Stats_Reset();
+
   /* Create tcp_ip stack thread */
   tcpip_init(NULL, NULL);
   
@@ -142,7 +148,11 @@ static void StartThread(void const * argument)
   osThreadDef(DHCP, DHCP_thread, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE * 2);
   osThreadCreate (osThread(DHCP), &gnetif);
 #endif
-  
+
+  /* Start LCD task : Write stat data on LCD ever 100ms */
+  osThreadDef(Stats, Task_Stats, osPriorityLow, 0, configMINIMAL_STACK_SIZE);
+  osThreadCreate(osThread(Stats), NULL);
+
 	/* Start LCD task : Write stat data on LCD ever 100ms */
   osThreadDef(xLCD, Task_Lcd, osPriorityLow, 0, configMINIMAL_STACK_SIZE);
   osThreadCreate(osThread(xLCD), NULL);
@@ -151,6 +161,16 @@ static void StartThread(void const * argument)
   {
     /* Delete the Init Thread */ 
     osThreadTerminate(NULL);
+  }
+}
+
+static void Task_Stats(void const * argument)
+{
+  for(;;)
+  {
+    Stats_Update();
+    BSP_LED_Toggle(LED4);
+    osDelay(333);
   }
 }
 
