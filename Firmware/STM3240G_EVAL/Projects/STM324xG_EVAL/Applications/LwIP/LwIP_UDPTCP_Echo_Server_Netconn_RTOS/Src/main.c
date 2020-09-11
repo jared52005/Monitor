@@ -55,6 +55,7 @@
 #ifdef USE_LCD
 #include "Task_Lcd.h"
 #endif
+#include "Task_Hub.h"
 #include "Task_Tcp_Wireshark_SocketCAN.h"
 #include "Task_Tcp_Wireshark_Raw.h"
 #include "System_stats.h"
@@ -153,8 +154,11 @@ static void StartThread(void const * argument)
   osThreadDef(DHCP, DHCP_thread, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE * 2);
   osThreadCreate (osThread(DHCP), &gnetif);
 #endif
+  /* Start Hub Task: Process data from peripherals into TCP */
+  osThreadDef(Hub, Task_Hub, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE * 2);
+  osThreadCreate(osThread(Hub), NULL);
 
-  /* Start LCD task : Write stat data on LCD ever 100ms */
+  /* Start Stats Task: Reclculate statistics data every 1000ms */
   osThreadDef(Stats, Task_Stats, osPriorityLow, 0, configMINIMAL_STACK_SIZE);
   osThreadCreate(osThread(Stats), NULL);
 

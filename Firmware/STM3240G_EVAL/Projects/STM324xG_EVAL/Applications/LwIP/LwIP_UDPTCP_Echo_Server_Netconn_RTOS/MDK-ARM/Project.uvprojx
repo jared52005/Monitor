@@ -391,6 +391,11 @@
           <GroupName>Drivers/STM32F4xx_HAL_Driver</GroupName>
           <Files>
             <File>
+              <FileName>stm32f4xx_hal_can.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_can.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32f4xx_hal_eth.c</FileName>
               <FileType>1</FileType>
               <FilePath>../../../../../../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_eth.c</FilePath>
@@ -826,6 +831,11 @@
               <FilePath>..\Src\System_stats.c</FilePath>
             </File>
             <File>
+              <FileName>Task_Hub.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Task_Hub.c</FilePath>
+            </File>
+            <File>
               <FileName>Task_Lcd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\Task_Lcd.c</FilePath>
@@ -839,6 +849,11 @@
               <FileName>Task_Tcp_Wireshark_SocketCAN.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\Task_Tcp_Wireshark_SocketCAN.c</FilePath>
+            </File>
+            <File>
+              <FileName>CanIf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\CanIf.c</FilePath>
             </File>
           </Files>
         </Group>
