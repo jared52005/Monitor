@@ -4,6 +4,7 @@
 * @attention
 ******************************************************************************  
 */ 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "ErrorCodes.h"
@@ -144,8 +145,8 @@ ErrorCodes Can_Enable(uint32_t baudrate, CanMode mode)
 	
 	/*##-1- Enable peripherals and GPIO Clocks #################################*/
 	/* CAN1 Periph clock enable */
-  	__HAL_RCC_CAN1_CLK_ENABLE();
-	__HAL_RCC_CAN2_CLK_ENABLE();
+  	__HAL_RCC_CAN2_CLK_ENABLE();
+		__HAL_RCC_CAN1_CLK_ENABLE();
 
   	/* Enable GPIO clock ****************************************/
   	__HAL_RCC_GPIOB_CLK_ENABLE();
@@ -156,7 +157,7 @@ ErrorCodes Can_Enable(uint32_t baudrate, CanMode mode)
   	GPIO_InitStruct.Pin = GPIO_PIN_5;
   	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  	GPIO_InitStruct.Pull = GPIO_PULLUP;
+  	GPIO_InitStruct.Pull = GPIO_NOPULL;
   	GPIO_InitStruct.Alternate =  GPIO_AF9_CAN2;
 
   	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -201,17 +202,11 @@ ErrorCodes Can_Enable(uint32_t baudrate, CanMode mode)
      * 7500000   4      1    8    5        420000000    CAN_BITRATE_750K
      * 10000000  3      1    8    5        420000000    CAN_BITRATE_1000K
      */
-
-	//RCC_GetClocksFreq(&RCC_Clocks);
-    //if(RCC_Clocks.PCLK1_Frequency == 42000000)
-	if(true)
+    if(HAL_RCC_GetPCLK1Freq() == 42000000)
     {
-        //CAN_InitStructure.CAN_SJW = CAN_SJW_1tq;
-        //CAN_InitStructure.CAN_BS1 = CAN_BS1_8tq;
-        //CAN_InitStructure.CAN_BS2 = CAN_BS2_5tq;  
 		hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-		hcan.Init.TimeSeg1 = CAN_BS1_4TQ;
-		hcan.Init.TimeSeg2 = CAN_BS2_3TQ;
+        hcan.Init.TimeSeg1 = CAN_BS1_8TQ;
+        hcan.Init.TimeSeg2 = CAN_BS2_5TQ;  
         switch(baudrate)
         {
             case 10000:
@@ -248,6 +243,7 @@ ErrorCodes Can_Enable(uint32_t baudrate, CanMode mode)
     }
     else
     {
+				printf("Unexpected PCLK1: %d\n", HAL_RCC_GetPCLK1Freq());
         return ERROR_CAN_INV_CLK;
     }
     HAL_CAN_Init(&hcan);
@@ -255,7 +251,7 @@ ErrorCodes Can_Enable(uint32_t baudrate, CanMode mode)
 
     // CAN filter init into transparent mode
     /*##-2- Configure the CAN Filter ###########################################*/
-	sFilterConfig.FilterBank = 0;
+	sFilterConfig.FilterBank = 14;
   	sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   	sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
   	sFilterConfig.FilterIdHigh = 0x0000;
