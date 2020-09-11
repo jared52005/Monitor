@@ -40,6 +40,7 @@ ErrorCodes Can_Rx_GetCount(uint32_t* count)
 	//Check if buffer has overflown
 	if (flagOverflow == true)
 	{
+		*count = 0;
 		Can_ResetFifo();
 		return ERROR_DATA_OVERFLOW;
 	}
