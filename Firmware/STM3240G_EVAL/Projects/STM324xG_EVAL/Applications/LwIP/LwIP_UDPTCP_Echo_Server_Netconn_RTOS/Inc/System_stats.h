@@ -13,14 +13,6 @@
 #ifndef SYSTEM_STATS_H
 #define SYSTEM_STATS_H
 
-typedef enum 
-{
-    UsbInterface,      //Primary active interface
-    UartInterface,     //Secondary interface for STM3240G EVAL and C10_P1A
-    SpiInterface,      //Secondary interface for C10_ESP32_P1B and C21 devices
-    EthernetInterface, //Secondary interface for STM3240G EVAL (select in PDU router)
-} StatsActiveDeviceType;
-
 /**
  * @brief Reset all statistics on 0
  */
@@ -62,65 +54,35 @@ uint32_t Stats_CanBytes_RxPerSecond_Get(void);
 void Stats_CanMessage_RxAdd(uint8_t dlc, uint8_t extendedFrame, uint32_t baudrate);
 
 /**
- * @brief Get total amount of transmitted messages
- */
-uint32_t Stats_CanMessages_TxTotal_Get(void);
-
-/**
- * @brief Add n bytes to amount of already received bytes
- * @param dlc: DLC of CAN message
- * @param extendedFrame: If 0, then processed as standard frame, otherwise processed as extended frame
- * @param baudrate: used for calculation of bus load
- */
-void Stats_CanMessage_TxAdd(uint8_t dlc, uint8_t extendedFrame, uint32_t baudrate);
-
-/**
  * @brief Get total amount of received bytes
  */
-uint64_t Stats_UsbBytes_RxTotal_Get(void);
+uint32_t Stats_KlineBytes_RxTotal_Get(void);
 
 /**
  * @brief Get total amount of received messages
  */
-uint32_t Stats_UsbMessages_RxTotal_Get(void);
+uint32_t Stats_KlineFrames_RxTotal_Get(void);
 
 /**
  * @brief Add n bytes to amount of already received bytes
  */
-void Stats_UsbBytes_RxAdd(uint32_t n);
-
-/**
- * @brief Get total amount of transmitted bytes
- */
-uint64_t Stats_UsbBytes_TxTotal_Get(void);
-
-/**
- * @brief Get total amount of transmitted messages
- */
-uint32_t Stats_UsbMessages_TxTotal_Get(void);
-
-/**
- * @brief Add n bytes to amount of already transmitted bytes
- */
-void Stats_UsbBytes_TxAdd(uint32_t n);
+void Stats_KlineBytes_RxAdd(uint32_t n);
 
 /**
  * @brief Get total amount of received CAN bytes per second
  */
-uint32_t Stats_UsbBytes_RxPerSecond_Get(void);
+uint32_t Stats_KlineBytes_RxPerSecond_Get(void);
 
 /**
- * @brief Get total amount of received CAN bytes per second
- */
-uint32_t Stats_UsbBytes_TxPerSecond_Get(void);
+ * @brief Upload state of DHCP into stats, so it can be shown on LCD
+*/
+void Stats_DHCP_SetState(uint8_t s);
 
 /**
- * @brief Set which device is curently active to talk to user
+ * @brief Return state of DHCP 
  */
-void Stats_UsbActiveDevice_Set(StatsActiveDeviceType device);
+uint32_t Stats_DHCP_GetState(void);
 
-/**
- * @brief Get which device is curently active to talk to user
- */
-StatsActiveDeviceType Stats_UsbActiveDevice_Get(void);
+void Stats_IP_Set(char* ip);
+char* Stats_IP_Get(void);
 #endif

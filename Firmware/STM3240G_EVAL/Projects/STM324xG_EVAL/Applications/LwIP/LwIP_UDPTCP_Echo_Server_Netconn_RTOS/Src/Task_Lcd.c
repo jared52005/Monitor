@@ -20,20 +20,24 @@
 //private functions
 void vTaskGetRunTimeStats(char *line);
 
-const char* DeviceTypeTranslate(void)
+const char* TranslateDhcpState(uint32_t dhcpState)
 {
-    switch (Stats_UsbActiveDevice_Get())
+    switch (dhcpState)
     {
-    case UsbInterface:
-        return "USB";
-    case UartInterface:
-        return "UART";
-    case SpiInterface:
-        return "SPI";
-    case EthernetInterface:
-        return "ETH";
+    case 0:
+    return "Off";
+    case 1:
+    return "Start";
+    case 2:
+    return "Waiting on IP...";
+    case 3:
+    return "IP assigned";
+    case 4:
+    return "Timeout";
+    case 5:
+    return "Link Down!";
     default:
-        return "???";
+    return "???";
     }
 }
 
@@ -42,6 +46,7 @@ const char* DeviceTypeTranslate(void)
 */
 void Task_Lcd(void const* pvParameters)
 {
+    uint32_t dhcpState;
     uint32_t peakCanBusLoad;
     char line[64];
     int lineNumber = -1;
@@ -50,7 +55,7 @@ void Task_Lcd(void const* pvParameters)
 
     // Initialise the xLastWakeTime variable with the current time.
     xLastWakeTime = xTaskGetTickCount();
-	  peakCanBusLoad = 0;
+	peakCanBusLoad = 0;
 
     for(;;lineNumber++)
     {
@@ -67,40 +72,59 @@ void Task_Lcd(void const* pvParameters)
             sprintf(line, "RAM Heap: Total %d [B] Free %d [B]   ", configTOTAL_HEAP_SIZE, xPortGetFreeHeapSize());
             break;
         case 2:
-            sprintf(line, "CAN: TX Msgs %d  RX Msgs %d   ", Stats_CanMessages_TxTotal_Get(), Stats_CanMessages_RxTotal_Get());
+            dhcpState = Stats_DHCP_GetState();
+            if(dhcpState != 3)
+            {
+                sprintf(line, "DHCP: %s", TranslateDhcpState(dhcpState));
+            }
+            else
+            {
+                sprintf(line, "IP address: %s   ", Stats_IP_Get());
+            }
             break;
         case 3:
+            //Empty line
+            continue;
+        case 4:
+            sprintf(line, "CAN: RX Msgs %d  ", Stats_CanMessages_RxTotal_Get());
+            break;
+        case 5:
             sprintf(line, "CAN: RX %d kB;  %d kBps   ", 
             Stats_CanBytes_RxTotal_Get() / 1024, 
             Stats_CanBytes_RxPerSecond_Get() / 1024);
             break;
-        case 4:
+        case 6:
             sprintf(line, "CAN Bus Load: %d %%  ", Stats_CanMessages_BusLoad_Get());
             break;
-        case 5:
+        case 7:
             if(Stats_CanMessages_BusLoad_Get() > peakCanBusLoad)
             {
                 peakCanBusLoad = Stats_CanMessages_BusLoad_Get();
             }
             sprintf(line, "CAN Bus Peak Load: %d %%  ", peakCanBusLoad);
             break;
-        case 6:
-            sprintf(line, "%s: TX Msgs %d  RX Msgs %d   ", 
-            DeviceTypeTranslate(),  
-            Stats_UsbMessages_TxTotal_Get(), 
-            Stats_UsbMessages_RxTotal_Get());
-            break;
-        case 7:
-            sprintf(line, "%s: TX %d kB  %d kBps   ", 
-            DeviceTypeTranslate(),  
-            (uint32_t)(Stats_UsbBytes_TxTotal_Get() / 1024), 
-            (uint32_t)(Stats_UsbBytes_TxPerSecond_Get() / 1024));
-            break;
         case 8:
-            sprintf(line, "%s: RX %d kB  %d kBps   ", 
-            DeviceTypeTranslate(),  
-            (uint32_t)(Stats_UsbBytes_RxTotal_Get() / 1024), 
-            (uint32_t)(Stats_UsbBytes_RxPerSecond_Get() / 1024));
+            //Empty line
+            continue;
+        case 9:
+            sprintf(line, "KLINE: Baudrate %d  ", 1234);
+            break;
+        case 10:
+            sprintf(line, "KLINE: RX Msgs %d  ", Stats_KlineFrames_RxTotal_Get());
+            break;
+        case 11:
+            sprintf(line, "KLINE: RX %d kB;  %d kBps   ", 
+            Stats_KlineBytes_RxTotal_Get() / 1024, 
+            Stats_KlineBytes_RxPerSecond_Get() / 1024);
+            break;
+        case 12:
+            //Empty line
+            continue;
+        case 13:
+            sprintf(line, "TCP Socket CAN: %s  ", "Disconnected");
+            break;
+        case 14:
+            sprintf(line, "TCP Datagrams: %s  ", "Disconnected");
             break;
         default:
             lineNumber = -1;

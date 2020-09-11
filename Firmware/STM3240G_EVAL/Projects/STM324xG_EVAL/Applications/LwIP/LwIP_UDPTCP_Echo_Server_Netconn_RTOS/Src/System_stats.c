@@ -10,23 +10,19 @@
 
 #include "System_stats.h"
 #include "rtos_utils.h"
+#include "string.h"
 
 typedef struct 
 {
- uint64_t ElementsTx; //How many bits or bytes did we transmit
  uint64_t ElementsRx; //How many bits or bytes did we received
- uint32_t MsgsTx;  //How many mesages did we transmitted
  uint32_t MsgsRx;  //How many messages did we received
 }PduStats;
 
 
-static PduStats _usb;
+static PduStats _kline;
 static PduStats _can;
-static StatsActiveDeviceType _usbDevice;
-static uint32_t _usbBytesReceivedPrevious;
-static uint32_t _usbBytesReceivedPerSecond;
-static uint32_t _usbBytesTransmitedPrevious;
-static uint32_t _usbBytesTransmitedPerSecond;
+static uint32_t _klineBytesReceivedPrevious;
+static uint32_t _klineBytesReceivedPerSecond;
 
 static uint32_t _canBusLoad; //How much is CAN bus loaded in percents (xxx.y = xxxy)
 static uint32_t _canBitsStdMsg[] = {51, 60, 70, 79, 89, 99, 108, 118, 127}; //How many bits is in standard message by DLC
@@ -38,20 +34,15 @@ static uint32_t _canBytesReceivedPerSecond;
 
 static uint32_t _lastTime;
 
+static uint32_t _dhcpState;
+static char _ipAddress[20];
+
 void Stats_Reset(void)
 {
-    _usb.ElementsTx = 0;
-    _usb.ElementsRx = 0;
-    _usb.MsgsTx = 0;
-    _usb.MsgsRx = 0;
-    _usbBytesReceivedPrevious = 0;
-    _usbBytesReceivedPerSecond = 0;
-    _usbBytesTransmitedPrevious = 0;
-    _usbBytesTransmitedPerSecond = 0;
+    _kline.ElementsRx = 0;
+    _kline.MsgsRx = 0;
     
-    _can.ElementsTx = 0;
     _can.ElementsRx = 0;
-    _can.MsgsTx = 0;
     _can.MsgsRx = 0;
     _canBusLoad = 0;
     _canBaudrate = 0;
@@ -68,9 +59,8 @@ void Stats_Update(void)
 {
     double canBusLoad;
     double diffTime = (GetTime_ms() - _lastTime) / 1000.0; //Get diff time in seconds
-    uint64_t totalBits = _can.ElementsTx + _can.ElementsRx;
+    uint64_t totalBits = _can.ElementsRx;
     canBusLoad = totalBits / diffTime;
-    _can.ElementsTx = 0;
     _can.ElementsRx = 0;
     _lastTime = GetTime_ms();
 
@@ -90,17 +80,12 @@ void Stats_Update(void)
     }
     _canBytesReceivedPrevious = _canBytesReceived;
 
-    //Update User interface communication (USB, UART, SPI) stats
-    if(_usb.ElementsRx != 0)
+    //Update communication parameters for KLINE
+    if(_kline.ElementsRx != 0)
     {
-        _usbBytesReceivedPerSecond = (uint32_t)((_usb.ElementsRx - _usbBytesReceivedPrevious) / diffTime);
+        _klineBytesReceivedPerSecond = (uint32_t)((_kline.ElementsRx - _klineBytesReceivedPrevious) / diffTime);
     }
-    _usbBytesReceivedPrevious = _usb.ElementsRx;
-    if(_usb.ElementsTx != 0)
-    {
-        _usbBytesTransmitedPerSecond = (uint32_t)((_usb.ElementsTx - _usbBytesTransmitedPrevious) / diffTime);
-    }
-    _usbBytesTransmitedPrevious = _usb.ElementsTx;
+    _klineBytesReceivedPrevious = _kline.ElementsRx;
 }
 
 /**
@@ -159,111 +144,66 @@ void Stats_CanMessage_RxAdd(uint8_t dlc, uint8_t extendedFrame, uint32_t baudrat
 }
 
 /**
- * @brief Get total amount of transmitted messages
- */
-uint32_t Stats_CanMessages_TxTotal_Get(void)
-{
-    return _can.MsgsTx;
-}
-
-/**
- * @brief Add n bytes to amount of already received bytes
- * @param dlc: DLC of CAN message
- * @param extendedFrame: If 0, then processed as standard frame, otherwise processed as extended frame
- * @param baudrate: used for calculation of bus load
- */
-void Stats_CanMessage_TxAdd(uint8_t dlc, uint8_t extendedFrame, uint32_t baudrate)
-{
-    _can.MsgsTx++;
-    _canBaudrate = baudrate;
-    if(extendedFrame == 0)
-    {
-        _can.ElementsTx += _canBitsStdMsg[dlc];
-    }
-    else
-    {
-        _can.ElementsTx += _canBitsExtMsg[dlc];
-    }
-}
-
-/**
  * @brief Get total amount of received bytes
  */
-uint64_t Stats_UsbBytes_RxTotal_Get(void)
+uint32_t Stats_KlineBytes_RxTotal_Get(void)
 {
-    return _usb.ElementsRx;
+    return _kline.ElementsRx;
 }
 
 /**
  * @brief Get total amount of received messages
  */
-uint32_t Stats_UsbMessages_RxTotal_Get(void)
+uint32_t Stats_KlineFrames_RxTotal_Get(void)
 {
-    return _usb.MsgsRx;
+    return _kline.MsgsRx;
 }
 
 /**
  * @brief Add n bytes to amount of already received bytes
  */
-void Stats_UsbBytes_RxAdd(uint32_t n)
+void Stats_KlineBytes_RxAdd(uint32_t n)
 {
-    _usb.MsgsRx++;
-    _usb.ElementsRx += n;
-}
-
-/**
- * @brief Get total amount of transmitted bytes
- */
-uint64_t Stats_UsbBytes_TxTotal_Get(void)
-{
-    return _usb.ElementsTx;
-}
-
-/**
- * @brief Get total amount of transmitted messages
- */
-uint32_t Stats_UsbMessages_TxTotal_Get(void)
-{
-    return _usb.MsgsTx;
+    _kline.MsgsRx++;
+    _kline.ElementsRx += n;
 }
 
 /**
  * @brief Get total amount of received CAN bytes per second
  */
-uint32_t Stats_UsbBytes_RxPerSecond_Get(void)
+uint32_t Stats_KlineBytes_RxPerSecond_Get(void)
 {
-    return _usbBytesReceivedPerSecond;
+    return _klineBytesReceivedPerSecond;
 }
 
 /**
- * @brief Get total amount of received CAN bytes per second
- */
-uint32_t Stats_UsbBytes_TxPerSecond_Get(void)
+ * @brief Upload state of DHCP into stats, so it can be shown on LCD
+*/
+void Stats_DHCP_SetState(uint8_t s)
 {
-    return _usbBytesTransmitedPerSecond;
+    _dhcpState = (uint32_t)s;
 }
 
 /**
- * @brief Add n bytes to amount of already transmitted bytes
+ * @brief Return state of DHCP 
  */
-void Stats_UsbBytes_TxAdd(uint32_t n)
+uint32_t Stats_DHCP_GetState(void)
 {
-    _usb.MsgsTx++;
-    _usb.ElementsTx += n;
+    return _dhcpState;
 }
 
 /**
- * @brief Set which device is curently active to talk to user
+ * @brief Save IP address to be shown on LCD
  */
-void Stats_UsbActiveDevice_Set(StatsActiveDeviceType device)
+void Stats_IP_Set(char* ip)
 {
-    _usbDevice = device;
+    strcpy(_ipAddress, ip);
 }
 
 /**
- * @brief Get which device is curently active to talk to user
+ * @brief Get IP address
  */
-StatsActiveDeviceType Stats_UsbActiveDevice_Get(void)
+char* Stats_IP_Get(void)
 {
-    return _usbDevice;
+    return _ipAddress;
 }

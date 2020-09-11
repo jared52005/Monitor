@@ -47,6 +47,7 @@
 #include "main.h"
 #include "lwip/dhcp.h"
 #include "app_ethernet.h"
+#include "System_stats.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -71,6 +72,7 @@ void User_notification(struct netif *netif)
 #ifdef USE_DHCP
     /* Update DHCP state machine */
     DHCP_state = DHCP_START;
+    Stats_DHCP_SetState(DHCP_state);
 #else
 #ifdef USE_LCD
     uint8_t iptxt[20];
@@ -87,6 +89,7 @@ void User_notification(struct netif *netif)
 #ifdef USE_DHCP
     /* Update DHCP state machine */
     DHCP_state = DHCP_LINK_DOWN;
+    Stats_DHCP_SetState(DHCP_state);
 #endif  /* USE_DHCP */
 #ifdef USE_LCD
     printf ("The network cable is not connected \n");
@@ -122,6 +125,7 @@ void ethernetif_notify_conn_changed(struct netif *netif)
 #ifdef USE_DHCP
     /* Update DHCP state machine */
     DHCP_state = DHCP_START;
+    Stats_DHCP_SetState(DHCP_state);
 #else
     IP_ADDR4(&ipaddr,IP_ADDR0,IP_ADDR1,IP_ADDR2,IP_ADDR3);
     IP_ADDR4(&netmask,NETMASK_ADDR0,NETMASK_ADDR1,NETMASK_ADDR2,NETMASK_ADDR3);
@@ -144,6 +148,7 @@ void ethernetif_notify_conn_changed(struct netif *netif)
 #ifdef USE_DHCP
     /* Update DHCP state machine */
     DHCP_state = DHCP_LINK_DOWN;
+    Stats_DHCP_SetState(DHCP_state);
 #endif /* USE_DHCP */
     
     /*  When the netif link is down this function must be called.*/
@@ -177,6 +182,7 @@ void DHCP_thread(void const * argument)
   
   for (;;)
   {
+    Stats_DHCP_SetState(DHCP_state);
     switch (DHCP_state)
     {
     case DHCP_START:
@@ -201,6 +207,7 @@ void DHCP_thread(void const * argument)
 #ifdef USE_LCD 
           sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&netif->ip_addr));   
           printf ("IP address assigned by a DHCP server: %s\n", iptxt);
+          Stats_IP_Set((char*)iptxt);
 #else
           BSP_LED_On(LED1);   
 #endif 
