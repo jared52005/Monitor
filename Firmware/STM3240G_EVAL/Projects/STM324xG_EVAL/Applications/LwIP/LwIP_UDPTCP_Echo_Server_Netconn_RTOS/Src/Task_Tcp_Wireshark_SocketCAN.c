@@ -5,6 +5,7 @@
  ******************************************************************************  
  */ 
 
+#include "System_stats.h"
 #include "Task_Tcp_Wireshark_SocketCAN.h"
 #include "lwip/opt.h"
 
@@ -49,7 +50,7 @@ static void tcpwscan_thread(void *arg)
         /* Process the new connection. */
         if (accept_err == ERR_OK) 
         {
-
+          Stats_TCP_WS_SocketCAN_State_Set(1);
           while (netconn_recv(newconn, &buf) == ERR_OK) 
           {
             do 
@@ -66,6 +67,7 @@ static void tcpwscan_thread(void *arg)
           /* Close connection and discard connection identifier. */
           netconn_close(newconn);
           netconn_delete(newconn);
+          Stats_TCP_WS_SocketCAN_State_Set(0);
         }
       }
     }

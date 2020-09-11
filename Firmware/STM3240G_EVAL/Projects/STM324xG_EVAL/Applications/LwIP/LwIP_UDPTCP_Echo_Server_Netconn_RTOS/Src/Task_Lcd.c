@@ -41,6 +41,19 @@ const char* TranslateDhcpState(uint32_t dhcpState)
     }
 }
 
+const char* TranslateSocketState(uint32_t state)
+{
+    switch (state)
+    {
+    case 0:
+    return "Disconnected";
+    case 1:
+    return "Connected   ";
+    default:
+    return "???";
+    }
+}
+
 /**
 * @brief  Task for printing data on LCD. Low prioririty task. Run only once in 100ms
 */
@@ -121,7 +134,7 @@ void Task_Lcd(void const* pvParameters)
             //Empty line
             continue;
         case 13:
-            sprintf(line, "TCP Socket CAN: %s  ", "Disconnected");
+            sprintf(line, "TCP Socket CAN: %s  ", TranslateSocketState(Stats_TCP_WS_SocketCAN_State_Get()));
             break;
         case 14:
             sprintf(line, "TCP Datagrams: %s  ", "Disconnected");

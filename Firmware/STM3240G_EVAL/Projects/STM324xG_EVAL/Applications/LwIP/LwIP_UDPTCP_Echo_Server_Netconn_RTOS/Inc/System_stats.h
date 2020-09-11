@@ -85,4 +85,13 @@ uint32_t Stats_DHCP_GetState(void);
 
 void Stats_IP_Set(char* ip);
 char* Stats_IP_Get(void);
+
+/**
+ * @brief Set state of Wirehsark SocketCAN socket
+ */
+void Stats_TCP_WS_SocketCAN_State_Set(uint32_t state);
+/**
+ * @brief Return state of Wirehsark SocketCAN socket
+ */
+uint32_t Stats_TCP_WS_SocketCAN_State_Get(void);
 #endif

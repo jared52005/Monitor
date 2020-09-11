@@ -37,6 +37,8 @@ static uint32_t _lastTime;
 static uint32_t _dhcpState;
 static char _ipAddress[20];
 
+static uint32_t _wsSocketCan_state;
+
 void Stats_Reset(void)
 {
     _kline.ElementsRx = 0;
@@ -50,6 +52,7 @@ void Stats_Reset(void)
     _canBytesReceivedPrevious = 0;
     _canBytesReceivedPerSecond = 0;
     _lastTime = GetTime_ms();
+    _wsSocketCan_state = 0;
 }
 
 /**
@@ -206,4 +209,20 @@ void Stats_IP_Set(char* ip)
 char* Stats_IP_Get(void)
 {
     return _ipAddress;
+}
+
+/**
+ * @brief Set state of Wirehsark SocketCAN socket
+ */
+void Stats_TCP_WS_SocketCAN_State_Set(uint32_t state)
+{
+    _wsSocketCan_state = state;
+}
+
+/**
+ * @brief Return state of Wirehsark SocketCAN socket
+ */
+uint32_t Stats_TCP_WS_SocketCAN_State_Get(void)
+{
+    return _wsSocketCan_state;
 }
