@@ -55,6 +55,8 @@
 #ifdef USE_LCD
 #include "Task_Lcd.h"
 #endif
+#include "Task_Tcp_Wireshark_SocketCAN.h"
+#include "Task_Tcp_Wireshark_Raw.h"
 #include "System_stats.h"
 #include "rtos_utils.h"
 
@@ -137,8 +139,11 @@ static void StartThread(void const * argument)
   /* Initialize tcp echo server */
   tcpecho_init();
 
-  /* Initialize udp echo server */
-  udpecho_init();
+  //Initialize RAW for Wireshark on port 19000
+  Task_Tcp_Wireshark_Raw_Init();
+
+  //Initialize Socket CAN for Wireshark on port 19001
+  Task_Tcp_Wireshark_SocketCAN_Init();
   
   /* Notify user about the network interface config */
   User_notification(&gnetif);

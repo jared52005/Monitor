@@ -806,11 +806,6 @@
               <FilePath>../Src/tcpecho.c</FilePath>
             </File>
             <File>
-              <FileName>udpecho.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/udpecho.c</FilePath>
-            </File>
-            <File>
               <FileName>stm32f4xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/stm32f4xx_it.c</FilePath>
@@ -834,6 +829,16 @@
               <FileName>Task_Lcd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\Task_Lcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>Task_Tcp_Wireshark_Raw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Task_Tcp_Wireshark_Raw.c</FilePath>
+            </File>
+            <File>
+              <FileName>Task_Tcp_Wireshark_SocketCAN.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Task_Tcp_Wireshark_SocketCAN.c</FilePath>
             </File>
           </Files>
         </Group>
