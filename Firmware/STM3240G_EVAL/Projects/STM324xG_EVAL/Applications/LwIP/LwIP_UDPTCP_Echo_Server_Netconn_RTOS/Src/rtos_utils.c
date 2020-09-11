@@ -30,7 +30,7 @@
 */
 uint32_t GetTime_ms()
 {
-	return (uint32_t)(xTaskGetTickCount() * portTICK_PERIOD_MS);
+	return (uint32_t)((xTaskGetTickCount() * portTICK_PERIOD_MS) * 3); //Clocks running 3 times slower (from whatever reason)
 }
 
 /**
