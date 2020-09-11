@@ -53,7 +53,7 @@
 #include "lwip/tcpip.h"
 #include "app_ethernet.h"
 #ifdef USE_LCD
-#include "Module_Lcd.h"
+#include "Task_Lcd.h"
 #endif
 
 /* Private typedef -----------------------------------------------------------*/
@@ -144,7 +144,7 @@ static void StartThread(void const * argument)
 #endif
   
 	/* Start LCD task : Write stat data on LCD ever 100ms */
-  osThreadDef(xLCD, Application_Lcd_Task, osPriorityLow, 0, configMINIMAL_STACK_SIZE);
+  osThreadDef(xLCD, Task_Lcd, osPriorityLow, 0, configMINIMAL_STACK_SIZE);
   osThreadCreate(osThread(xLCD), NULL);
 	
   for( ;; )
@@ -250,7 +250,7 @@ static void BSP_Config(void)
 #ifdef USE_LCD
   
   /* Initialize the LCD */
-	Application_Lcd_Init(); 
+	Task_Lcd_Init(); 
   printf("  State: Ethernet Initialization ...\n");
 #endif
 }

@@ -1,6 +1,5 @@
 /*******************************************************************************
- * @file    Module_Lcd.c
- * @brief   Module controlling generic LCD display, which can write lines
+  * @brief   Control of default ILI9525 LCD
  ******************************************************************************
  * @attention
  ******************************************************************************  
@@ -41,7 +40,7 @@ const char* DeviceTypeTranslate(void)
 /**
 * @brief  Task for printing data on LCD. Low prioririty task. Run only once in 100ms
 */
-void Application_Lcd_Task(void const* pvParameters)
+void Task_Lcd(void const* pvParameters)
 {
     uint32_t peakCanBusLoad;
     char line[64];
@@ -116,7 +115,7 @@ void Application_Lcd_Task(void const* pvParameters)
 /**
 * @brief  Setup LCD
 */
-void Application_Lcd_Init(void)
+void Task_Lcd_Init(void)
 {
     if(BSP_LCD_Init() == LCD_OK)
     {

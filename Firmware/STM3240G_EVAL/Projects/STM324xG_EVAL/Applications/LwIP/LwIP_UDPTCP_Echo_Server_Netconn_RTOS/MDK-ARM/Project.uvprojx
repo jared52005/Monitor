@@ -826,14 +826,14 @@
               <FilePath>../Src/ethernetif.c</FilePath>
             </File>
             <File>
-              <FileName>Module_Lcd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\Module_Lcd.c</FilePath>
-            </File>
-            <File>
               <FileName>System_stats.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\System_stats.c</FilePath>
+            </File>
+            <File>
+              <FileName>Task_Lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Task_Lcd.c</FilePath>
             </File>
           </Files>
         </Group>
