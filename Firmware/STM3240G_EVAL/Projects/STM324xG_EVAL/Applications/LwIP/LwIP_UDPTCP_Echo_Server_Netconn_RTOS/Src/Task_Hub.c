@@ -10,6 +10,7 @@
 #include "main.h"
 #include "System_stats.h"
 #include "rtos_utils.h"
+#include "CanIf.h"
 //******************************************************************************
 //#include "FreeRTOS.h"
 //#include "queue.h"
@@ -21,6 +22,9 @@
 */
 void Task_Hub(void const* pvParameters)
 {
+    ErrorCodes error;
+    error = Can_Enable(500000, CAN_ACTIVE);
+    printf("CAN Setup result: %d\n", error);
     //Init CAN
     for(;;)
     {
