@@ -22,11 +22,11 @@
 /* Private variables ---------------------------------------------------------*/
 CAN_HandleTypeDef     hcan;
 
-int canFifo_readPtr = 0;   //Pointer where we are starting with reading
-int canFifo_writePtr = 0;  //Pointer where we are starting with writing
-bool flagOverflow = false; //Overflow flag
-struct CanMessage canMessageFifo[CAN_BUFFER_ITEMS]; //FIFO buffer with received CAN messages for user
-uint32_t canBaudrate;
+static int canFifo_readPtr = 0;   //Pointer where we are starting with reading
+static int canFifo_writePtr = 0;  //Pointer where we are starting with writing
+static bool flagOverflow = false; //Overflow flag
+static struct CanMessage canMessageFifo[CAN_BUFFER_ITEMS]; //FIFO buffer with received CAN messages for user
+static uint32_t canBaudrate;
 
 /* Private methods -----------------------------------------------------------*/
 static ErrorCodes Can_ResetFifo(void);
@@ -121,29 +121,7 @@ ErrorCodes Can_Enable(uint32_t baudrate, CanMode mode)
 {   
 	CAN_FilterTypeDef  sFilterConfig;
 	GPIO_InitTypeDef   GPIO_InitStruct;
-    // Enable GPIO clock 
-    //RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 
-    // Connect CAN pins 
-    //GPIO_PinAFConfig(GPIOB, GPIO_PinSource5, GPIO_AF_CAN2);
-    //GPIO_PinAFConfig(GPIOB, GPIO_PinSource13, GPIO_AF_CAN2); 
-    
-    // Configure CAN RX and TX pins 
-    /*GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_13;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);*/
-
-    // CAN configuration ********************************************************/  
-  
-    // Enable CAN clock - Necessary to enable CAN1 | CAN2, otherwise 1FFFFFB DLC=0 will be sent
-    //RCC_APB1PeriphClockCmd((RCC_APB1Periph_CAN2 | RCC_APB1Periph_CAN1), ENABLE);
-
-    // CAN register init 
-    //CAN_DeInit(CAN2);
-	
 	/*##-1- Enable peripherals and GPIO Clocks #################################*/
 	/* CAN1 Periph clock enable */
   	__HAL_RCC_CAN2_CLK_ENABLE();
