@@ -15,6 +15,9 @@ Socket CAN read directly from remote target:
 Parsed KW1281 / KWP2000 (ISO14230) traffic on ME7 ECU  
 ![WS Socket CAN](/Resources/Wireshark_KWP2000_Example.png)
 
+## Setup
+To replicate screenshots above, use setup described [here](\Setup.md)
+
 ## Existing devices
  * **STM3240G-EVAL** Development kit with a small [Hardware modification](https://github.com/jared52005/Monitor/blob/master/Hardware/Passive_KLine/readme.md) to trace KLINE traffic. I have used [FreeRTOS + LWIP based firmware](https://github.com/jared52005/Monitor/blob/master/Firmware/STM3240G_EVAL/readme.md) to trace CAN @ TCP:19001 and datagram (RAW) packets @ TCP:19000. Tracing should be working in parallel to get raw CAN or preprocessed datagrams or both;
 
