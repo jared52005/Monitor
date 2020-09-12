@@ -110,6 +110,7 @@ ErrorCodes Uart_Enable(uint32_t baudrate)
 {
     Uart_ResetFifo();
 	uartBaudrate = baudrate;
+
 	__GPIOB_CLK_ENABLE();
     __USART3_CLK_ENABLE();
 
@@ -122,7 +123,7 @@ ErrorCodes Uart_Enable(uint32_t baudrate)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     huart.Instance = USART3;
-    huart.Init.BaudRate = 10400;
+    huart.Init.BaudRate = baudrate;
     huart.Init.WordLength = UART_WORDLENGTH_8B;
     huart.Init.StopBits = UART_STOPBITS_1;
     huart.Init.Parity = UART_PARITY_NONE;
@@ -175,4 +176,5 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
         uartFifo_writePtr = 0;
         uartFifo_readPtr = 0;
     }
+    Stats_KlineBytes_RxAdd(1, uartBaudrate);
 }
