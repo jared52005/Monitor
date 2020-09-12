@@ -4,9 +4,12 @@ Monitor is a name for group of devices which are able to only read and aggregate
 ## Use Case
  * **Aggregate CAN traffic** 
  * **Aggregate ISO9141 traffic via RAW** Simple postprocessing via LUA dissectors possible.
- * **Aggregate ISO15765 traffic via RAW** Simple postprocessing via LUA dissectors possible. !! *Implement switch on Monitor devices to indicate if we want raw CAN or ISO15765 / TP2.0 traffic.*
+ * **Aggregate ISO15765 traffic via RAW** Simple postprocessing via LUA dissectors possible.
  * **Aggregate FlexRay traffic** Simple postprocessing via LUA dissectors possible.
  * **Aggregate SWO output from STM32 processors**
+
+## Existing devices
+ * **STM3240G-EVAL** Development kit with a small [Hardware modification](https://github.com/jared52005/Monitor/blob/master/Hardware/Passive_KLine/readme.md) to trace KLINE traffic. I have used [FreeRTOS + LWIP based firmware](https://github.com/jared52005/Monitor/blob/master/Firmware/STM3240G_EVAL/readme.md) to trace CAN @ TCP:19001 and datagram (RAW) packets @ TCP:19000. Tracing should be working in parallel to get raw CAN or preprocessed datagrams or both;
 
 ## Protocol
 However with this approach there are some problems. First I can trace `CAN, DoIP and FlexRay*` however **I can't** trace `VWTP20, ISO9141, KW1281 and ISO15765*` For those protocols I was forced to create dummy IPV4 header and then put those packets at a top of it. Adding of those 20 bytes header will give me ability to preprocess data in a some local device and send whole frame into Wireshark via TCP socket
