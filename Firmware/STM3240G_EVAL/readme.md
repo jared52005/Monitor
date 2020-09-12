@@ -9,4 +9,4 @@ TCP Server is then extended with:
  * CAN statistics on LCD
 
 ## How it looks
-![STM3240G Example](/STM3240G.jpg)
+![STM3240G Example](STM3240G.jpg)
