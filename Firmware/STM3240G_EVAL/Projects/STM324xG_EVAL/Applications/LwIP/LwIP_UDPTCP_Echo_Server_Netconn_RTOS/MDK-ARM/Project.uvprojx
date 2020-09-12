@@ -855,6 +855,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\CanIf.c</FilePath>
             </File>
+            <File>
+              <FileName>UartIf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\UartIf.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

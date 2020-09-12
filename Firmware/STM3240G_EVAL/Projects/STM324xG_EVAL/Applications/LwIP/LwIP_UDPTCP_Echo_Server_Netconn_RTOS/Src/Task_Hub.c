@@ -9,9 +9,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "main.h"
+#include "Task_Tcp_Wireshark_SocketCAN.h"
 #include "System_stats.h"
 #include "rtos_utils.h"
 #include "CanIf.h"
+#include "UartIf.h"
 //******************************************************************************
 
 //- Private Variables ------------
@@ -23,9 +25,12 @@ static void ProcessCanElements(void);
 void Task_Hub(void const* pvParameters)
 {
     ErrorCodes error;
+    //Init CAN
     error = Can_Enable(500000, CAN_ACTIVE);
     printf("CAN Setup result: %d\n", error);
-    //Init CAN
+    //Init UART
+    error = Uart_Enable(10400);
+    printf("UART Setup result: %d\n", error);
     for(;;)
     {
         ProcessCanElements();
