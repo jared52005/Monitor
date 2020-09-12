@@ -66,7 +66,12 @@ uint32_t Stats_KlineFrames_RxTotal_Get(void);
 /**
  * @brief Add n bytes to amount of already received bytes
  */
-void Stats_KlineBytes_RxAdd(uint32_t n);
+void Stats_KlineBytes_RxAdd(uint32_t n, uint32_t baudrate);
+
+/**
+ * @brief Get current baudrate of KLINE
+ */
+uint32_t Stats_Kline_GetBaudrate(void);
 
 /**
  * @brief Get total amount of received CAN bytes per second

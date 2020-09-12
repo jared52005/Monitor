@@ -23,6 +23,7 @@ static PduStats _kline;
 static PduStats _can;
 static uint32_t _klineBytesReceivedPrevious;
 static uint32_t _klineBytesReceivedPerSecond;
+static uint32_t _klineBaudrate;
 
 static uint32_t _canBusLoad; //How much is CAN bus loaded in percents (xxx.y = xxxy)
 static uint32_t _canBitsStdMsg[] = {51, 60, 70, 79, 89, 99, 108, 118, 127}; //How many bits is in standard message by DLC
@@ -165,10 +166,19 @@ uint32_t Stats_KlineFrames_RxTotal_Get(void)
 /**
  * @brief Add n bytes to amount of already received bytes
  */
-void Stats_KlineBytes_RxAdd(uint32_t n)
+void Stats_KlineBytes_RxAdd(uint32_t n, uint32_t baudrate)
 {
     _kline.MsgsRx++;
     _kline.ElementsRx += n;
+    _klineBaudrate = baudrate;
+}
+
+/**
+ * @brief Get current baudrate of KLINE
+ */
+uint32_t Stats_Kline_GetBaudrate(void)
+{
+    return _klineBaudrate;
 }
 
 /**
