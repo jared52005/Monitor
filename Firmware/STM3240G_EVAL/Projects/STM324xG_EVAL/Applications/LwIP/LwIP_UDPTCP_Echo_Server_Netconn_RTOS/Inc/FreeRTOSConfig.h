@@ -101,9 +101,10 @@
 #define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 20 * 1024 ) )
 #else
 //40*1024 = DHCP is working
-//80*1024 = DHCP is working
-//100*1024 = DHCP is not working. WTF? LWIP and FreeRTOS has different malloc / free memory?
-#define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 80 * 1024 ) )
+//80*1024 = DHCP is not working
+//100*1024 = DHCP is not working.
+//ERROR: LWIP seems to be using malloc/free, where FreeRTOS is using pvPortMalloc/vPortFree
+#define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 40 * 1024 ) )
 #endif
 #define configMAX_TASK_NAME_LEN			        16
 #define configUSE_TRACE_FACILITY		        1

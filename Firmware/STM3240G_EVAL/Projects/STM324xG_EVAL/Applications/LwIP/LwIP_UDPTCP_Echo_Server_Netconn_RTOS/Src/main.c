@@ -138,7 +138,7 @@ static void StartThread(void const * argument)
   Netif_Config();
   
   /* Initialize tcp echo server */
-  tcpecho_init();
+  //tcpecho_init();
 
   //Initialize RAW for Wireshark on port 19000
   Task_Tcp_Wireshark_Raw_Init();
