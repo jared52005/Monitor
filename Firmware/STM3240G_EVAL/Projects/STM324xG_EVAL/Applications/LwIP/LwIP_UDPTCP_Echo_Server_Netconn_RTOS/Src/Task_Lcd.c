@@ -137,7 +137,7 @@ void Task_Lcd(void const* pvParameters)
             sprintf(line, "TCP Socket CAN: %s  ", TranslateSocketState(Stats_TCP_WS_SocketCAN_State_Get()));
             break;
         case 14:
-            sprintf(line, "TCP Datagrams: %s  ", "Disconnected");
+            sprintf(line, "TCP Datagrams: %s  ", TranslateSocketState(Stats_TCP_WS_RAW_State_Get()));
             break;
         default:
             lineNumber = -1;

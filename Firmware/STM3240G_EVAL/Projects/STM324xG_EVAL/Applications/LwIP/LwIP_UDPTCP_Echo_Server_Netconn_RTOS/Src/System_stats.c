@@ -39,6 +39,7 @@ static uint32_t _dhcpState;
 static char _ipAddress[20];
 
 static uint32_t _wsSocketCan_state;
+static uint32_t _wsRaw_state;
 
 void Stats_Reset(void)
 {
@@ -235,4 +236,20 @@ void Stats_TCP_WS_SocketCAN_State_Set(uint32_t state)
 uint32_t Stats_TCP_WS_SocketCAN_State_Get(void)
 {
     return _wsSocketCan_state;
+}
+
+/**
+ * @brief Set state of Wirehsark SocketCAN socket
+ */
+void Stats_TCP_WS_RAW_State_Set(uint32_t state)
+{
+    _wsRaw_state = state;
+}
+
+/**
+ * @brief Return state of Wirehsark SocketCAN socket
+ */
+uint32_t Stats_TCP_WS_RAW_State_Get(void)
+{
+    return _wsRaw_state;
 }

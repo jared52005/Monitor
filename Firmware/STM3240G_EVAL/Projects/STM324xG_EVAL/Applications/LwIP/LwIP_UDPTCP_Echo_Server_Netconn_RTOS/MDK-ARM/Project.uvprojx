@@ -860,6 +860,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\UartIf.c</FilePath>
             </File>
+            <File>
+              <FileName>Passive_Iso15765.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Passive_Iso15765.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -14,6 +14,9 @@
 #include "rtos_utils.h"
 #include "CanIf.h"
 #include "UartIf.h"
+
+#include "Passive_Iso15765.h"
+
 //******************************************************************************
 
 //- Private Variables ------------
@@ -64,9 +67,12 @@ static void ProcessCanElements(void)
             {
                 Task_Tcp_Wireshark_SocketCAN_AddNewCanMessage(cmsg);
             }
-            
-            //Try to process CAN element in VWTP20 passive protocol
             //Try to process CAN element in ISO15765 passive protocol
+            if(Passive_Iso15765_Parse(cmsg) == true)
+            {
+                continue;
+            }
+            //Try to process CAN element in VWTP20 passive protocol
         }
     }
     while(pduElements > 0);

@@ -99,4 +99,13 @@ void Stats_TCP_WS_SocketCAN_State_Set(uint32_t state);
  * @brief Return state of Wirehsark SocketCAN socket
  */
 uint32_t Stats_TCP_WS_SocketCAN_State_Get(void);
+
+/**
+ * @brief Set state of Wirehsark RAW socket
+ */
+void Stats_TCP_WS_RAW_State_Set(uint32_t state);
+/**
+ * @brief Return state of Wirehsark SocketCAN socket
+ */
+uint32_t Stats_TCP_WS_RAW_State_Get(void);
 #endif
