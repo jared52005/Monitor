@@ -870,6 +870,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\Passive_Vwtp20.c</FilePath>
             </File>
+            <File>
+              <FileName>Passive_Kline.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Passive_Kline.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

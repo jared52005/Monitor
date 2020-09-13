@@ -17,11 +17,13 @@
 
 #include "Passive_Iso15765.h"
 #include "Passive_Vwtp20.h"
+#include "Passive_Kline.h"
 
 //******************************************************************************
 
 //- Private Variables ------------
 static void ProcessCanElements(void);
+static void ProcessKlineElements(void);
 
 /**
 * @brief  Task for parsing data into CAN
@@ -38,8 +40,40 @@ void Task_Hub(void const* pvParameters)
     for(;;)
     {
         ProcessCanElements();
+        ProcessKlineElements();
         osDelay(20);
     }
+}
+
+static void ProcessKlineElements(void)
+{
+    uint8_t c;
+    uint32_t pduElements;
+    ErrorCodes error;
+    do
+    {
+        error = Uart_Rx_GetCount(&pduElements);
+        if(error == ERROR_DATA_OVERFLOW)
+        {
+            printf("ERROR: KLINE Buffer Overflow\n");
+        }
+        else if(pduElements > 0)
+        {
+            //Read CAN element from buffer
+            error = Uart_Rx(&c);
+            if(error == ERROR_DATA_EMPTY)
+            {
+                continue;
+            }
+
+            //Add CAN element into TCP ring buffer as socket CAN (if socket CAN is connected)
+            //if(Stats_TCP_WS_RAW_State_Get() != 0)
+            {
+                Passive_Kline_Parse(c);
+            }
+        }
+    }
+    while(pduElements > 0);
 }
 
 static void ProcessCanElements(void)
@@ -68,15 +102,18 @@ static void ProcessCanElements(void)
             {
                 Task_Tcp_Wireshark_SocketCAN_AddNewCanMessage(cmsg);
             }
-            //Try to process CAN element in ISO15765 passive protocol
-            if(Passive_Iso15765_Parse(cmsg) == true)
+            if(Stats_TCP_WS_RAW_State_Get() != 0)
             {
-                continue;
-            }
-            //Try to process CAN element in VWTP20 passive protocol
-            if(Passive_Vwtp20_Parse(cmsg) == true)
-            {
-                continue;
+                //Try to process CAN element in ISO15765 passive protocol
+                if(Passive_Iso15765_Parse(cmsg) == true)
+                {
+                    continue;
+                }
+                //Try to process CAN element in VWTP20 passive protocol
+                if(Passive_Vwtp20_Parse(cmsg) == true)
+                {
+                    continue;
+                }
             }
         }
     }
