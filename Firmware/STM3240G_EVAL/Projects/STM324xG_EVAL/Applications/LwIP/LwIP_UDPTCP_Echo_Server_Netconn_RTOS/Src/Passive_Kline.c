@@ -23,6 +23,13 @@ typedef enum Kline5BaudInit
     K5I_NEcuAddress,
 }Kline5BaudInit;
 
+typedef enum KlineKw1281
+{
+    Kw1281_Data,
+    Kw1281_DataComplement,
+    Kw1281_Etx,
+}KlineKw1281;
+
 // -- Private variables ---------------------------
 uint8_t  kline_buffer[KLINE_BUFFER_SIZE];
 uint8_t  kline_frame[0x110]; //Frame to be sent to Wireshark
@@ -38,6 +45,85 @@ void Passive_Kline_Parse_ResetFifo()
     kline_buffer_start = 0;
     kline_buffer_end = 0;
     kline_buffer_overflow = false;
+}
+
+bool Passive_Kline_SearchKw1281(uint32_t* start, uint32_t* end)
+{
+    int i;
+    int expectedLength;
+    bool result = false;
+    int length = 0;
+    int etx = 0x03;
+    uint8_t data;
+    uint8_t data_c;
+    KlineKw1281 kw1281_sm = Kw1281_Data;
+    /* 0F f0   Length
+       1 fe    Block ID
+       f6 9    Block Type
+       b4 4b 
+       5a a5 
+       37 c8
+       39 c6 
+       30 cf 
+       37 c8 
+       35 ca 
+       35 ca 
+       31 ce 
+       41 be 
+       41 be 
+       20 df 
+       3      Last byte is ETX without a complement.
+       */   
+
+    //Go through buffer
+    for(i = kline_buffer_start; i!= kline_buffer_end; i = ++i % KLINE_BUFFER_SIZE)
+    {
+        switch (kw1281_sm)
+        {
+        case Kw1281_Data:
+            data = kline_buffer[i];
+            kw1281_sm = Kw1281_DataComplement;
+            if(length == 0)
+            {
+                *start = i;
+            }
+            break;
+        case Kw1281_DataComplement:
+            data_c = (uint8_t)(~kline_buffer[i]);
+            if(data == data_c)
+            {
+                length++;
+                if(length == 1)
+                {
+                    expectedLength = data;
+                }
+                if(length == expectedLength)
+                {
+                    kw1281_sm = Kw1281_Etx;
+                }
+                else
+                {
+                    kw1281_sm = Kw1281_Data;
+                }
+            }
+            else
+            {
+                length = 0;
+                kw1281_sm = Kw1281_Data;
+            }
+        case Kw1281_Etx:
+            data = kline_buffer[i];
+            if(data == etx)
+            {
+                *end = i + 1;
+                result = true;
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    return result;
 }
 
 /**
@@ -82,6 +168,12 @@ bool Passive_Kline_SearchKeyBytes(uint32_t* start, uint32_t* end)
             length++;
             if(nKb2 == kb2 && length == 4)
             {
+                if(kb2 == 0x8A)
+                {
+                    //KW1281 is not sending back ECU address
+                    *end = i + 1;
+                    result = true;
+                }
                 init_sm = K5I_NEcuAddress;
             }
             else
@@ -102,14 +194,17 @@ bool Passive_Kline_SearchKeyBytes(uint32_t* start, uint32_t* end)
     return result;
 }
 
-void Passive_Kline_Dequeue(uint32_t start, uint32_t end)
+/**
+ * @brief Dequeue data from ring buffer, including junk data between start of buffer and start of packet
+ */
+void Passive_Kline_Dequeue_Iso14230(uint32_t start, uint32_t end)
 {
     int i;
     int framePos;
     //Dequeue crap
     if(kline_buffer_start != start)
     {
-        printf("KLINE crap bytes: ");
+        printf("ISO14230 crap bytes: ");
         for(i = kline_buffer_start; i!= start; i = ++i % KLINE_BUFFER_SIZE)
         {
             printf("%x ", kline_buffer[i]);
@@ -122,14 +217,58 @@ void Passive_Kline_Dequeue(uint32_t start, uint32_t end)
 
     //Dequeue data
     framePos = 0;
-    printf("KLINE Data: ");
+    printf("ISO14230 Data: ");
     for(i = start; i!= end; i = ++i % KLINE_BUFFER_SIZE)
     {
         kline_frame[framePos] = kline_buffer[i];
         printf("%x ", kline_buffer[i]);
         kline_buffer[i] = 0x00;
-        kline_buffer_start++;
         framePos++;
+        kline_buffer_start++;
+        kline_buffer_start = kline_buffer_start % KLINE_BUFFER_SIZE;
+        //Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_ISO14230);
+    }
+    printf("\n");
+}
+
+/**
+ * @brief Dequeue data from ring buffer using data, nData structure, including junk data between start of buffer and start of packet
+ */
+void Passive_Kline_Dequeue_Kw1281(uint32_t start, uint32_t end)
+{
+    int i;
+    int framePos;
+    int length;
+    //Dequeue crap
+    if(kline_buffer_start != start)
+    {
+        printf("KW1281 crap bytes: ");
+        for(i = kline_buffer_start; i!= start; i = ++i % KLINE_BUFFER_SIZE)
+        {
+            printf("%x ", kline_buffer[i]);
+            kline_buffer[i] = 0x00;
+            kline_buffer_start++;
+            kline_buffer_start = kline_buffer_start % KLINE_BUFFER_SIZE;
+        }
+        printf("\n");
+    }
+
+    //Dequeue data
+    framePos = 0;
+    length = 0;
+    printf("KW1281 Data: ");
+    for(i = start; i!= end; i = ++i % KLINE_BUFFER_SIZE)
+    {
+        //Write only even positions. Odd positions are complements
+        if(length % 2 == 0)
+        {
+            kline_frame[framePos] = kline_buffer[i];
+            printf("%x ", kline_buffer[i]);
+            framePos++;
+        }
+        kline_buffer[i] = 0x00;
+        kline_buffer_start++;
+        length++;
         kline_buffer_start = kline_buffer_start % KLINE_BUFFER_SIZE;
         //Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_ISO14230);
     }
@@ -142,7 +281,6 @@ void Passive_Kline_Dequeue(uint32_t start, uint32_t end)
 */
 bool Passive_Kline_Parse(uint8_t c)
 {
-    
     uint32_t start;
     uint32_t end;
     //Write data into ring buffer
@@ -165,7 +303,11 @@ bool Passive_Kline_Parse(uint8_t c)
     //Process data in the buffer
     if(Passive_Kline_SearchKeyBytes(&start, &end))
     {
-        Passive_Kline_Dequeue(start, end);
+        Passive_Kline_Dequeue_Iso14230(start, end);
+    }
+    if(Passive_Kline_SearchKw1281(&start, &end))
+    {
+        Passive_Kline_Dequeue_Kw1281(start, end);
     }
     return true;
 }
