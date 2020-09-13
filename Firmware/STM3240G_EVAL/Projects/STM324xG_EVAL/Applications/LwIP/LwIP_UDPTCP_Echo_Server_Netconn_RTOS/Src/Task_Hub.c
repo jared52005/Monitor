@@ -16,6 +16,7 @@
 #include "UartIf.h"
 
 #include "Passive_Iso15765.h"
+#include "Passive_Vwtp20.h"
 
 //******************************************************************************
 
@@ -73,6 +74,10 @@ static void ProcessCanElements(void)
                 continue;
             }
             //Try to process CAN element in VWTP20 passive protocol
+            if(Passive_Vwtp20_Parse(cmsg) == true)
+            {
+                continue;
+            }
         }
     }
     while(pduElements > 0);
