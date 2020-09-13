@@ -100,7 +100,10 @@
 #if defined(__GNUC__)
 #define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 20 * 1024 ) )
 #else
-#define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 40 * 1024 ) ) //Increased heap, because there was no more space for new threads
+//40*1024 = DHCP is working
+//80*1024 = DHCP is working
+//100*1024 = DHCP is not working. WTF? LWIP and FreeRTOS has different malloc / free memory?
+#define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 80 * 1024 ) )
 #endif
 #define configMAX_TASK_NAME_LEN			        16
 #define configUSE_TRACE_FACILITY		        1
