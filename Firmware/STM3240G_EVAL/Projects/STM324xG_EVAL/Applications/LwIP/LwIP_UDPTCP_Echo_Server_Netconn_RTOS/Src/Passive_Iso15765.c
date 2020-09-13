@@ -53,7 +53,6 @@ void Passive_Iso15765_SingleFrame(CanMessage cmsg)
         iso15765_frame[iso15765_frame_position] = cmsg.Frame[i];
         iso15765_frame_position++;
     }
-    printf("ISO15765 SF = %x\n", iso15765_frame_position);
     Task_Tcp_Wireshark_Raw_AddNewRawMessage(iso15765_frame, iso15765_frame_position, cmsg.Id, cmsg.Timestamp, Raw_ISO15765);
     iso15765_frame_position = 0;
 }
@@ -72,7 +71,6 @@ void Passive_Iso15765_FirstFrame(CanMessage cmsg)
 
         if (iso15765_frame_expectedLength == 0)
         {
-            printf("ISO15765 FF = %x (should not happen)\n", iso15765_frame_position);
             Task_Tcp_Wireshark_Raw_AddNewRawMessage(iso15765_frame, iso15765_frame_position, cmsg.Id, cmsg.Timestamp, Raw_ISO15765);
             iso15765_frame_position = 0;
             break;
@@ -104,7 +102,6 @@ void Passive_Iso15765_ConsequtiveFrame(CanMessage cmsg)
         
         if (iso15765_frame_expectedLength == 0)
         {
-            printf("ISO15765 CC = %x\n", iso15765_frame_position);
             Task_Tcp_Wireshark_Raw_AddNewRawMessage(iso15765_frame, iso15765_frame_position, cmsg.Id, cmsg.Timestamp, Raw_ISO15765);
             iso15765_frame_position = 0;
             break;
