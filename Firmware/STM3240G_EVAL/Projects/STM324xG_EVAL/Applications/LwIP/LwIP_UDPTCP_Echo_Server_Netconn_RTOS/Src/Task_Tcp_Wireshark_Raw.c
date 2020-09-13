@@ -10,13 +10,15 @@
 #include "System_stats.h"
 #include "lwip/opt.h"
 
+#include "FreeRTOS.h"
+
 #if LWIP_NETCONN
 
 #include "lwip/sys.h"
 #include "lwip/api.h"
 
 #define TCPECHO_THREAD_PRIO  ( tskIDLE_PRIORITY + 4 )
-#define TCP_RAW_BUFFER_ITEMS 4
+#define TCP_RAW_BUFFER_ITEMS 32
 
 // -- Private Variables ---------------------------------
 static u8_t fileHeader[] = 
@@ -81,7 +83,7 @@ static int tcpswraw_prepare_body(RawMessage rmsg, u8_t* array, u16_t sequence)
   array[18] = (u8_t)(rmsg.Id >> 8);
   array[19] = (u8_t)(rmsg.Id);
   //Data
-  //memcpy(&array[20], rmsg.Frame, rmsg.Length);
+  memcpy(&array[20], rmsg.Frame, rmsg.Length);
   return totalLength;
 }
 
@@ -162,17 +164,14 @@ static void tcpwsraw_thread(void *arg)
           {
             if(tcpwsraw_fifo_count() > 0)
             {
-							printf("Get Raw Message");
               rmsg = tcp_rawMessageFifo[tcp_rawFifo_readPtr];
               //Write packet header
-							printf("Create and send raw header\n");
               tcpswraw_prepare_header(rmsg, packetHeader);
               netconn_write(newconn, packetHeader, 16, NETCONN_COPY);
 							
               //Write packet data
-							printf("Create and send raw body\n");
               packetBody_Lenght = tcpswraw_prepare_body(rmsg, packetBody, sequence);
-							printf("Send Raw packet %x\n", packetBody_Lenght);
+							//printf("Send Raw packet %x\n", packetBody_Lenght);
               netconn_write(newconn, packetBody, packetBody_Lenght, NETCONN_COPY);
 
               //Move to next packet
@@ -181,6 +180,7 @@ static void tcpwsraw_thread(void *arg)
               {
                 tcp_rawFifo_readPtr = 0;
               }
+              vPortFree(rmsg.Frame); //Delete allocated space
               //Send all packets in buffer on TCP
               continue;
             }
@@ -217,7 +217,7 @@ void Task_Tcp_Wireshark_Raw_AddNewRawMessage(uint8_t* frame, uint32_t length, ui
 	tcp_rawMessageFifo[tcp_rawFifo_writePtr].Id = id;
 	tcp_rawMessageFifo[tcp_rawFifo_writePtr].Timestamp = timestamp;
   tcp_rawMessageFifo[tcp_rawFifo_writePtr].Length = length;
-	
+	tcp_rawMessageFifo[tcp_rawFifo_writePtr].Frame = pvPortMalloc(length); //Allocate only necessary memory space
 	for (i = 0; i < length; i++)
 	{
 		tcp_rawMessageFifo[tcp_rawFifo_writePtr].Frame[i] = frame[i];

@@ -22,7 +22,7 @@ typedef enum RawMessageType
 */
 typedef struct RawMessage
 {
-	uint8_t   Frame[4096];
+	uint8_t*  Frame;
 	uint32_t  Length;      //Length of received frame
 	uint32_t  Id;          //ID of received frame
 	uint32_t  Timestamp;
