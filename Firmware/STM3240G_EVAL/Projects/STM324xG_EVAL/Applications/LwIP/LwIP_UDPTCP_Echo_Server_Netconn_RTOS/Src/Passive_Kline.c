@@ -402,18 +402,18 @@ void Passive_Kline_Dequeue_Iso14230(uint32_t start, uint32_t end)
 
     //Dequeue data
     framePos = 0;
-    printf("ISO14230 Data: ");
+    //printf("ISO14230 Data: ");
     for(i = start; i!= end; i = ++i % KLINE_BUFFER_SIZE)
     {
         kline_frame[framePos] = kline_buffer[i];
-        printf("%x ", kline_buffer[i]);
+        //printf("%x ", kline_buffer[i]);
         kline_buffer[i] = 0x00;
         framePos++;
         kline_buffer_start++;
         kline_buffer_start = kline_buffer_start % KLINE_BUFFER_SIZE;
     }
     Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_ISO14230);
-    printf("\n");
+    //printf("\n");
 }
 
 /**
@@ -441,14 +441,14 @@ void Passive_Kline_Dequeue_Kw1281(uint32_t start, uint32_t end)
     //Dequeue data
     framePos = 0;
     length = 0;
-    printf("KW1281 Data: ");
+    //printf("KW1281 Data: ");
     for(i = start; i!= end; i = ++i % KLINE_BUFFER_SIZE)
     {
         //Write only even positions. Odd positions are complements
         if(length % 2 == 0)
         {
             kline_frame[framePos] = kline_buffer[i];
-            printf("%x ", kline_buffer[i]);
+            //printf("%x ", kline_buffer[i]);
             framePos++;
         }
         kline_buffer[i] = 0x00;
@@ -457,7 +457,7 @@ void Passive_Kline_Dequeue_Kw1281(uint32_t start, uint32_t end)
         kline_buffer_start = kline_buffer_start % KLINE_BUFFER_SIZE;
     }
     Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_KW1281);
-    printf("\n");
+    //printf("\n");
 }
 
 /**
