@@ -451,6 +451,13 @@ void Passive_Kline_Dequeue_Kw1281(uint32_t start, uint32_t end)
         {
             kline_frame[framePos] = kline_buffer[i];
             //printf("%x ", kline_buffer[i]);
+            //Check for End Communication command
+            if((framePos == 2) && (kline_frame[framePos] == 0x06))
+            {
+                //If correct, reset kline bus status
+                printf("KLINE bus reset from KW1281 command\n");
+                kline_bus_state = KBS_Idle;
+            }
             framePos++;
         }
         kline_buffer[i] = 0x00;
