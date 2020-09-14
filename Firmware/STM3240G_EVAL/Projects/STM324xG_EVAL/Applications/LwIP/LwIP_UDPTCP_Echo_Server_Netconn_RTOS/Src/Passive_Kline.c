@@ -30,6 +30,16 @@ typedef enum KlineKw1281
     Kw1281_Etx,
 }KlineKw1281;
 
+typedef enum KlineIso14230
+{
+    Iso14230_Fmt,
+    Iso14230_Tgt,
+    Iso14230_Src,
+    Iso14230_Len,
+    Iso14230_Data,
+    Iso14230_Cs,
+}KlineIso14230;
+
 // -- Private variables ---------------------------
 uint8_t  kline_buffer[KLINE_BUFFER_SIZE];
 uint8_t  kline_frame[0x110]; //Frame to be sent to Wireshark
@@ -45,6 +55,160 @@ void Passive_Kline_Parse_ResetFifo()
     kline_buffer_start = 0;
     kline_buffer_end = 0;
     kline_buffer_overflow = false;
+}
+
+/** 
+ * @brief Return amount of data in the buffer
+*/
+uint32_t Passive_Kline_GetBufferLength()
+{
+    //this setup is being used as a ring buffer
+	if(kline_buffer_start > kline_buffer_end)
+	{
+		//If read data has higher index than write data
+		//this means that write data index has jumped on start
+		return KLINE_BUFFER_SIZE - kline_buffer_start + kline_buffer_end;
+	}
+	else
+	{
+		return kline_buffer_end - kline_buffer_start;
+	}
+}
+
+bool Passive_Kline_SearchIso14230_Frame(uint32_t offset, uint32_t buffer_length, uint32_t* start, uint32_t* end)
+{
+    int i;
+    uint8_t frame_Fmt; //Expected Fmt
+    uint8_t frame_Len; //Expected length of a payload
+    uint32_t frame_ExpectedLength; //Length of whole frame
+    uint32_t frame_FoundLength;
+    uint32_t frame_Cs;
+    KlineIso14230 iso14230_sm = Iso14230_Fmt;
+    //Set length withing ranges of ring buffer
+    i = kline_buffer_start + offset;
+    i = i % KLINE_BUFFER_SIZE;
+    for(; i!= kline_buffer_end; i = ++i % KLINE_BUFFER_SIZE)
+    {
+        switch (iso14230_sm)
+        {
+        case Iso14230_Fmt:
+            *start = i;
+            frame_FoundLength = 1;
+            frame_ExpectedLength = 1; //FMT + (CS)
+            frame_Cs = kline_buffer[i];
+            frame_Fmt = kline_buffer[i];
+
+            //Check if length is in FMT
+            frame_Len = frame_Fmt & 0x3F;
+            if(frame_Len != 0)
+            {
+                frame_ExpectedLength = frame_ExpectedLength + frame_Len;
+                if(frame_ExpectedLength > buffer_length)
+                {
+                    //Not all data were received
+                    return false;
+                }
+            }
+
+            //Check if we have address information
+            if((frame_Fmt & 0x80) == 0x80)
+            {
+                //Yes we do. Next state will be TGT / SRC
+                frame_ExpectedLength += 2;
+                iso14230_sm = Iso14230_Tgt;
+            }
+            else
+            {
+                //No we don't. Set next state by frame_Len
+                if(frame_Len == 0)
+                {
+                    //FMT.LEN == 0, so next should be LEN byte
+                    iso14230_sm = Iso14230_Len;
+                }
+                else
+                {
+                    //FMT.LEN != 0, so next should be Data byte(s)
+                    iso14230_sm = Iso14230_Data;
+                }
+            }
+            break;
+        case Iso14230_Tgt:
+            frame_FoundLength++;
+            frame_Cs += kline_buffer[i];
+            iso14230_sm = Iso14230_Src;
+            break;
+        case Iso14230_Src:
+            frame_FoundLength++;
+            frame_Cs += kline_buffer[i];
+            if(frame_Len == 0)
+            {
+                iso14230_sm = Iso14230_Len;
+            }
+            else
+            {
+                iso14230_sm = Iso14230_Data;
+            }
+            break;
+        case Iso14230_Len:
+            frame_FoundLength++;
+            frame_Cs += kline_buffer[i];
+            frame_Len = kline_buffer[i];
+            frame_ExpectedLength = frame_ExpectedLength + frame_Len;
+            if(frame_ExpectedLength > buffer_length)
+            {
+                //Not all data were received
+                return false;
+            }
+            iso14230_sm = Iso14230_Data;
+            break;
+        case Iso14230_Data:
+            frame_FoundLength++;
+            frame_Cs += kline_buffer[i];
+            if(frame_FoundLength == frame_ExpectedLength)
+            {
+                iso14230_sm = Iso14230_Cs;
+            }
+            break;
+        case Iso14230_Cs:
+            if((uint8_t)frame_Cs == kline_buffer[i])
+            {
+                *end = i + 1;
+                return true;
+            }
+            else
+            {
+                //printf("ISO14230: Invalid CS %x vs %x\n", frame_Cs, kline_buffer[i]);
+                return false;
+            }
+        default:
+            return false;
+        }
+    }
+    return false;
+}
+
+bool Passive_Kline_SearchIso14230(uint32_t* start, uint32_t* end)
+{
+    uint32_t offset;
+    uint32_t buffer_length;
+    bool result = false;
+    buffer_length = Passive_Kline_GetBufferLength();
+    //ISO14230 packet must be at least 3 bytes long
+    if(buffer_length < 3)
+    {
+        return false;
+    }
+    //Search through buffer
+    for(offset = 0; offset < (buffer_length - 3); offset++)
+    {
+        result = Passive_Kline_SearchIso14230_Frame(offset, buffer_length, start, end);
+        if(result == true)
+        {
+            break;
+        }
+    }
+
+    return result;
 }
 
 bool Passive_Kline_SearchKw1281(uint32_t* start, uint32_t* end)
@@ -301,6 +465,10 @@ bool Passive_Kline_Parse(uint8_t c)
     }
 
     //Process data in the buffer
+    if(Passive_Kline_SearchIso14230(&start, &end))
+    {
+        Passive_Kline_Dequeue_Iso14230(start, end);
+    }
     if(Passive_Kline_SearchKeyBytes(&start, &end))
     {
         Passive_Kline_Dequeue_Iso14230(start, end);
