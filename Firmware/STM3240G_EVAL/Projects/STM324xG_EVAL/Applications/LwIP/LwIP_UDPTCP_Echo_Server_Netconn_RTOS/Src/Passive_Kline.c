@@ -23,6 +23,12 @@ typedef enum Kline5BaudInit
     K5I_NEcuAddress,
 }Kline5BaudInit;
 
+typedef enum KlineProtocolType
+{
+    KPT_Iso14230,
+    KPT_Kw1281,
+}KlineProtocolType;
+
 typedef enum KlineKw1281
 {
     Kw1281_Data,
@@ -49,6 +55,7 @@ typedef enum KlineIso14230_FrameParseResult
 }KlineIso14230_FrameParseResult;
 
 // -- Private variables ---------------------------
+KlineProtocolType kline_protocol = KPT_Iso14230; //By default parse data as ISO14230
 uint8_t  kline_buffer[KLINE_BUFFER_SIZE];
 uint8_t  kline_frame[0x110]; //Frame to be sent to Wireshark
 uint32_t kline_buffer_start = 0;
@@ -356,6 +363,7 @@ bool Passive_Kline_SearchKeyBytes(uint32_t* start, uint32_t* end)
                 if(kb2 == 0x8A)
                 {
                     //KW1281 is not sending back ECU address
+                    kline_protocol = KPT_Kw1281;
                     *end = i + 1;
                     result = true;
                 }
@@ -368,8 +376,16 @@ bool Passive_Kline_SearchKeyBytes(uint32_t* start, uint32_t* end)
             }
             break;
         case K5I_NEcuAddress:
-            *end = i + 1;
-            result = true;
+            if(kb2 == 0x8F)
+            {
+                kline_protocol = KPT_Iso14230;
+                *end = i + 1;
+                result = true;
+            }
+            else
+            {
+                printf("Unknown KLINE protocol: %x", kb2);
+            }
             break;
         default:
             break;
@@ -486,17 +502,23 @@ bool Passive_Kline_Parse(uint8_t c)
     }
 
     //Process data in the buffer
-    if(Passive_Kline_SearchIso14230(&start, &end))
-    {
-        Passive_Kline_Dequeue_Iso14230(start, end);
-    }
     if(Passive_Kline_SearchKeyBytes(&start, &end))
     {
         Passive_Kline_Dequeue_Iso14230(start, end);
     }
-    if(Passive_Kline_SearchKw1281(&start, &end))
+    if(kline_protocol == KPT_Iso14230)
     {
-        Passive_Kline_Dequeue_Kw1281(start, end);
+        if(Passive_Kline_SearchIso14230(&start, &end))
+        {
+            Passive_Kline_Dequeue_Iso14230(start, end);
+        }
+    }
+    else
+    {
+        if(Passive_Kline_SearchKw1281(&start, &end))
+        {
+            Passive_Kline_Dequeue_Kw1281(start, end);
+        }
     }
     return true;
 }
