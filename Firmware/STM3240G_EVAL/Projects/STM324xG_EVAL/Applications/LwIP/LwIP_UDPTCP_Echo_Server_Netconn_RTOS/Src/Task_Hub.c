@@ -67,7 +67,7 @@ static void ProcessKlineElements(void)
             }
 
             //Add CAN element into TCP ring buffer as socket CAN (if socket CAN is connected)
-            //if(Stats_TCP_WS_RAW_State_Get() != 0)
+            if(Stats_TCP_WS_RAW_State_Get() != 0)
             {
                 Passive_Kline_Parse(c);
             }

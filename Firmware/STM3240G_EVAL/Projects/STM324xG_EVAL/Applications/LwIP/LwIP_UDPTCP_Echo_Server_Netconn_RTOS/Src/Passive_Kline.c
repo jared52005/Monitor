@@ -411,8 +411,8 @@ void Passive_Kline_Dequeue_Iso14230(uint32_t start, uint32_t end)
         framePos++;
         kline_buffer_start++;
         kline_buffer_start = kline_buffer_start % KLINE_BUFFER_SIZE;
-        //Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_ISO14230);
     }
+    Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_ISO14230);
     printf("\n");
 }
 
@@ -455,8 +455,8 @@ void Passive_Kline_Dequeue_Kw1281(uint32_t start, uint32_t end)
         kline_buffer_start++;
         length++;
         kline_buffer_start = kline_buffer_start % KLINE_BUFFER_SIZE;
-        //Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_ISO14230);
     }
+    Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_KW1281);
     printf("\n");
 }
 
