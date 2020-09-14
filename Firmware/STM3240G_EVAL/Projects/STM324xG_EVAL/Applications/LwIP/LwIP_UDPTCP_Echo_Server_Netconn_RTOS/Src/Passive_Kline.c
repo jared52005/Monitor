@@ -166,6 +166,7 @@ KlineIso14230_FrameParseResult Passive_Kline_SearchIso14230_Frame(uint32_t offse
             frame_FoundLength++;
             frame_Cs += kline_buffer[i];
             frame_Len = kline_buffer[i];
+            frame_ExpectedLength++; //LEN byte
             frame_ExpectedLength = frame_ExpectedLength + frame_Len;
             if(frame_ExpectedLength > kline_buffer_end)
             {
