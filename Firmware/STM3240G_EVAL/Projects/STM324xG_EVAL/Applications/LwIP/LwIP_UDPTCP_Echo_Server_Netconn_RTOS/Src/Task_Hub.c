@@ -50,12 +50,13 @@ static void ProcessKlineElements(void)
     uint8_t c;
     uint32_t pduElements;
     ErrorCodes error;
+    Passive_Kline_UpdateState();
     do
     {
         error = Uart_Rx_GetCount(&pduElements);
         if(error == ERROR_DATA_OVERFLOW)
         {
-            printf("ERROR: KLINE Buffer Overflow\n");
+            printf("ERROR: UART Buffer Overflow\n");
         }
         else if(pduElements > 0)
         {

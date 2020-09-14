@@ -13,3 +13,8 @@
  * @retval True if successfuly processed
 */
 bool Passive_Kline_Parse(uint8_t c);
+
+/**
+ * @brief Called periodicailly to update state of kline bus
+*/
+void Passive_Kline_UpdateState(void);

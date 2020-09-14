@@ -13,6 +13,7 @@
 
 // -- Pirvate definitions -------------------------
 #define KLINE_BUFFER_SIZE 0x200
+#define KLINE_LAST_ACTIVTY_DELAY 3000 //3000 ms
 
 typedef enum Kline5BaudInit
 {
@@ -23,11 +24,12 @@ typedef enum Kline5BaudInit
     K5I_NEcuAddress,
 }Kline5BaudInit;
 
-typedef enum KlineProtocolType
+typedef enum KlineBusState
 {
-    KPT_Iso14230,
-    KPT_Kw1281,
-}KlineProtocolType;
+    KBS_Idle,     //Nothing is happening on the KLINE. Automatically slips into idle after 2~3 seconds and erase buffer
+    KBS_Iso14230, //Try to parse incomming data as ISO14230. Will get set after 5 baud init or used as default if 5 baud is not parsed correctly
+    KBS_Kw1281,   //Try to parse incomming data as KW1281. Will ONLY happen after 5 baud init.
+}KlineBusState;
 
 typedef enum KlineKw1281
 {
@@ -55,42 +57,37 @@ typedef enum KlineIso14230_FrameParseResult
 }KlineIso14230_FrameParseResult;
 
 // -- Private variables ---------------------------
-KlineProtocolType kline_protocol = KPT_Iso14230; //By default parse data as ISO14230
+KlineBusState kline_bus_state = KBS_Idle; //By default parse data as ISO14230
 uint8_t  kline_buffer[KLINE_BUFFER_SIZE];
 uint8_t  kline_frame[0x110]; //Frame to be sent to Wireshark
-uint32_t kline_buffer_start = 0;
 uint32_t kline_buffer_end = 0;
-bool     kline_buffer_overflow;
+uint32_t kline_last_activity;
 
-/**
- * @brief Clean current buffer
-*/
-void Passive_Kline_Parse_ResetFifo()
+void Passive_Kline_PrintBuffer(int start, int length)
 {
-    kline_buffer_start = 0;
-    kline_buffer_end = 0;
-    kline_buffer_overflow = false;
+    int i;
+    for(i = start; i < length; i++)
+    {
+        printf("%x ", kline_buffer[i]);
+        kline_buffer[i] = 0x00;
+    }
+    printf("\n");
 }
 
-/** 
- * @brief Return amount of data in the buffer
-*/
-uint32_t Passive_Kline_GetBufferLength()
+void Passive_Kline_UpdateState()
 {
-    //this setup is being used as a ring buffer
-	if(kline_buffer_start > kline_buffer_end)
-	{
-		//If read data has higher index than write data
-		//this means that write data index has jumped on start
-		return KLINE_BUFFER_SIZE - kline_buffer_start + kline_buffer_end;
-	}
-	else
-	{
-		return kline_buffer_end - kline_buffer_start;
-	}
+    if((kline_last_activity + KLINE_LAST_ACTIVTY_DELAY) < GetTime_ms())
+    {
+        if(kline_buffer_end != 0 || kline_bus_state != KBS_Idle)
+        {
+            kline_bus_state = KBS_Idle;
+            kline_buffer_end = 0;
+            printf("KLINE Reset back to default @ %d ms\n", GetTime_ms());
+        }
+    }
 }
 
-KlineIso14230_FrameParseResult Passive_Kline_SearchIso14230_Frame(uint32_t offset, uint32_t buffer_length, uint32_t* start, uint32_t* end)
+KlineIso14230_FrameParseResult Passive_Kline_SearchIso14230_Frame(uint32_t offset, uint32_t* start, uint32_t* end)
 {
     int i;
     uint8_t frame_Fmt; //Expected Fmt
@@ -99,10 +96,7 @@ KlineIso14230_FrameParseResult Passive_Kline_SearchIso14230_Frame(uint32_t offse
     uint32_t frame_FoundLength;
     uint32_t frame_Cs;
     KlineIso14230 iso14230_sm = Iso14230_Fmt;
-    //Set length withing ranges of ring buffer
-    i = kline_buffer_start + offset;
-    i = i % KLINE_BUFFER_SIZE;
-    for(; i!= kline_buffer_end; i = ++i % KLINE_BUFFER_SIZE)
+    for(i = offset; i < kline_buffer_end; i++)
     {
         switch (iso14230_sm)
         {
@@ -118,7 +112,7 @@ KlineIso14230_FrameParseResult Passive_Kline_SearchIso14230_Frame(uint32_t offse
             if(frame_Len != 0)
             {
                 frame_ExpectedLength = frame_ExpectedLength + frame_Len;
-                if(frame_ExpectedLength > buffer_length)
+                if(frame_ExpectedLength > kline_buffer_end)
                 {
                     //Not all data were received
                     return Iso14230_NotEnoughData;
@@ -169,7 +163,7 @@ KlineIso14230_FrameParseResult Passive_Kline_SearchIso14230_Frame(uint32_t offse
             frame_Cs += kline_buffer[i];
             frame_Len = kline_buffer[i];
             frame_ExpectedLength = frame_ExpectedLength + frame_Len;
-            if(frame_ExpectedLength > buffer_length)
+            if(frame_ExpectedLength > kline_buffer_end)
             {
                 //Not all data were received
                 return Iso14230_NotEnoughData;
@@ -205,34 +199,34 @@ KlineIso14230_FrameParseResult Passive_Kline_SearchIso14230_Frame(uint32_t offse
 bool Passive_Kline_SearchIso14230(uint32_t* start, uint32_t* end)
 {
     uint32_t offset;
-    uint32_t buffer_length;
     bool result = false;
     int frameParseResult;
-    buffer_length = Passive_Kline_GetBufferLength();
     //ISO14230 packet must be at least 3 bytes long
-    if(buffer_length < 3)
+    if(kline_buffer_end < 3)
     {
         return false;
     }
     //Search through buffer
-    for(offset = 0; offset < (buffer_length - 3); offset++)
+    offset = 0;
+    //for(offset = 0; offset < (buffer_length - 3); offset++)
     {
-        frameParseResult = Passive_Kline_SearchIso14230_Frame(offset, buffer_length, start, end);
+        frameParseResult = Passive_Kline_SearchIso14230_Frame(offset, start, end);
         if(frameParseResult == Iso14230_Good)
         {
             //Process frame
             result = true;
-            break;
+            //break;
         }
         else if(frameParseResult == Iso14230_NotEnoughData)
         {
             //Wait on more data
             result = false;
-            break;
+            //break;
         }
         else
         {
-            continue;
+            kline_buffer_end = 0;
+            result = false;
         }
     }
 
@@ -268,7 +262,7 @@ bool Passive_Kline_SearchKw1281(uint32_t* start, uint32_t* end)
        */   
 
     //Go through buffer
-    for(i = kline_buffer_start; i!= kline_buffer_end; i = ++i % KLINE_BUFFER_SIZE)
+    for(i = 0; i < kline_buffer_end; i++)
     {
         switch (kw1281_sm)
         {
@@ -333,7 +327,7 @@ bool Passive_Kline_SearchKeyBytes(uint32_t* start, uint32_t* end)
     bool result = false;
 
     //Go through ring buffer
-    for(i = kline_buffer_start; i!= kline_buffer_end; i = ++i % KLINE_BUFFER_SIZE)
+    for(i = 0; i < kline_buffer_end; i++)
     {
         switch (init_sm)
         {
@@ -363,7 +357,7 @@ bool Passive_Kline_SearchKeyBytes(uint32_t* start, uint32_t* end)
                 if(kb2 == 0x8A)
                 {
                     //KW1281 is not sending back ECU address
-                    kline_protocol = KPT_Kw1281;
+                    kline_bus_state = KBS_Kw1281;
                     *end = i + 1;
                     result = true;
                 }
@@ -378,13 +372,13 @@ bool Passive_Kline_SearchKeyBytes(uint32_t* start, uint32_t* end)
         case K5I_NEcuAddress:
             if(kb2 == 0x8F)
             {
-                kline_protocol = KPT_Iso14230;
+                kline_bus_state = KBS_Iso14230;
                 *end = i + 1;
                 result = true;
             }
             else
             {
-                printf("Unknown KLINE protocol: %x", kb2);
+                printf("Unknown KLINE protocol: %x\n", kb2);
             }
             break;
         default:
@@ -403,32 +397,24 @@ void Passive_Kline_Dequeue_Iso14230(uint32_t start, uint32_t end)
     int i;
     int framePos;
     //Dequeue crap
-    if(kline_buffer_start != start)
+    if(start != 0)
     {
         printf("ISO14230 crap bytes: ");
-        for(i = kline_buffer_start; i!= start; i = ++i % KLINE_BUFFER_SIZE)
-        {
-            printf("%x ", kline_buffer[i]);
-            kline_buffer[i] = 0x00;
-            kline_buffer_start++;
-            kline_buffer_start = kline_buffer_start % KLINE_BUFFER_SIZE;
-        }
-        printf("\n");
+        Passive_Kline_PrintBuffer(0, start);
     }
 
     //Dequeue data
     framePos = 0;
     //printf("ISO14230 Data: ");
-    for(i = start; i!= end; i = ++i % KLINE_BUFFER_SIZE)
+    for(i = start; i!= end; i++)
     {
         kline_frame[framePos] = kline_buffer[i];
         //printf("%x ", kline_buffer[i]);
         kline_buffer[i] = 0x00;
         framePos++;
-        kline_buffer_start++;
-        kline_buffer_start = kline_buffer_start % KLINE_BUFFER_SIZE;
     }
     Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_ISO14230);
+    kline_buffer_end = 0;
     //printf("\n");
 }
 
@@ -441,24 +427,17 @@ void Passive_Kline_Dequeue_Kw1281(uint32_t start, uint32_t end)
     int framePos;
     int length;
     //Dequeue crap
-    if(kline_buffer_start != start)
+    if(start != 0)
     {
         printf("KW1281 crap bytes: ");
-        for(i = kline_buffer_start; i!= start; i = ++i % KLINE_BUFFER_SIZE)
-        {
-            printf("%x ", kline_buffer[i]);
-            kline_buffer[i] = 0x00;
-            kline_buffer_start++;
-            kline_buffer_start = kline_buffer_start % KLINE_BUFFER_SIZE;
-        }
-        printf("\n");
+        Passive_Kline_PrintBuffer(0, start);
     }
 
     //Dequeue data
     framePos = 0;
     length = 0;
     //printf("KW1281 Data: ");
-    for(i = start; i!= end; i = ++i % KLINE_BUFFER_SIZE)
+    for(i = start; i!= end; i++)
     {
         //Write only even positions. Odd positions are complements
         if(length % 2 == 0)
@@ -468,11 +447,10 @@ void Passive_Kline_Dequeue_Kw1281(uint32_t start, uint32_t end)
             framePos++;
         }
         kline_buffer[i] = 0x00;
-        kline_buffer_start++;
         length++;
-        kline_buffer_start = kline_buffer_start % KLINE_BUFFER_SIZE;
     }
     Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_KW1281);
+    kline_buffer_end = 0;
     //printf("\n");
 }
 
@@ -485,40 +463,55 @@ bool Passive_Kline_Parse(uint8_t c)
     uint32_t start;
     uint32_t end;
     //Write data into ring buffer
-	  kline_buffer[kline_buffer_end] = c;
+    kline_buffer[kline_buffer_end] = c;
     kline_buffer_end++;
-    kline_buffer_end = kline_buffer_end % KLINE_BUFFER_SIZE;
     //Check if overflow
-    if(kline_buffer_start == kline_buffer_end)
+    if(kline_buffer_end == KLINE_BUFFER_SIZE)
     {
-        kline_buffer_overflow = true;
-    }
-    if(kline_buffer_overflow == true)
-    {
-        //Reset buffer and return
-        printf("KLINE buffer overflow");
-        Passive_Kline_Parse_ResetFifo();
+        printf ("KLINE buffer overflow: ");
+        Passive_Kline_PrintBuffer(0, kline_buffer_end - 1);
+        kline_buffer_end = 0;
+        kline_bus_state = KBS_Idle;
         return false;
     }
 
+    kline_last_activity = GetTime_ms();
+
     //Process data in the buffer
-    if(Passive_Kline_SearchKeyBytes(&start, &end))
+    switch (kline_bus_state)
     {
-        Passive_Kline_Dequeue_Iso14230(start, end);
-    }
-    if(kline_protocol == KPT_Iso14230)
-    {
+    case KBS_Idle:
+        //Try to parse keybytes
+        if(Passive_Kline_SearchKeyBytes(&start, &end))
+        {
+            Passive_Kline_Dequeue_Iso14230(start, end);
+        }
+        else
+        {
+            //Try to parse it as ISO14230
+            if(Passive_Kline_SearchIso14230(&start, &end))
+            {
+                //Success, switch state of bus into ISO14230
+                kline_bus_state = KBS_Iso14230;
+                Passive_Kline_Dequeue_Iso14230(start, end);
+            }    
+        }
+        break;
+    case KBS_Iso14230:
         if(Passive_Kline_SearchIso14230(&start, &end))
         {
             Passive_Kline_Dequeue_Iso14230(start, end);
         }
-    }
-    else
-    {
+        break;
+    case KBS_Kw1281:
         if(Passive_Kline_SearchKw1281(&start, &end))
         {
             Passive_Kline_Dequeue_Kw1281(start, end);
         }
+        break;
+    default:
+        printf("KLINE: Unknown protocol\n");
+        break;
     }
     return true;
 }
