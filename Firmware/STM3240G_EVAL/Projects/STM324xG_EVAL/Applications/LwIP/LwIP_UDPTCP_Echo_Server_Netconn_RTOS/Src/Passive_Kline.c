@@ -40,6 +40,14 @@ typedef enum KlineIso14230
     Iso14230_Cs,
 }KlineIso14230;
 
+typedef enum KlineIso14230_FrameParseResult
+{
+    Iso14230_Good,
+    Iso14230_InvalidCs,
+    Iso14230_NotEnoughData,
+    Iso14230_InvalidState,
+}KlineIso14230_FrameParseResult;
+
 // -- Private variables ---------------------------
 uint8_t  kline_buffer[KLINE_BUFFER_SIZE];
 uint8_t  kline_frame[0x110]; //Frame to be sent to Wireshark
@@ -75,7 +83,7 @@ uint32_t Passive_Kline_GetBufferLength()
 	}
 }
 
-bool Passive_Kline_SearchIso14230_Frame(uint32_t offset, uint32_t buffer_length, uint32_t* start, uint32_t* end)
+KlineIso14230_FrameParseResult Passive_Kline_SearchIso14230_Frame(uint32_t offset, uint32_t buffer_length, uint32_t* start, uint32_t* end)
 {
     int i;
     uint8_t frame_Fmt; //Expected Fmt
@@ -106,7 +114,7 @@ bool Passive_Kline_SearchIso14230_Frame(uint32_t offset, uint32_t buffer_length,
                 if(frame_ExpectedLength > buffer_length)
                 {
                     //Not all data were received
-                    return false;
+                    return Iso14230_NotEnoughData;
                 }
             }
 
@@ -157,7 +165,7 @@ bool Passive_Kline_SearchIso14230_Frame(uint32_t offset, uint32_t buffer_length,
             if(frame_ExpectedLength > buffer_length)
             {
                 //Not all data were received
-                return false;
+                return Iso14230_NotEnoughData;
             }
             iso14230_sm = Iso14230_Data;
             break;
@@ -173,18 +181,18 @@ bool Passive_Kline_SearchIso14230_Frame(uint32_t offset, uint32_t buffer_length,
             if((uint8_t)frame_Cs == kline_buffer[i])
             {
                 *end = i + 1;
-                return true;
+                return Iso14230_Good;
             }
             else
             {
                 //printf("ISO14230: Invalid CS %x vs %x\n", frame_Cs, kline_buffer[i]);
-                return false;
+                return Iso14230_InvalidCs;
             }
         default:
-            return false;
+            return Iso14230_InvalidState;
         }
     }
-    return false;
+    return Iso14230_NotEnoughData;
 }
 
 bool Passive_Kline_SearchIso14230(uint32_t* start, uint32_t* end)
@@ -192,6 +200,7 @@ bool Passive_Kline_SearchIso14230(uint32_t* start, uint32_t* end)
     uint32_t offset;
     uint32_t buffer_length;
     bool result = false;
+    int frameParseResult;
     buffer_length = Passive_Kline_GetBufferLength();
     //ISO14230 packet must be at least 3 bytes long
     if(buffer_length < 3)
@@ -201,10 +210,22 @@ bool Passive_Kline_SearchIso14230(uint32_t* start, uint32_t* end)
     //Search through buffer
     for(offset = 0; offset < (buffer_length - 3); offset++)
     {
-        result = Passive_Kline_SearchIso14230_Frame(offset, buffer_length, start, end);
-        if(result == true)
+        frameParseResult = Passive_Kline_SearchIso14230_Frame(offset, buffer_length, start, end);
+        if(frameParseResult == Iso14230_Good)
         {
+            //Process frame
+            result = true;
             break;
+        }
+        else if(frameParseResult == Iso14230_NotEnoughData)
+        {
+            //Wait on more data
+            result = false;
+            break;
+        }
+        else
+        {
+            continue;
         }
     }
 
