@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "rtos_utils.h"
+#include "System_stats.h"
 #include "Task_Tcp_Wireshark_Raw.h"
 
 // -- Pirvate definitions -------------------------
@@ -418,6 +419,7 @@ void Passive_Kline_Dequeue_Iso14230(uint32_t start, uint32_t end)
         kline_buffer[i] = 0x00;
         framePos++;
     }
+    Stats_KlineBytes_RxFrameAdd(1);
     Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_ISO14230);
     kline_buffer_end = 0;
     //printf("\n");
@@ -454,6 +456,7 @@ void Passive_Kline_Dequeue_Kw1281(uint32_t start, uint32_t end)
         kline_buffer[i] = 0x00;
         length++;
     }
+    Stats_KlineBytes_RxFrameAdd(1);
     Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_KW1281);
     kline_buffer_end = 0;
     //printf("\n");

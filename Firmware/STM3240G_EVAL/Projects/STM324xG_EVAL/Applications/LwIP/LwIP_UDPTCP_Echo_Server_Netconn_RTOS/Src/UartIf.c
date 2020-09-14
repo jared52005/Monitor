@@ -110,6 +110,7 @@ ErrorCodes Uart_Enable(uint32_t baudrate)
 {
     Uart_ResetFifo();
 	uartBaudrate = baudrate;
+		Stats_KlineBytes_RxByteAdd(0, baudrate);
 
 	__GPIOB_CLK_ENABLE();
     __USART3_CLK_ENABLE();
@@ -180,5 +181,5 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
         uartFifo_writePtr = 0;
         uartFifo_readPtr = 0;
     }
-    Stats_KlineBytes_RxAdd(1, uartBaudrate);
+    Stats_KlineBytes_RxByteAdd(1, uartBaudrate);
 }

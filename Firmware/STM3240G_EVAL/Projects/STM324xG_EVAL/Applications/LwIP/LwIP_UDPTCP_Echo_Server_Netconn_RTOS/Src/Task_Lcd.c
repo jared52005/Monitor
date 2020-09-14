@@ -123,7 +123,7 @@ void Task_Lcd(void const* pvParameters)
             sprintf(line, "KLINE: Baudrate %d  ", Stats_Kline_GetBaudrate());
             break;
         case 10:
-            sprintf(line, "KLINE: RX Msgs %d  ", Stats_KlineFrames_RxTotal_Get());
+            sprintf(line, "KLINE: RX Frames %d  ", Stats_KlineFrames_RxTotal_Get());
             break;
         case 11:
             sprintf(line, "KLINE: RX %d kB;  %d Bps   ", 
