@@ -168,6 +168,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
     //Start receiving again
     HAL_UART_Receive_IT(&huart, &rxByte, 1);
     uartFifo_writePtr++; //pointers are 8bit long, so they will be always in range
+    if (uartFifo_writePtr >= UART_BUFFER_ITEMS)
+	{
+		uartFifo_writePtr = 0;
+	}
     //Check if we overrun
     if(uartFifo_writePtr == uartFifo_readPtr)
     {
