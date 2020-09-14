@@ -80,6 +80,10 @@ void Passive_Kline_UpdateState()
     {
         if(kline_buffer_end != 0 || kline_bus_state != KBS_Idle)
         {
+            if(kline_buffer_end != 0)
+            {
+                Passive_Kline_PrintBuffer(0, kline_buffer_end);
+            }
             kline_bus_state = KBS_Idle;
             kline_buffer_end = 0;
             printf("KLINE Reset back to default @ %d ms\n", GetTime_ms());
