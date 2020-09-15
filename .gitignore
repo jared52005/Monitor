@@ -187,3 +187,4 @@ UpgradeLog*.htm
 # FreeRTOS dump files
 *.dump
 EventRecorderStub.scvd
+Firmware/STM3240G_EVAL/Projects/STM324xG_EVAL/Applications/LwIP/LwIP_UDPTCP_Echo_Server_Netconn_RTOS/MDK-ARM/STM324xG_EVAL/STM324xG_EVAL.hex
