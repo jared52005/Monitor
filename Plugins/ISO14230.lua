@@ -37,6 +37,22 @@ function iso14230_dissector.dissector(tvbuf,pktinfo,root)
     local pktlen = tvbuf:reported_length_remaining()
     local tree = root:add(iso14230_dissector, tvbuf:range(0,pktlen))
 
+    -- Rudimentary identification of 5 baud inits.
+    local initPattern = tvbuf:range(0,1):uint()
+    if(initPattern == 0x55) then
+        local keybytes = tostring(tvbuf:range(1,2))
+        if(pktlen == 4) then
+            pktinfo.cols.protocol:set("Key bytes")
+            pktinfo.cols.info = "5Baud init for KW1281 [" .. string.upper(keybytes) .. "]"
+            return
+        end
+        if(pktlen == 5) then
+            pktinfo.cols.protocol:set("Key bytes")
+            pktinfo.cols.info = "5Baud init for KWP2000 [" .. string.upper(keybytes) .. "]"
+            return
+        end
+    end
+
     -- Parse header and LEN byte
     local fmt = tvbuf:range(0,1):uint()
     local addressing = bit32.rshift(bit32.band(fmt, 0xC0), 6)
