@@ -59,6 +59,9 @@ const char* TranslateSocketState(uint32_t state)
 */
 void Task_Lcd(void const* pvParameters)
 {
+    uint32_t time_ms;
+    uint32_t time_sec;
+    uint32_t time_min;
     uint32_t dhcpState;
     uint32_t peakCanBusLoad;
     char line[64];
@@ -75,11 +78,11 @@ void Task_Lcd(void const* pvParameters)
         switch (lineNumber)
         {
         case 0:
-            sprintf(line, "Time [ms]: %d", GetTime_ms());
-            //Using https://www.freertos.org/uxTaskGetSystemState.html is problematic, because when system trace needs to be enabled
-            //However firmware will crash on boot when I enable tracing (am I missing some module?)
-            //CPU load in my implementation is nonsensical value because I am using state machines combined with TaskYield() everywhere, 
-            //processor will be always running 100%. Either 1 task or 100 tasks
+            time_ms = GetTime_ms() % 1000;
+            time_sec = GetTime_ms() / 1000;
+            time_min = time_sec / 60;
+            time_sec = time_sec % 60;
+            sprintf(line, "Time : %d:%02d.%03d   ", time_min, time_sec, time_ms);
             break;
         case 1:
             sprintf(line, "RAM Heap: Total %d [B] Free %d [B]   ", configTOTAL_HEAP_SIZE, xPortGetFreeHeapSize());
