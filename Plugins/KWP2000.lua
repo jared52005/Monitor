@@ -1,6 +1,17 @@
 -- Base file taken from: https://github.com/Stubatiger/can-wireshark-dissector
+-- Description of protocol partially taken from: https://github.com/NefMoto/NefMotoOpenSource 
 -- constants
 local sid_dict_description = {
+    [0x01] = "SAEJ1979_ShowCurrentData",
+    [0x02] = "SAEJ1979_ShowFreezeFrameData",
+    [0x03] = "SAEJ1979_ShowDiagnosticTroubleCodes",
+    [0x04] = "SAEJ1979_ClearTroubleCodesAndStoredValues",
+    [0x05] = "SAEJ1979_TestResultOxygenSenors",
+    [0x06] = "SAEJ1979_TestResultsNonContinuouslyMonitored",
+    [0x07] = "SAEJ1979_ShowPendingTroubleCodes",
+    [0x08] = "SAEJ1979_SpecialControlMode",
+    [0x09] = "SAEJ1979_RequestVehicleInformation",
+    [0x0A] = "SAEJ1979_RequestPermanentTroubleCodes",
     [0x10] = "Start Diagnostic Session",
     [0x11] = "ECU Reset",
     [0x12] = "Read Freeze Frame Data",
@@ -8,11 +19,12 @@ local sid_dict_description = {
     [0x14] = "Clear Diagnostic Information",
     [0x17] = "Read Status of DTCs",
     [0x18] = "Read DTCs by Status",
-    [0x1A] = "Read Data By Local ID",
+    [0x1A] = "Read ECU Identification",
     [0x20] = "Stop Diagnostic Session",
     [0x21] = "Read Data by Local Identifier",
     [0x22] = "Read Data by Common Identifier",
     [0x23] = "Read Memory by Address",
+    [0x25] = "Stop Repeated Data Transmission",
     [0x26] = "Set Data Rates",
     [0x27] = "Security Access",
     [0x28] = "Disable Normal Message Transm.",
@@ -45,22 +57,37 @@ local sid_dict_description = {
 
 local nrc_description = {
     [0x10] = "General reject",
-    [0x11] = "Service not supported",
+    [0x11] = "Service not supported - Invalid format",
     [0x12] = "Subfunction not supported",
     [0x13] = "Message length or format incorrect",
     [0x21] = "Busy - Repeat request",
-    [0x22] = "Conditions not correct",
-    [0x23] = "Routine not complete",
+    [0x22] = "Conditions not correct or Request Sequence Error",
+    [0x23] = "Routine not complete or Service in progress",
     [0x24] = "Request sentence error",
     [0x31] = "Request out of range",
     [0x33] = "Security access denied",
     [0x35] = "Invalid key",
-    [0x36] = "Exceed attempts",
+    [0x36] = "Exceed Number of Attempts",
+    [0x37] = "Required Time Delay not Expired",
+    [0x40] = "Download not Accpted",
+    [0x41] = "Improper Download Type",
+    [0x42] = "Can Not Download To Specified Address",
+    [0x43] = "CanNotDownloadNumberOfBytesRequested",
     [0x50] = "Upload Not Accepted",
+    [0x51] = "Improper Upload Type",
+    [0x52] = "Can Not Upload From Specified Address",
+    [0x53] = "Can Not Upload Number of Bytes Requested",
+    [0x71] = "Transfer Suspended",
+    [0x72] = "Transfer Aborted",
+    [0x74] = "Illegal Address in Block Transfer",
     [0x75] = "Illegal Byte Count in block transfer",
+    [0x76] = "Illegal Block Transfer Type",
+    [0x77] = "Block Transfer Data Checksum Error",
     [0x78] = "Busy - Response pending",
+    [0x79] = "Incorrect Byte Count During Block Transfer",
     [0x7E] = "Service or Subfunction not supported",
     [0x7F] = "Service or Subfunction not supported",
+    [0x80] = "Service Not Supported In Active Diagnostic Session",
     [0x90] = "No Program",
 }
 
@@ -77,9 +104,13 @@ end
 
 --KWP 10
 local sds_dict_description = {
-    ["89"] = "Default",
+    ["81"] = "Standard Session",
+    ["83"] = "End Of Line - Fiat",
+    ["84"] = "End Of Line - System Supplier",
     ["85"] = "Programming",
     ["86"] = "Extended",
+    ["87"] = "Adjustment Session",
+    ["89"] = "Default",
 }
 function SDS_InfoColumn(tvbuf, pktinfo)
     -- `[1001] - Start Diagnostic Session; Default`
@@ -93,8 +124,67 @@ end
 
 --KWP 1A
 local rdbci_dict_description = {
+    ["81"] = "ECU Identification Scaling Table",
+    ["82"] = "ECU Identification Data Table",
+    ["86"] = "Vehicle Manufacturer Specific", -- Extended ECU identification number, serial number? SCA insertion requires this field
+	["87"] = "Vehicle Manufacturer Spare Part Number",
+	["88"] = "Vehicle Manufacturer ECU Software Number",
+	["89"] = "Vehicle Manufacturer ECU Software Version Number",
+    ["8a"] = "System Supplier",
+	["8b"] = "ECU Manufacturing Date",
+	["8c"] = "ECU Serial Number",
+    --systemSupplierSpecific1 = 0x8D,
+    --systemSupplierSpecific2 = 0x8E,
+    --systemSupplierSpecific3 = 0x8F,
     ["90"] = "VIN",
     ["9b"] = "ECU Identification",
+	["91"] = "Vehicle Manufacturer ECU Hardware Number",
+	["92"] = "System Supplier ECU Hardware Number",
+	["93"] = "System Supplier ECU Hardware Version Number",
+	["94"] = "System Supplier ECU Software Number",
+	["95"] = "System Supplier ECU Software Version Number",
+	["96"] = "Exhaust Regulation or Type Approval Number",
+	["97"] = "System Name or Engine Type",
+	["98"] = "Repair Shop Code or Tester Serial Number",
+	["99"] = "Programming Date",
+	["9a"] = "Calibration Repair Shop Code or Calibration Equipment Serial Number",
+	["9b"] = "Calibration Date", -- ECU identification number.  SCA insertion requires this field
+	["9c"] = "Calibration Equiment Software Number", -- flash status -  byte:flash status, byte:num flash attempts, byte:num successful flash attempts, byte:status of flash preconditions
+	["9d"] = "ECU Installation Date",
+    -- vehicleManufacturerSpecific1 = 0x9E,
+    -- vehicleManufacturerSpecific2 = 0x9F,
+    -- vehicleManufacturerSpecific3 = 0xA0,
+    -- vehicleManufacturerSpecific4 = 0xA1,
+    -- vehicleManufacturerSpecific5 = 0xA2,
+    -- vehicleManufacturerSpecific6 = 0xA3,
+    -- vehicleManufacturerSpecific7 = 0xA4,
+    -- vehicleManufacturerSpecific8 = 0xA5,
+    -- vehicleManufacturerSpecific9 = 0xA6,
+    -- vehicleManufacturerSpecific10 = 0xA7,
+    -- vehicleManufacturerSpecific11 = 0xA8,
+    -- vehicleManufacturerSpecific12 = 0xA9,
+    -- vehicleManufacturerSpecific13 = 0xAA,
+    -- vehicleManufacturerSpecific14 = 0xAB,
+    -- vehicleManufacturerSpecific15 = 0xAC,
+    -- vehicleManufacturerSpecific16 = 0xAD,
+    -- vehicleManufacturerSpecific17 = 0xAE,
+    -- vehicleManufacturerSpecific18 = 0xAF,
+    -- systemSupplierSpecific4 = 0xB0,
+    -- systemSupplierSpecific5 = 0xB1,
+    -- systemSupplierSpecific6 = 0xB2,
+    -- systemSupplierSpecific7 = 0xB3,
+    -- systemSupplierSpecific8 = 0xB4,
+    -- systemSupplierSpecific9 = 0xB5,
+    -- systemSupplierSpecific10 = 0xB6,
+    -- systemSupplierSpecific11 = 0xB7,
+    -- systemSupplierSpecific12 = 0xB8,
+    -- systemSupplierSpecific13 = 0xB9,
+    -- systemSupplierSpecific14 = 0xBA,
+    -- systemSupplierSpecific15 = 0xBB,
+    -- systemSupplierSpecific16 = 0xBC,
+    -- systemSupplierSpecific17 = 0xBD,
+    -- systemSupplierSpecific18 = 0xBE,
+    -- systemSupplierSpecific19 = 0xBF
 }
 
 function RDBCI_InfoColumn(tvbuf, pktinfo)
@@ -125,7 +215,7 @@ end
 --KWP 31
 local rc_dict_description = {
     ["c4"] = "Erase Flash",
-    ["c5"] = "Check Flash",
+    ["c5"] = "Validate Flash Checksum",
 }
 function RC_InfoColumn(tvbuf, pktinfo)
     -- `[31C4] - Tester Present; Default`
