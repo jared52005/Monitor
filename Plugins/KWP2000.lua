@@ -112,14 +112,34 @@ local sds_dict_description = {
     ["87"] = "Adjustment Session",
     ["89"] = "Default",
 }
+function SDS_Baudrate(baudRateByte)
+    -- 0x14 = 10400
+    local exp = bit32.rrotate(baudRateByte, 0x5);
+    exp = bit32.band(exp, 0x7)
+    local pow = bit32.lrotate(0x1, exp);
+    
+    local base = bit32.band(baudRateByte, 0x1F);
+    
+    local baudRate = 200 * pow * (base + 32)
+    return baudRate;
+end
+
 function SDS_InfoColumn(tvbuf, pktinfo)
     -- `[1001] - Start Diagnostic Session; Default`
+    local pktlen = tvbuf:len()
     local preview = tostring(tvbuf:range(0,2))
     local type = sds_dict_description[tostring(tvbuf:range(1,1))]
     if type == nil then
         type= "???"
     end
-    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x10] .. "; " .. type
+    if(pktlen == 3) then
+        -- Calculate also baudrate
+        local baudrateByte = tvbuf:range(2,1):uint()
+        local baudrate = SDS_Baudrate(baudrateByte)
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x10] .. "; " .. type .. "Request baudrate: " .. string.upper(baudrate)
+    else
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x10] .. "; " .. type
+    end
 end
 
 --KWP 1A
