@@ -33,9 +33,14 @@ function debug_trace_dissector.dissector(tvbuf,pktinfo,root)
 
     -- Convert data into a string and show it in info column
     local s = ""
+    local c
     for i=0, pktlen - 1, 1
     do
-        s = s .. string.char(tvbuf:range(i,1):uint())
+        c = string.char(tvbuf:range(i,1):uint())
+        -- Ignore line break to prevent adding extra line and thus prevent expanding height of Wireshark line
+        if c ~= "\n" then
+            s = s .. c
+        end
     end
     tree:add(dt_text, s)
     pktinfo.cols.info = s
