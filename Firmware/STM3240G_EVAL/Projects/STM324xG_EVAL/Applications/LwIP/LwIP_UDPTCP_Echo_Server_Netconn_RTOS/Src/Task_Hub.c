@@ -57,7 +57,7 @@ void Task_Hub(void const* pvParameters)
         if(uartBaudrateChange_requested == true)
         {
             error = Uart_Enable(uartBaudrates[uartBaudrateChange_selector]);
-            printf("UART Setup result: %d\n", error);
+            printf("UART default baudrate changed to: %d; Setup result: %d\n", uartBaudrates[uartBaudrateChange_selector], error);
             uartBaudrateChange_selector++;
             if(uartBaudrateChange_selector >= UART_BAUDRATES_COUNT)
             {
