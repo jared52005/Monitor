@@ -58,6 +58,10 @@ function iso14230_dissector.dissector(tvbuf,pktinfo,root)
     local addressing = bit32.rshift(bit32.band(fmt, 0xC0), 6)
     tree:add(iso_fmt_address, tvbuf:range(0,1))
     local fmt_len = bit32.band(fmt, 0x3F) --Get Length byte from FMT
+    if(fmt_len ~= 0) then
+        tree:add(iso_fmt_len, tvbuf:range(0,1))
+        length = fmt_len
+    end
 
     -- Parse physical addressing (if included)
     local parserPosition = 1
@@ -74,9 +78,6 @@ function iso14230_dissector.dissector(tvbuf,pktinfo,root)
         tree:add(iso_length, tvbuf:range(parserPosition,1))
         length = tvbuf:range(parserPosition,1):uint()
         parserPosition = parserPosition + 1
-    else
-        tree:add(iso_fmt_len, tvbuf:range(0,1))
-        length = fmt_len
     end
 
     -- calculate checksum
