@@ -59,7 +59,7 @@ ErrorCodes Uart_Rx_GetCount(uint32_t* count)
 }
 
 /**
-* @brief  Receive one CAN message from buffer
+* @brief  Receive one UART byte from buffer
 * @param  msg: Structure where message is going to be copied
 * @retval ERROR_OK: Received data are written in provided variables
 *         ERROR_DATA_EMPTY: In buffer are no data available
@@ -101,10 +101,9 @@ ErrorCodes Uart_ResetFifo()
 	return ERROR_OK;
 }
 /**
-* @brief  Enable CAN peripheral
-* @param  baudrate: bits per seconds which we want to set CAN peripheral on. Max 1MBit/s
+* @brief  Enable UART peripheral
+* @param  baudrate: bits per seconds which we want to set UART peripheral on.
 * @retval ERROR_OK: Setup OK
-*         ERROR_GENERAL: Name of CAN peripheral which we want to work with is not supported on this device
 */
 ErrorCodes Uart_Enable(uint32_t baudrate)
 {
@@ -145,7 +144,7 @@ ErrorCodes Uart_Enable(uint32_t baudrate)
 }
 
 /**
-* @brief  Disable CAN peripheral
+* @brief  Disable UART peripheral
 */
 ErrorCodes Uart_Disable()
 {

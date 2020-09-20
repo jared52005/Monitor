@@ -20,10 +20,25 @@
 #include "Passive_Kline.h"
 
 //******************************************************************************
+//- Private Definitions --------
+#define UART_BAUDRATES_COUNT 2
 
-//- Private Variables ------------
+//- Private Methods ------------
 static void ProcessCanElements(void);
 static void ProcessKlineElements(void);
+
+//- Private Variables ----------
+static bool uartBaudrateChange_requested;
+static int  uartBaudrateChange_selector;
+static uint32_t uartBaudrates[] = {10400, 9600};
+
+/**
+ * @brief  User event to change baudrate in Task_Hub thread
+*/
+void Task_Hub_Uart_ChangeBaudrateRequest(void)
+{
+    uartBaudrateChange_requested = true;
+}
 
 /**
 * @brief  Task for parsing data into CAN
@@ -33,12 +48,23 @@ void Task_Hub(void const* pvParameters)
     ErrorCodes error;
     //Init CAN
     error = Can_Enable(500000, CAN_ACTIVE);
-    printf("CAN Setup result: %d\n", error);
-    //Init UART
-    error = Uart_Enable(10400);
-    printf("UART Setup result: %d\n", error);
+    //printf("CAN Setup result: %d\n", error);
+    //request init UART
+    uartBaudrateChange_requested = true;
+    uartBaudrateChange_selector = 0;
     for(;;)
     {
+        if(uartBaudrateChange_requested == true)
+        {
+            error = Uart_Enable(uartBaudrates[uartBaudrateChange_selector]);
+            printf("UART Setup result: %d\n", error);
+            uartBaudrateChange_selector++;
+            if(uartBaudrateChange_selector >= UART_BAUDRATES_COUNT)
+            {
+                uartBaudrateChange_selector = 0;
+            }
+            uartBaudrateChange_requested = false;
+        }
         ProcessCanElements();
         ProcessKlineElements();
         osDelay(20);

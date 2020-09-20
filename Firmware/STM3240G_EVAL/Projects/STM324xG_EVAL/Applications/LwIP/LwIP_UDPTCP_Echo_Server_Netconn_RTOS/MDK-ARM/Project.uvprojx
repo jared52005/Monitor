@@ -880,6 +880,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\Passive_Printf.c</FilePath>
             </File>
+            <File>
+              <FileName>ButtonIf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ButtonIf.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

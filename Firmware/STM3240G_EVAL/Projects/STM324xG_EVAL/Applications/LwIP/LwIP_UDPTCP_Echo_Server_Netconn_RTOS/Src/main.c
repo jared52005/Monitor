@@ -60,6 +60,8 @@
 #include "Task_Tcp_Wireshark_Raw.h"
 #include "System_stats.h"
 #include "rtos_utils.h"
+#include "Passive_Printf.h"
+#include "ButtonIf.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -127,6 +129,9 @@ static void StartThread(void const * argument)
   
 	//Enable SWO output
 	DBGMCU->CR = 0x00000020;
+	
+	//Enable IRQ on Key button
+	ButtonIf_Init();
 	
   //Reset System stats
   Stats_Reset();
@@ -282,19 +287,6 @@ static void BSP_Config(void)
 	Task_Lcd_Init(); 
   printf("  State: Ethernet Initialization ...\n");
 #endif
-}
-
-/**
-  * @brief  EXTI line detection callbacks
-  * @param  GPIO_Pin: Specifies the pins connected EXTI line
-  * @retval None
-  */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-  if (GPIO_Pin == GPIO_PIN_14)
-  {
-    osSemaphoreRelease(Netif_LinkSemaphore);
-  }
 }
 
 /**
