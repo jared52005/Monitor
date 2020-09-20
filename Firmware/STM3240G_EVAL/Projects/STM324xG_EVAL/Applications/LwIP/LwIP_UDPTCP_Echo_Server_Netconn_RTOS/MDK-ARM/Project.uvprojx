@@ -875,6 +875,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\Passive_Kline.c</FilePath>
             </File>
+            <File>
+              <FileName>Passive_Printf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Passive_Printf.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

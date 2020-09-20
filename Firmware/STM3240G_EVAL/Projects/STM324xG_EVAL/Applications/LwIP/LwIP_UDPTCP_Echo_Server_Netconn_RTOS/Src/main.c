@@ -374,6 +374,8 @@ int fputc(int ch, FILE *f)
 		while (ITM->PORT[0].u32 == 0);			// Wait for available 
 		ITM->PORT[0].u8 = (uint8_t)ch;	  		// Send character 
 	}
+
+  Passive_Printf_Add((uint8_t)ch);
 	
   return(ch);
 }

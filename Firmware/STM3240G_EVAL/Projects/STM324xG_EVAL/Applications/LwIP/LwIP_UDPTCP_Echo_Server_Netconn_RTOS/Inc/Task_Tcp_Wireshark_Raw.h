@@ -12,9 +12,9 @@ typedef enum RawMessageType
   Raw_VWTP20 = 0x93,
   Raw_ISO15765 = 0x94,
   
-  Debug = 0xFA,    //For Debug information (i.e. SWO output)
-  Warning = 0xFB,
-  Error = 0xFC,
+  Raw_Debug = 0xFA,    //For Debug information (i.e. SWO output)
+  Raw_Warning = 0xFB,
+  Raw_Error = 0xFC,
 }RawMessageType;
 
 /**
