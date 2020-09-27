@@ -58,6 +58,7 @@
 #include "Task_Hub.h"
 #include "Task_Tcp_Wireshark_SocketCAN.h"
 #include "Task_Tcp_Wireshark_Raw.h"
+#include "Task_Tcp_KlineRaw.h"
 #include "System_stats.h"
 #include "rtos_utils.h"
 #include "Passive_Printf.h"
@@ -145,6 +146,9 @@ static void StartThread(void const * argument)
   /* Initialize tcp echo server */
   //tcpecho_init();
 
+  //Initialize Kline RAW output on port 19100
+	Task_Tcp_Kline_Init();
+	
   //Initialize RAW for Wireshark on port 19000
   Task_Tcp_Wireshark_Raw_Init();
 

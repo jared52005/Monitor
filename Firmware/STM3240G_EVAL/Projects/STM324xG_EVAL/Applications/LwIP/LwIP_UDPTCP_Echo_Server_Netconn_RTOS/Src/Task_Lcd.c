@@ -137,10 +137,13 @@ void Task_Lcd(void const* pvParameters)
             //Empty line
             continue;
         case 13:
+            sprintf(line, "TCP KLINE RAW:  %s  ", TranslateSocketState(Stats_TCP_KLINE_State_Get()));
+            break;    
+        case 14:
             sprintf(line, "TCP Socket CAN: %s  ", TranslateSocketState(Stats_TCP_WS_SocketCAN_State_Get()));
             break;
-        case 14:
-            sprintf(line, "TCP Datagrams: %s  ", TranslateSocketState(Stats_TCP_WS_RAW_State_Get()));
+        case 15:
+            sprintf(line, "TCP Datagrams:  %s  ", TranslateSocketState(Stats_TCP_WS_RAW_State_Get()));
             break;
         default:
             lineNumber = -1;

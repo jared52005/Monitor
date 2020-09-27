@@ -113,4 +113,13 @@ void Stats_TCP_WS_RAW_State_Set(uint32_t state);
  * @brief Return state of Wirehsark SocketCAN socket
  */
 uint32_t Stats_TCP_WS_RAW_State_Get(void);
+
+/**
+ * @brief Set state of KLINE RAW socket
+ */
+void Stats_TCP_KLINE_State_Set(uint32_t state);
+/**
+ * @brief Return state of KLINE RAW socket
+ */
+uint32_t Stats_TCP_KLINE_State_Get(void);
 #endif

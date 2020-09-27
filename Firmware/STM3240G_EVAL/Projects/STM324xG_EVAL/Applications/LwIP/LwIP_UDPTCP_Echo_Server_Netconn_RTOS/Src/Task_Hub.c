@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include "main.h"
 #include "Task_Tcp_Wireshark_SocketCAN.h"
+#include "Task_Tcp_KlineRaw.h"
 #include "System_stats.h"
 #include "rtos_utils.h"
 #include "CanIf.h"
@@ -97,6 +98,10 @@ static void ProcessKlineElements(void)
             if(Stats_TCP_WS_RAW_State_Get() != 0)
             {
                 Passive_Kline_Parse(c);
+            }
+            if(Stats_TCP_KLINE_State_Get() != 0)
+            {
+                Task_Tcp_Kline_AddNewByte(c);
             }
         }
     }
