@@ -132,13 +132,23 @@ function SDS_InfoColumn(tvbuf, pktinfo)
     if type == nil then
         type= "???"
     end
+    local baudrate = nil
     if(pktlen == 3) then
         -- Calculate also baudrate
         local baudrateByte = tvbuf:range(2,1):uint()
-        local baudrate = SDS_Baudrate(baudrateByte)
-        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x10] .. "; " .. type .. "Request baudrate: " .. string.upper(baudrate)
-    else
+        baudrate = SDS_Baudrate(baudrateByte)
+    end
+
+    if(pktlen == 4) then
+        -- Calculate also baudrate
+        local baudrateByte = tvbuf:range(3,1):uint()
+        baudrate = SDS_Baudrate(baudrateByte)
+    end
+
+    if baudrate == nil then
         pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x10] .. "; " .. type
+    else
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x10] .. "; " .. type .. " Request baudrate: " .. string.upper(baudrate)
     end
 end
 
