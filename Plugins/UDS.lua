@@ -45,6 +45,7 @@ local nrc_description = {
     [0x33] = "Security access denied",
     [0x35] = "Invalid key",
     [0x36] = "Exceed attempts",
+    [0x72] = "General Programming Failure",
     [0x78] = "Busy - Response pending",
     [0x7E] = "Service or Subfunction not supported",
     [0x7F] = "Service or Subfunction not supported",
