@@ -142,6 +142,25 @@ function RDBLI_InfoColumn(tvbuf, pktinfo)
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x22] .. "; " .. type
 end
 
+--UDS 23
+function RMBA_InfoColumn(tvbuf, pktinfo)
+    -- `[23 14 A001420C 10] - RDBLI; VIN` = First 3 bytes of request, Service ID (22 = RDBLI) Subfunciton ID (F190 = VIN)
+    local preview = tostring(tvbuf:range(0,1))
+
+    if preview == "23" then
+        local fmt = tvbuf:range(1,1):uint()
+        local fmt_length = bit32.rshift(bit32.band(fmt, 0xF0), 4)
+        local fmt_address = bit32.band(fmt, 0xF)
+
+        local address = tostring(tvbuf:range(2, fmt_address))
+        local length = tostring(tvbuf:range(2 + fmt_address,fmt_length))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x23] .. "; " .. string.upper(address) .. " [" .. string.upper(length) .. "]"
+    else
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x23]
+    end
+
+end
+
 --UDS 27
 function SA_InfoColumn(tvbuf, pktinfo)
     -- `[2701] - Seceurity access`
@@ -238,6 +257,7 @@ local sid_dict_methods = {
     [0x11] = ERST_InfoColumn,
     [0x14] = EDTC_InfoColumn,
     [0x22] = RDBLI_InfoColumn,
+    [0x23] = RMBA_InfoColumn,
     [0x27] = SA_InfoColumn,
     [0x2E] = WDBLI_InfoColumn,
     [0x31] = RC_InfoColumn,
