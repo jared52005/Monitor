@@ -107,9 +107,28 @@ end
 
 --UDS 22
 local rdbli_dict_description = {
-    ["f190"] = "VIN",
+    ["0405"] = "State of flash memory (VAG)",
+    ["0407"] = "Amount of programming attempts (VAG)", -- How many times Erase was called as [00 01] [00 01] [00 01] = 1/1/1 counters
+    ["0408"] = "Amount of successful attempts (VAG)", -- How many times we get through Check Memory as [00 01] [00 01] [00 01] = 1/1/1 counters
+    ["0600"] = "Coding (VAG)",
+    ["f15b"] = "Fingerprint (VAG)",
+    ["f17c"] = "FAZIT (VAG)", --ID and Serial number string printed on label of the ECU
+    ["f186"] = "Active Diagnostic Session",
+    ["f187"] = "Software Number",
     ["f189"] = "Software Revision",
-    ["f187"] = "Software Type",
+    ["f18c"] = "ECU Serial Number (VAG)",
+    ["f190"] = "VIN",
+    ["f191"] = "Hardware Number",
+    ["f197"] = "ECU Type",
+    ["f19e"] = "ASAM name (VAG)",
+    ["f1a2"] = "ASAM version (VAG)",
+    ["f1a3"] = "Hardware Revision VAG", --Hnn if stock hardware. Xnn if TD1 / TG1 is triggered
+    ["f1aa"] = "VAG System Name", --How this component is called in diagrams / electrical schematics
+    ["f1ad"] = "Engine Code Letters (VAG)",
+    ["f1df"] = "Programming Information", --Usually means if ECU is in application (0x40) or in a bootloader (0x44). Could be also related to TD1 / TG1
+    ["f1f4"] = "Bootloader ID (VAG)",
+    ["f442"] = "ECU Voltage (VAG)",
+    ["f806"] = "CVN (VAG)", --You should be able to get CVN via 0x0A PID 
 }
 
 function RDBLI_InfoColumn(tvbuf, pktinfo)
