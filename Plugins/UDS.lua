@@ -156,6 +156,7 @@ local rdbli_dict_description = {
     ["f197"] = "ECU Type",
     ["f19e"] = "ASAM name (VAG)",
     ["f1a2"] = "ASAM version (VAG)",
+    ["f1a5"] = "Coding or serial number",
     ["f1a3"] = "Hardware Revision VAG", --Hnn if stock hardware. Xnn if TD1 / TG1 is triggered
     ["f1aa"] = "VAG System Name", --How this component is called in diagrams / electrical schematics
     ["f1ad"] = "Engine Code Letters (VAG)",
@@ -215,13 +216,13 @@ local wdbli_dict_description = {
 }
 
 function WDBLI_InfoColumn(tvbuf, pktinfo)
-    -- `[22F190] - RDBLI; VIN` = First 3 bytes of request, Service ID (22 = RDBLI) Subfunciton ID (F190 = VIN)
+    -- `[2EF190] - RDBLI; VIN` = First 3 bytes of request, Service ID (22 = RDBLI) Subfunciton ID (F190 = VIN)
     local preview = tostring(tvbuf:range(0,3))
     local type = wdbli_dict_description[tostring(tvbuf:range(1,2))]
     if type == nil then
         type= "???"
     end
-    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x22] .. "; " .. type
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x2E] .. "; " .. type
 end
 
 --UDS 31
