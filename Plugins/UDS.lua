@@ -226,9 +226,10 @@ end
 
 --UDS 31
 local rc_dict_description = {
+    ["0202"] = "Block Checksum",
     ["0203"] = "Programming Preconditions",
     ["ff00"] = "Erase",
-    ["ff01"] = "Checksum",
+    ["ff01"] = "Check programming dependencies",
 }
 function RC_InfoColumn(tvbuf, pktinfo)
     -- `[31010203] - Tester Present; Default`
