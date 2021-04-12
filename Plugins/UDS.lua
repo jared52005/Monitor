@@ -202,6 +202,13 @@ function SA_InfoColumn(tvbuf, pktinfo)
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x27] .. "; " .. type
 end
 
+--UDS 28
+function COMCtrl_InfoColumn(tvbuf, pktinfo)
+    -- `[28xx] - Communication Control`
+    local preview = tostring(tvbuf:range(0,2))
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x28]
+end
+
 --UDS 2E
 local wdbli_dict_description = {
     ["f15a"] = "Progamming Fingerprints",
@@ -284,6 +291,21 @@ function TP_InfoColumn(tvbuf, pktinfo)
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x3E] .. "; " .. type
 end
 
+--UDS 85
+local dtcctrl_dict_description = {
+    ["00"] = "Default",
+}
+
+function DTCCtrl_InfoColumn(tvbuf, pktinfo)
+    -- `[85xx] - Control DTC Settings`
+    local preview = tostring(tvbuf:range(0,2))
+    local type = dtcctrl_dict_description[tostring(tvbuf:range(1,1))]
+    if type == nil then
+        type= "???"
+    end
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x85] .. "; " .. type
+end
+
 local sid_dict_methods = {
     [0x04] = EDTC_PID_InfoColumn,
     [0x09] = ReqVehInfo_PID_InfoColumn,
@@ -294,12 +316,14 @@ local sid_dict_methods = {
     [0x22] = RDBLI_InfoColumn,
     [0x23] = RMBA_InfoColumn,
     [0x27] = SA_InfoColumn,
+    [0x28] = COMCtrl_InfoColumn,
     [0x2E] = WDBLI_InfoColumn,
     [0x31] = RC_InfoColumn,
     [0x34] = RD_InfoColumn,
     [0x36] = T_InfoColumn,
     [0x37] = RTE_InfoColumn,
     [0x3E] = TP_InfoColumn,
+    [0x85] = DTCCtrl_InfoColumn,
 }
 
 local positive_response_mask = 0x40
