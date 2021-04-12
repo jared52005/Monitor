@@ -1,12 +1,22 @@
 -- LUA bitwise operations: https://www.lua.org/manual/5.2/manual.html#6.7
 -- constants
 local sid_dict_description = {
+    [0x01] = "Show current data",
+    [0x02] = "Show freeze frame data",
+    [0x03] = "Show stored Diagnostic Trouble Codes",
     [0x04] = "Clear DTC (Emission related ECUs)",
+    [0x05] = "Test Results, Oxygen sensor monitoring (non CAN only)",
+    [0x06] = "Test results, other component/system monitoring (CAN only)",
+    [0x07] = "Show pending Diagnostic Trouble Codes",
+    [0x08] = "Control operation of on-board component/system",
+    [0x09] = "Request vehicle information",
+    [0x0A] = "Permanent Diagnostic Trouble Codes (DTCs) (Cleared DTCs)",
     [0x10] = "Start Diagnostic Session",
     [0x11] = "ECU Reset",
     [0x12] = "Read Freeze Frame Data",
     [0x13] = "Read Diagnostic Trouble Code",
     [0x14] = "Clear DTC (Standard method)",
+    [0x19] = "Read DTC information",
     [0x17] = "Read Status of DTCs",
     [0x18] = "Read DTCs by Status",
     [0x22] = "RDBLI",
@@ -62,11 +72,27 @@ function NegativeResponse_InfoColumn(tvbuf, pktinfo)
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[sid] .. "; " .. nrc
 end
 
--- UDS 14
+-- UDS 04
 function EDTC_PID_InfoColumn(tvbuf, pktinfo)
-    -- `[14] - Erase DTC`
+    -- `[04] - Erase DTC`
     local preview = tostring(tvbuf:range(0,1))
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x04]
+end
+
+local reqVehInfo_PID_dict_description = {
+    ["02"] = "VIN",
+    ["06"] = "CVN Maybe",
+}
+
+-- UDS 09
+function ReqVehInfo_PID_InfoColumn(tvbuf, pktinfo)
+    -- `[09] - Request Vehicle Information`
+    local preview = tostring(tvbuf:range(0,1))
+    local type = reqVehInfo_PID_dict_description[tostring(tvbuf:range(1,1))]
+    if type == nil then
+        type= "???"
+    end
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x09] .. "; " .. type
 end
 
 -- UDS 10
@@ -104,6 +130,13 @@ function EDTC_InfoColumn(tvbuf, pktinfo)
     -- `[14] - Erase DTC`
     local preview = tostring(tvbuf:range(0,4))
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x14]
+end
+
+-- UDS 19
+function RDTC_InfoColumn(tvbuf, pktinfo)
+    -- `[19] - Read DTC`
+    local preview = tostring(tvbuf:range(0,3))
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x19]
 end
 
 --UDS 22
@@ -253,9 +286,11 @@ end
 
 local sid_dict_methods = {
     [0x04] = EDTC_PID_InfoColumn,
+    [0x09] = ReqVehInfo_PID_InfoColumn,
     [0x10] = SDS_InfoColumn,
     [0x11] = ERST_InfoColumn,
     [0x14] = EDTC_InfoColumn,
+    [0x19] = RDTC_InfoColumn,
     [0x22] = RDBLI_InfoColumn,
     [0x23] = RMBA_InfoColumn,
     [0x27] = SA_InfoColumn,
