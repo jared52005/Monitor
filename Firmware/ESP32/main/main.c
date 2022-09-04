@@ -18,12 +18,12 @@
 
 #include "driver/gpio.h"
 
-#include "can.h"
+#include "CanIf.h"
 #include "uart.h"
 
 #define LED_GPIO 27
 
-static const char* TAG = "main.c";
+#define TAG "main.c"
 
 void app_main(void)
 {
@@ -32,7 +32,7 @@ void app_main(void)
     gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
 
 	//config_uart();
-	config_can();
+	Can_Enable(500000, CAN_PASSIVE);
 
     ESP_LOGE(TAG, "Error Example");
     ESP_LOGW(TAG, "Warning Example");
@@ -45,7 +45,5 @@ void app_main(void)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
         gpio_set_level(LED_GPIO, 1);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-        ESP_LOGI(TAG, "Loop");
     }
 }
