@@ -1,0 +1,34 @@
+{
+    "configurations": [
+        {
+            "name": "ESP32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "D:/esp-idf/components/driver/include/",
+                "D:/esp-idf/components/esp_common/include/",
+                "D:/esp-idf/components/esp_rom/include/",
+                "D:/esp-idf/components/esp_system/include/",
+                "D:/esp-idf/components/freertos/include/",
+                "D:/esp-idf/components/freertos/port/xtensa/include/",
+                "D:/esp-idf/components/hal/include/",
+                "D:/esp-idf/components/log/include/",
+                "D:/esp-idf/components/soc/include/",
+                "D:/esp-idf/components/soc/esp32/include/soc/",
+                "D:/esp-idf/components/xtensa/include/"
+            ],
+            "defines": [
+                "ESP_PLATFORM",
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "__INLINE=inline",
+                "__STATIC_INLINE=static inline"
+            ],
+            "windowsSdkVersion": "10.0.17763.0",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "msvc-x64"
+        }
+    ],
+    "version": 4
+}
