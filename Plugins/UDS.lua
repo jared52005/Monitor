@@ -141,6 +141,13 @@ end
 
 --UDS 22
 local rdbli_dict_description = {
+    ["02e0"] = "WFS Challenge",
+    ["02ed"] = "WFS Status",
+    ["02ee"] = "WFS Status Slaves",
+    ["02ef"] = "WFS Locktimes",
+    ["02f9"] = "WFS CS (501+)",
+    ["02ff"] = "WFS Snapshot",
+    ["ef90"] = "WFS Status SHE",
     ["0405"] = "State of flash memory (VAG)",
     ["0407"] = "Amount of programming attempts (VAG)", -- How many times Erase was called as [00 01] [00 01] [00 01] = 1/1/1 counters
     ["0408"] = "Amount of successful attempts (VAG)", -- How many times we get through Check Memory as [00 01] [00 01] [00 01] = 1/1/1 counters
@@ -212,7 +219,12 @@ end
 
 --UDS 2E
 local wdbli_dict_description = {
+    ["02e1"] = "WFS Login; 4",
+    ["02e2"] = "WFS 5 Download; 52",
+    ["02f6"] = "WFS 5 Download (SHE); 176",
+    ["02fb"] = "WFS 4 Download; 52",
     ["f15a"] = "Progamming Fingerprints",
+    ["f198"] = "Repair Shop Code",
 }
 
 function WDBLI_InfoColumn(tvbuf, pktinfo)
