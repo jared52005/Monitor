@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <esp_log.h>
 #include "rtos_utils.h"
 #include "System_stats.h"
 #include "Task_Tcp_Wireshark_Raw.h"
@@ -57,6 +58,9 @@ typedef enum KlineIso14230_FrameParseResult
     Iso14230_InvalidState,
 }KlineIso14230_FrameParseResult;
 
+// -- Private definitions
+#define TAG "Passive_Kline.c"
+
 // -- Private variables ---------------------------
 KlineBusState kline_bus_state = KBS_Idle; //By default parse data as ISO14230
 uint8_t  kline_buffer[KLINE_BUFFER_SIZE];
@@ -87,7 +91,7 @@ void Passive_Kline_UpdateState()
             }
             kline_bus_state = KBS_Idle;
             kline_buffer_end = 0;
-            printf("KLINE Reset back to default @ %d ms\n", GetTime_ms());
+            ESP_LOGW(TAG, "KLINE Reset back to default @ %d ms\n", GetTime_ms());
         }
     }
 }
@@ -192,7 +196,6 @@ KlineIso14230_FrameParseResult Passive_Kline_SearchIso14230_Frame(uint32_t offse
             }
             else
             {
-                //printf("ISO14230: Invalid CS %x vs %x\n", frame_Cs, kline_buffer[i]);
                 return Iso14230_InvalidCs;
             }
         default:
@@ -385,7 +388,7 @@ bool Passive_Kline_SearchKeyBytes(uint32_t* start, uint32_t* end)
             }
             else
             {
-                printf("Unknown KLINE protocol: %x\n", kb2);
+                ESP_LOGE(TAG, "Unknown KLINE protocol: %x\n", kb2);
             }
             break;
         default:
@@ -406,13 +409,12 @@ void Passive_Kline_Dequeue_Iso14230(uint32_t start, uint32_t end)
     //Dequeue crap
     if(start != 0)
     {
-        printf("ISO14230 crap bytes: ");
+        ESP_LOGW(TAG, "ISO14230 crap bytes: ");
         Passive_Kline_PrintBuffer(0, start);
     }
 
     //Dequeue data
     framePos = 0;
-    //printf("ISO14230 Data: ");
     for(i = start; i!= end; i++)
     {
         kline_frame[framePos] = kline_buffer[i];
@@ -423,7 +425,6 @@ void Passive_Kline_Dequeue_Iso14230(uint32_t start, uint32_t end)
     Stats_KlineBytes_RxFrameAdd(1);
     Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_ISO14230);
     kline_buffer_end = 0;
-    //printf("\n");
 }
 
 /**
@@ -437,14 +438,13 @@ void Passive_Kline_Dequeue_Kw1281(uint32_t start, uint32_t end)
     //Dequeue crap
     if(start != 0)
     {
-        printf("KW1281 crap bytes: ");
+        ESP_LOGW(TAG, "KW1281 crap bytes: ");
         Passive_Kline_PrintBuffer(0, start);
     }
 
     //Dequeue data
     framePos = 0;
     length = 0;
-    //printf("KW1281 Data: ");
     for(i = start; i!= end; i++)
     {
         //Write only even positions. Odd positions are complements
@@ -456,7 +456,7 @@ void Passive_Kline_Dequeue_Kw1281(uint32_t start, uint32_t end)
             if((framePos == 2) && (kline_frame[framePos] == 0x06))
             {
                 //If correct, reset kline bus status
-                printf("KLINE bus reset from KW1281 command\n");
+                ESP_LOGI(TAG, "KLINE bus reset from KW1281 command\n");
                 kline_bus_state = KBS_Idle;
             }
             framePos++;
@@ -467,7 +467,6 @@ void Passive_Kline_Dequeue_Kw1281(uint32_t start, uint32_t end)
     Stats_KlineBytes_RxFrameAdd(1);
     Task_Tcp_Wireshark_Raw_AddNewRawMessage(kline_frame, framePos, 0x00, GetTime_ms(), Raw_KW1281);
     kline_buffer_end = 0;
-    //printf("\n");
 }
 
 /**
@@ -484,7 +483,7 @@ bool Passive_Kline_Parse(uint8_t c)
     //Check if overflow
     if(kline_buffer_end == KLINE_BUFFER_SIZE)
     {
-        printf ("KLINE buffer overflow: ");
+        ESP_LOGW(TAG, "KLINE buffer overflow: ");
         Passive_Kline_PrintBuffer(0, kline_buffer_end - 1);
         kline_buffer_end = 0;
         kline_bus_state = KBS_Idle;
@@ -526,7 +525,7 @@ bool Passive_Kline_Parse(uint8_t c)
         }
         break;
     default:
-        printf("KLINE: Unknown protocol\n");
+        ESP_LOGE(TAG, "KLINE: Unknown protocol\n");
         break;
     }
     return true;

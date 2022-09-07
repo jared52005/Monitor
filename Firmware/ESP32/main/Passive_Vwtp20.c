@@ -7,6 +7,7 @@
 #include "string.h"
 #include "Passive_Vwtp20.h"
 #include "Task_Tcp_Wireshark_Raw.h"
+#include <esp_log.h>
 
 // -- Private defintions
 typedef enum TCPI1
@@ -46,6 +47,8 @@ static uint32_t tp20_frame_count;
 static bool flag_DatagramReceived= false;
 static bool flag_expectingAck = false;
 
+#define TAG "Passive_Vwtp20.c"
+
 /**
  * @brief Method is checking for 0x200~0x2FF CAN IDs
 */
@@ -61,7 +64,7 @@ bool Passive_Vwtp20_BroadcastChannel(CanMessage msg)
     uint16_t txid = *((uint16_t*)(msg.Frame + 2));
     uint16_t rxid = *((uint16_t*)(msg.Frame + 4));
     //uint8_t appType = msg.Frame[6];
-    printf("ECU at address %x. TXID={%x} / RXID={%x}\n", ecuAddress, txid, rxid);
+    ESP_LOGI(TAG, "ECU at address %x. TXID={%x} / RXID={%x}\n", ecuAddress, txid, rxid);
 
     if (msg.Id == 0x200)
     {
@@ -160,7 +163,7 @@ bool Passive_Vwtp20_UnicastChannel(CanMessage msg)
         if (tp20_frame_count < 3)
         {
             //Too small.
-            printf("ERROR: TP20 Datagram is smaller than 3 bytes.\n");
+            ESP_LOGE(TAG, "TP20 Datagram is smaller than 3 bytes.\n");
         }
         //Validate datagram header
         else
@@ -173,12 +176,12 @@ bool Passive_Vwtp20_UnicastChannel(CanMessage msg)
                 {
                     tp20_frame_count = tp20_frame_count - 2;
                     Task_Tcp_Wireshark_Raw_AddNewRawMessage(tp20_frame + 2, tp20_frame_count, msg.Id, msg.Timestamp, Raw_VWTP20);
-                    printf("WARNING: TP20 Datagram header starts on 0x8000\n");
+                    ESP_LOGW(TAG, "TP20 Datagram header starts on 0x8000\n");
                 }
                 else
                 {
                     //Datagram seems to have invalid header
-                    printf("ERROR: TP20 Datagram has invalid header.\n");
+                    ESP_LOGE(TAG, "TP20 Datagram has invalid header.\n");
                 }
             }
             else

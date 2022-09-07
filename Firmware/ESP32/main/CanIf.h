@@ -23,13 +23,13 @@
 /**
 * @brief  One row of CAN message FIFO buffer
 */
-typedef struct CanMessage
+typedef struct
 {
 	uint8_t   Frame[8]; //1-8 received bytes in CAN message
 	uint8_t   Dlc;      //Length of received frame
 	uint32_t  Id;       //ID of received frame
 	uint32_t  Timestamp;
-}CanMessage;
+} CanMessage;
 
 /**
 * @brief CAN can work in active or passive mode

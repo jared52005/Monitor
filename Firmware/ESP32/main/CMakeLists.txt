@@ -7,5 +7,6 @@ idf_component_register(
         "Passive_Vwtp20.c"
         "rtos_utils.c"
         "System_stats.c"
+        "Task_CanReconstruct.c"
         "uart.c" 
         INCLUDE_DIRS ".")

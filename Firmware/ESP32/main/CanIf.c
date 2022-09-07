@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "string.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -31,6 +32,7 @@
 #include "driver/twai.h"
 
 #include "CanIf.h"
+#include "rtos_utils.h"
 
 /* --------------------- Definitions and static variables ------------------ */
 //Example Configuration
@@ -49,7 +51,7 @@ static const twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
 static const twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
 
 /* --------------------------- Tasks and Functions -------------------------- */
-
+#if false
 static void twai_receive_task(void *arg)
 {
     esp_err_t result;
@@ -65,6 +67,26 @@ static void twai_receive_task(void *arg)
          }
     }
 }
+#endif
+
+ErrorCodes Can_Rx(CanMessage *msg)
+{
+    esp_err_t result;
+    twai_message_t rx_msg;
+    result = twai_receive(&rx_msg, portMAX_DELAY);
+    if (result == ESP_OK) 
+    {
+        //ESP_LOGI(pcTaskGetTaskName(0),"RX ID=0x%x flags=0x%x-%x-%x DLC=%d", rx_msg.identifier, rx_msg.flags, rx_msg.extd, rx_msg.rtr, rx_msg.data_length_code);
+        //ESP_LOG_BUFFER_HEXDUMP(TAG, rx_msg.data, rx_msg.data_length_code, ESP_LOG_INFO);
+
+        msg->Dlc = rx_msg.data_length_code;
+        msg->Id = rx_msg.identifier;
+        memcpy(msg->Frame, rx_msg.data, rx_msg.data_length_code);
+        msg->Timestamp = GetTime_ms();
+        return ERROR_OK;
+    }
+    return ERROR_DATA_EMPTY;
+}
 
 ErrorCodes Can_Enable(uint32_t baudrate, CanMode mode)
 {
@@ -74,6 +96,6 @@ ErrorCodes Can_Enable(uint32_t baudrate, CanMode mode)
     ESP_ERROR_CHECK(twai_start());
     ESP_LOGI(TAG, "CAN Driver started");
 
-    xTaskCreatePinnedToCore(twai_receive_task, "TWAI_rx", 4096, NULL, RX_TASK_PRIO, NULL, tskNO_AFFINITY);
+    //xTaskCreatePinnedToCore(twai_receive_task, "TWAI_rx", 4096, NULL, RX_TASK_PRIO, NULL, tskNO_AFFINITY);
     return ERROR_OK;
 }

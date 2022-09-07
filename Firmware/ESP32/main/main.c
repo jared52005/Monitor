@@ -18,7 +18,7 @@
 
 #include "driver/gpio.h"
 
-#include "CanIf.h"
+#include "Task_CanReconstruct.h"
 #include "uart.h"
 
 #define LED_GPIO 27
@@ -31,13 +31,7 @@ void app_main(void)
     gpio_reset_pin(LED_GPIO);
     gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
 
-	//config_uart();
-	Can_Enable(500000, CAN_PASSIVE);
-
-    ESP_LOGE(TAG, "Error Example");
-    ESP_LOGW(TAG, "Warning Example");
-    ESP_LOGI(TAG, "Info Example");
-
+    xTaskCreatePinnedToCore(Task_CanReconstruct, "Reconstruct", 4096, NULL, 8, NULL, tskNO_AFFINITY);
     for(;;)
     {
         //Blink with LED
