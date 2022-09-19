@@ -1,12 +1,12 @@
 # Wireshark Monitor
-Monitor is a name for group of devices which are able to only read and aggregate traffic from various buses into Wireshark via TCP socket. This option gives me ability to use dissector scripts, however downside is preprocessing of most of the data in a firmware into frames.
+Monitor is a name for group of devices which are able to only read and aggregate traffic from various automotive buses into Wireshark via TCP socket. This option is making it much easier to use dissector scripts, however downside is preprocessing of most of the data in a dedicated firmware into frames.
 
 ## Use Case
  * **Aggregate CAN traffic** 
  * **Aggregate ISO9141 traffic via RAW** Simple postprocessing via LUA dissectors possible.
  * **Aggregate ISO15765 traffic via RAW** Simple postprocessing via LUA dissectors possible.
  * **Aggregate FlexRay traffic** Simple postprocessing via LUA dissectors possible.
- * **Aggregate SWO output from STM32 processors**
+ * **Aggregate SWO output from STM32 processors** Only for STM3240G-EVAL
 
 ## How it looks
 Socket CAN read directly from remote target:  
@@ -15,17 +15,22 @@ Socket CAN read directly from remote target:
 Parsed KW1281 / KWP2000 (ISO14230) traffic on ME7 ECU  
 ![WS Socket CAN](/Resources/Wireshark_KWP2000_Example.png)
 
+Parsed UDS traffic on MDG1 ECU  
+![WS Socket CAN](/Resources/Wireshark_UDS_Example.png)
+
 ## Setup
-To replicate screenshots above, use setup described [here](/Setup.md)
+To replicate screenshots above: 
+ * **STM3240G-EVAL** use setup described [here](/Setup_STM32.md)
+ * **ESP32** use setup described [here](/Setup_ESP32.md)
 
 ## Existing devices
  * **STM3240G-EVAL** Development kit with a small [Hardware modification](https://github.com/jared52005/Monitor/blob/master/Hardware/Passive_KLine/readme.md) to trace KLINE traffic. I have used [FreeRTOS + LWIP based firmware](https://github.com/jared52005/Monitor/blob/master/Firmware/STM3240G_EVAL/readme.md) to trace CAN @ TCP:19001 and datagram (RAW) packets @ TCP:19000. Tracing should be working in parallel to get raw CAN or preprocessed datagrams or both;
+ * **ESP32** Compilable via esp-idf usign their implementation of FreeRTOS + SDK behind it provided by esp-idf. Does not implement KLINE parsing yet.
 
 ## Protocol
-However with this approach there are some problems. First I can trace `CAN, DoIP and FlexRay*` however **I can't** trace `VWTP20, ISO9141, KW1281 and ISO15765*` For those protocols I was forced to create dummy IPV4 header and then put those packets at a top of it. Adding of those 20 bytes header will give me ability to preprocess data in a some local device and send whole frame into Wireshark via TCP socket
+With this approach there are some problems. First I can trace `CAN, DoIP and FlexRay` however **I can't** trace `VWTP20, ISO9141, KW1281 and ISO15765*` For those protocols I was forced to create dummy IPV4 header and then put those packets at a top of it. Adding of those 20 bytes header will give me ability to preprocess data in a some local device and send whole frame into Wireshark via TCP socket
 
-**ISO15765** There is ISO15765 dissector in Wireshark, but it is useless crap. It is not grouping multiple packets into one: i.e. you will have 20 CAN messages of conseq. frames. Dissector will just fancy mark them, but not hide them into one line. Second big problem is inability to see errors: i.e. You have SEQ on conseq frame 1,2,4 with mising 3. That is obvious error. But not for this dissector. This dissector just don't care. Previous errors also screws up follow up fancy marking, but sometimes it recovers...  
-**FlexRay** Wireshark pretends that it supports FlexRay, but I am missing to see name of link layer to parse it from.  
+**ISO15765** There is ISO15765 dissector in Wireshark, but it is useless crap. It is not grouping multiple packets into one: i.e. you will have 20 CAN messages of conseq. frames. Dissector will just fancy mark them, but not merge them into one line. Second big problem is inability to see errors: i.e. You have SEQ on conseq frame 1,2,4 with mising 3. That is obvious error. But not for this dissector. This dissector just don't care. Previous errors also screws up follow up fancy marking, but sometimes it recovers...  
 
 ### TCP protocol
 [There is not much information in official wireshark guide on TCP sockets](https://wiki.wireshark.org/CaptureSetup/Pipes) just only this example:  
