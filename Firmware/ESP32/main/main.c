@@ -20,6 +20,7 @@
 
 #include "Task_CanReconstruct.h"
 #include "uart.h"
+#include "wifi.h"
 
 #define LED_GPIO 27
 
@@ -31,6 +32,8 @@ void app_main(void)
     gpio_reset_pin(LED_GPIO);
     gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
 
+    Wifi_Init();
+
     xTaskCreatePinnedToCore(Task_CanReconstruct, "Reconstruct", 4096, NULL, 8, NULL, tskNO_AFFINITY);
     for(;;)
     {
@@ -39,5 +42,6 @@ void app_main(void)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
         gpio_set_level(LED_GPIO, 1);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
+        ESP_LOGI(TAG, "Heap size: %d Bytes", xPortGetFreeHeapSize());
     }
 }

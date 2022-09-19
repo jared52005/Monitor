@@ -9,8 +9,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <esp_log.h>
-#include "Task_Tcp_Wireshark_SocketCAN.h"
-#include "Task_Tcp_KlineRaw.h"
+#include "Task_Tcp_SocketCAN.h"
 #include "System_stats.h"
 #include "rtos_utils.h"
 #include "CanIf.h"
@@ -31,6 +30,8 @@ void Task_CanReconstruct(void* pvParameters)
 {
     //Init CAN
     Can_Enable(500000, CAN_ACTIVE);
+    //Create TCP server for Wireshark
+    Task_Tcp_SocketCAN_Init();
     for(;;)
     {
         ProcessCanElements();
@@ -48,13 +49,11 @@ static void ProcessCanElements(void)
     {
         return;
     }
-    ESP_LOGI(TAG,"RX ID=0x%x DLC=%d", cmsg.Id, cmsg.Dlc);
-    ESP_LOG_BUFFER_HEXDUMP(TAG, cmsg.Frame, cmsg.Dlc, ESP_LOG_INFO);
 
     //Add CAN element into TCP ring buffer as socket CAN (if socket CAN is connected)
     if(Stats_TCP_WS_SocketCAN_State_Get() != 0)
     {
-        //Task_Tcp_Wireshark_SocketCAN_AddNewCanMessage(cmsg);
+        Task_Tcp_SocketCAN_AddNewCanMessage(cmsg);
     }
     /*if(Stats_TCP_WS_RAW_State_Get() != 0)
     {

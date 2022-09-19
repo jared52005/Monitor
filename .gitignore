@@ -191,3 +191,4 @@ Firmware/STM3240G_EVAL/Projects/STM324xG_EVAL/Applications/LwIP/LwIP_UDPTCP_Echo
 
 #ESP IDF generated files
 Firmware/ESP32/sdkconfig
+Firmware/ESP32/main/wifi_creds.h

@@ -8,5 +8,7 @@ idf_component_register(
         "rtos_utils.c"
         "System_stats.c"
         "Task_CanReconstruct.c"
+        "Task_Tcp_SocketCAN.c"
         "uart.c" 
+        "wifi.c"
         INCLUDE_DIRS ".")
