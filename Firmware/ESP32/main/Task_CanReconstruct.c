@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <esp_log.h>
 #include "Task_Tcp_SocketCAN.h"
+#include "Task_Tcp_Wireshark_Raw.h"
 #include "System_stats.h"
 #include "rtos_utils.h"
 #include "CanIf.h"
@@ -32,6 +33,7 @@ void Task_CanReconstruct(void* pvParameters)
     Can_Enable(500000, CAN_ACTIVE);
     //Create TCP server for Wireshark
     Task_Tcp_SocketCAN_Init();
+    Task_Tcp_Wireshark_Raw_Init();
     for(;;)
     {
         ProcessCanElements();
@@ -55,7 +57,7 @@ static void ProcessCanElements(void)
     {
         Task_Tcp_SocketCAN_AddNewCanMessage(cmsg);
     }
-    /*if(Stats_TCP_WS_RAW_State_Get() != 0)
+    if(Stats_TCP_WS_RAW_State_Get() != 0)
     {
         //Try to process CAN element in ISO15765 passive protocol
         if(Passive_Iso15765_Parse(cmsg) == true)
@@ -67,5 +69,5 @@ static void ProcessCanElements(void)
         {
             return;
         }
-    }*/
+    }
 }

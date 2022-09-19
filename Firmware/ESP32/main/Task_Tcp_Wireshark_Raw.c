@@ -6,7 +6,7 @@
  */ 
 #include <stdio.h>
 #include "System_stats.h"
-#include "Task_Tcp_SocketCAN.h"
+#include "Task_Tcp_Wireshark_Raw.h"
 #include "string.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -20,13 +20,11 @@
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
 
-// -- Private definitions
-#define TCPECHO_THREAD_PRIO  ( tskIDLE_PRIORITY + 4 )
-
-#define TAG "Task_Tcp_SocketCAN.c"
+// -- Private Definitions -------------------------------
+#define TAG "Task_Tcp_Wireshark_Raw.c"
 
 #define CONFIG_EXAMPLE_IPV4
-#define PORT                        19001
+#define PORT                        19000
 #define KEEPALIVE_IDLE              100
 #define KEEPALIVE_INTERVAL          100
 #define KEEPALIVE_COUNT             100
@@ -35,50 +33,66 @@
 static uint8_t fileHeader[] = 
 {
   0xD4, 0xC3, 0xB2, 0xA1, 0x02, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0xFF, 0xFF, 0x00, 0x00, 0xE3, 0x00, 0x00, 0x00
+  0xFF, 0xFF, 0x00, 0x00, 0x65, 0x00, 0x00, 0x00
 };
-static uint8_t packetHeader[] = 
-{
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00
-};
-static uint8_t packetBody[16];
+static uint8_t packetHeader[16];
+static uint8_t packetBody[4116]; //4096 of data + 20 bytes of header
 
-static QueueHandle_t xCanMessageQueue = NULL;
+static QueueHandle_t xRawMessageQueue = NULL;
 
-static void tcpswcan_prepare_header(CanMessage* cmsg, uint8_t* array)
+static void tcpswraw_prepare_header(RawMessage* rmsg, uint8_t* array)
 {
   /* 00-00-00-00 00-00-00-00-10-00-00-00-10-00-00-00
    Where:
     00-00-00-00 = Time Stamp seconds.
     00-00-00-00 = Time Stamp micro seconds
-    10-00-00-00 = Size of packet saved in a file = 16 bytes of body
-    10-00-00-00 = Actual size of packet = 16 bytes of body
+    10-00-00-00 = Size of packet saved in a file = 20 bytes of header + Frame length
+    10-00-00-00 = Actual size of packet = 20 bytes of header + Frame length
   */
   uint32_t timestamp_seconds;
   uint32_t timestamp_microseconds;
 
   //Prepare timestamp
-  timestamp_seconds = (uint32_t)(cmsg->Timestamp / 1000); //Only second part (I know there should be Unix time, but I am too lazy to get RTC or NTP working)
-  timestamp_microseconds = (uint32_t)(cmsg->Timestamp % 1000); //Only remainder from seconds
+  timestamp_seconds = (uint32_t)(rmsg->Timestamp / 1000); //Only second part (I know there should be Unix time, but I am too lazy to get RTC or NTP working)
+  timestamp_microseconds = (uint32_t)(rmsg->Timestamp % 1000); //Only remainder from seconds
   timestamp_microseconds = timestamp_microseconds * 1000; //Convert milisecond to microseconds
   //Store timestamp
   *(uint32_t*)array = timestamp_seconds;
   *(uint32_t*)(array + 4) = timestamp_microseconds;
+
+  //Store length
+  *(uint32_t*)(array + 8) = rmsg->Length + 20;
+  *(uint32_t*)(array + 12) = rmsg->Length + 20;
 }
 
-static void tcpswcan_prepare_body(CanMessage* cmsg, uint8_t* array)
+static int tcpswraw_prepare_body(RawMessage* rmsg, uint8_t* array, uint16_t sequence)
 {
-  array[0] = (uint8_t)(cmsg->Id >> 24);
-  array[1] = (uint8_t)(cmsg->Id >> 16);
-  array[2] = (uint8_t)(cmsg->Id >> 8);
-  array[3] = (uint8_t)cmsg->Id;
-  //DLC
-  array[4] = cmsg->Dlc;
+  int totalLength = rmsg->Length + 20;
+  array[0] = 0x45; //Version 4, 5 words (5*4=20 bytes)
+  array[1] = 0x00; //Differential services
+  array[2] = (uint8_t)(totalLength >> 8); //Total size
+  array[3] = (uint8_t)(totalLength);
+  array[4] = (uint8_t)(sequence >> 8); //Identification, should be unique number
+  array[5] = (uint8_t)(sequence);
+  array[6] = 0x40; //Don't fragment
+  array[7] = 0x00;
+  array[8] = 0x80; //TTL
+  array[9] = (uint8_t)(rmsg->MessageType); //Undefined protocol. Used together with datagrams
+  array[10] = 0x00; //Header checksum (disabled)
+  array[11] = 0x00;
+  array[12] = 192; //Source
+  array[13] = 168;
+  array[14] = 0;
+  array[15] = 1;
+  array[16] = (uint8_t)(rmsg->Id >> 24); //Destination
+  array[17] = (uint8_t)(rmsg->Id >> 16);
+  array[18] = (uint8_t)(rmsg->Id >> 8);
+  array[19] = (uint8_t)(rmsg->Id);
   //Data
-  memcpy(&array[8], cmsg->Frame, cmsg->Dlc);
+  memcpy(&array[20], rmsg->Frame, rmsg->Length);
+  return totalLength;
 }
 
-/*-----------------------------------------------------------------------------------*/
 static bool netconn_write(const int sock, uint8_t* tx_buffer, int len)
 {
   //ESP_LOGW(TAG, "TCP Transmit");
@@ -101,12 +115,13 @@ static bool netconn_write(const int sock, uint8_t* tx_buffer, int len)
 
 static void do_transmit(const int sock)
 {
-  CanMessage* xcmsg;
+  RawMessage* xrmsg;
+  int packetBody_Lenght;
   //Erase all data from SWCAN
-  xQueueReset(xCanMessageQueue);
+  xQueueReset(xRawMessageQueue);
 
   //Show on LCD that we have connection
-  Stats_TCP_WS_SocketCAN_State_Set(1);
+  Stats_TCP_WS_RAW_State_Set(1);
 	ESP_LOGI(TAG, "Connection established");
 
   //Write file header to init Wireshark
@@ -116,10 +131,10 @@ static void do_transmit(const int sock)
   }
   while (1) 
   {
-    if(xQueueReceive( xCanMessageQueue, &(xcmsg), ( TickType_t ) 10 ) == pdPASS)
+    if(xQueueReceive( xRawMessageQueue, &(xrmsg), ( TickType_t ) 10 ) == pdPASS)
     {
       //Write packet header
-      tcpswcan_prepare_header(xcmsg, packetHeader);
+      tcpswraw_prepare_header(xrmsg, packetHeader);
       if(netconn_write(sock, packetHeader, 16) == false)
       {
         //Failed to write into TCP, connection probably closed
@@ -127,19 +142,19 @@ static void do_transmit(const int sock)
       }
 
       //Write packet data
-      tcpswcan_prepare_body(xcmsg, packetBody);
-      if(netconn_write(sock, packetBody, 16) == false)
+      packetBody_Lenght = tcpswraw_prepare_body(xrmsg, packetBody, 0);
+      if(netconn_write(sock, packetBody, packetBody_Lenght) == false)
       {
         //Failed to write into TCP, connection probably closed
         return;
       }
-
-      vPortFree(xcmsg);
+      vPortFree(xrmsg->Frame);
+      vPortFree(xrmsg);
     }
   }
 }
 
-static void tcpwscan_thread(void *pvParameters)
+static void tcpwsraw_thread(void *pvParameters)
 {
   char addr_str[128];
   int addr_family = (int)pvParameters;
@@ -151,7 +166,7 @@ static void tcpwscan_thread(void *pvParameters)
   struct sockaddr_storage dest_addr;
 
   //Hold 32 messages max 
-  xCanMessageQueue = xQueueCreate( 32, sizeof( CanMessage* ) );
+  xRawMessageQueue = xQueueCreate( 32, sizeof( RawMessage* ) );
 
   if (addr_family == AF_INET) 
   {
@@ -218,7 +233,7 @@ static void tcpwscan_thread(void *pvParameters)
     ESP_LOGI(TAG, "Socket accepted ip address: %s", addr_str);
     do_transmit(sock);
     ESP_LOGW(TAG, "Socket closed");
-    Stats_TCP_WS_SocketCAN_State_Set(0);
+    Stats_TCP_WS_RAW_State_Set(0);
     shutdown(sock, 0);
     close(sock);
   }
@@ -226,27 +241,33 @@ CLEAN_UP:
     close(listen_sock);
     vTaskDelete(NULL);
 }
+
 /*-----------------------------------------------------------------------------------*/
 
-void Task_Tcp_SocketCAN_Init(void)
+void Task_Tcp_Wireshark_Raw_Init(void)
 {
-  xTaskCreate(tcpwscan_thread, "tcp_server_can", 4096, (void*)AF_INET, 5, NULL);
+  xTaskCreate(tcpwsraw_thread, "tcpwsraw_thread", 4096, (void*)AF_INET, 5, NULL);
 }
 
-void Task_Tcp_SocketCAN_AddNewCanMessage(CanMessage cmsg)
+void Task_Tcp_Wireshark_Raw_AddNewRawMessage(uint8_t* frame, uint32_t length, uint32_t id, uint32_t timestamp, RawMessageType msgType)
 {
-  if(xCanMessageQueue == NULL)
+	if(xRawMessageQueue == NULL)
   {
     return;
   }
+  //Alocate data for message
+  RawMessage* qRawMessage = (RawMessage*)pvPortMalloc(sizeof(RawMessage));
+  qRawMessage->Frame = pvPortMalloc(sizeof(length));
 
-  //Copy cmsg into allocated qCanMessage and queue it
-  CanMessage* qCanMessage = (CanMessage*)pvPortMalloc(sizeof(CanMessage));
-  qCanMessage->Dlc = cmsg.Dlc;
-  qCanMessage->Id = cmsg.Id;
-  qCanMessage->Timestamp = cmsg.Timestamp;
-  memcpy(qCanMessage->Frame, cmsg.Frame, cmsg.Dlc);
-  //ESP_LOGW(TAG, "Before queue %x", (uint32_t)qCanMessage);
-  //ESP_LOG_BUFFER_HEXDUMP(TAG, (uint8_t*)&cmsg, sizeof(CanMessage), ESP_LOG_INFO);
-  xQueueSend(xCanMessageQueue, ( void * ) &qCanMessage, (TickType_t)0);
+  //Write down data into ring buffer for sending
+	qRawMessage->MessageType = msgType;
+	qRawMessage->Id = id;
+	qRawMessage->Timestamp = timestamp;
+  qRawMessage->Length = length;
+	
+  memcpy(qRawMessage->Frame, frame, length);
+	
+  //ESP_LOGW(TAG, "Before queue %x", (uint32_t)qRawMessage);
+  //ESP_LOG_BUFFER_HEXDUMP(TAG, (uint8_t*)&qRawMessage, sizeof(RawMessage), ESP_LOG_INFO);
+  xQueueSend(xRawMessageQueue, ( void * ) &qRawMessage, (TickType_t)0);
 }

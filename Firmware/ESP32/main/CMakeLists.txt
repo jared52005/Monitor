@@ -9,6 +9,7 @@ idf_component_register(
         "System_stats.c"
         "Task_CanReconstruct.c"
         "Task_Tcp_SocketCAN.c"
+        "Task_Tcp_Wireshark_Raw.c"
         "uart.c" 
         "wifi.c"
         INCLUDE_DIRS ".")

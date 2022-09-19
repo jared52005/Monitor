@@ -113,7 +113,6 @@ bool Passive_Vwtp20_UnicastChannel(CanMessage msg)
     switch (tcpi)
     {
         case TCPI1_CFrame_LastMessageNoAck:
-            //_datagram.AddRange(msg.Data);
             memcpy(tp20_frame + tp20_frame_count, msg.Frame, msg.Dlc);
             tp20_frame_count += msg.Dlc;
             flag_DatagramReceived = true;
@@ -121,13 +120,11 @@ bool Passive_Vwtp20_UnicastChannel(CanMessage msg)
             break;
         case TCPI1_CFrame_Flow:
             //Received one frame from several frames
-            //_datagram.AddRange(msg.Data.Skip(1));
             memcpy(tp20_frame + tp20_frame_count, msg.Frame + 1, msg.Dlc - 1);
             tp20_frame_count += msg.Dlc - 1;
             break;
         case TCPI1_CFrame_LastMessageAck:
             //Received last message of block expecting ACK
-            //_datagram.AddRange(msg.Data.Skip(1));
             memcpy(tp20_frame + tp20_frame_count, msg.Frame + 1, msg.Dlc - 1);
             tp20_frame_count += msg.Dlc - 1;
             flag_DatagramReceived = true;
@@ -135,7 +132,6 @@ bool Passive_Vwtp20_UnicastChannel(CanMessage msg)
             break;
         case TCPI1_CFrame_BlockSizeReachedAck:
             //Block has ended, expecting ACK
-            //_datagram.AddRange(msg.Frame.Skip(1));
             memcpy(tp20_frame + tp20_frame_count, msg.Frame + 1, msg.Dlc - 1);
             tp20_frame_count += msg.Dlc - 1;
             flag_expectingAck = true;
