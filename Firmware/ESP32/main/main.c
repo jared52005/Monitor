@@ -42,6 +42,6 @@ void app_main(void)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
         gpio_set_level(LED_GPIO, 1);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-        ESP_LOGI(TAG, "Heap size: %d Bytes", xPortGetFreeHeapSize());
+        //ESP_LOGI(TAG, "Heap size: %d Bytes", xPortGetFreeHeapSize());
     }
 }
