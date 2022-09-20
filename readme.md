@@ -1,12 +1,11 @@
-# Wireshark Monitor
-Monitor is a name for group of devices which are able to only read and aggregate traffic from various automotive buses into Wireshark via TCP socket. This option is making it much easier to use dissector scripts, however downside is preprocessing of most of the data in a dedicated firmware into frames.
+# Wireshark Traffic Monitor
+This repository is group of tools for pre-processing, logging and aggreagtion of traffic from CAN (and PDUs like ISO15765-2, VW TP2.0) and KLINE (ISO9141, ISO14230) into Wireshark.
 
 ## Use Case
- * **Aggregate CAN traffic** 
- * **Aggregate ISO9141 traffic via RAW** Simple postprocessing via LUA dissectors possible.
- * **Aggregate ISO15765 traffic via RAW** Simple postprocessing via LUA dissectors possible.
- * **Aggregate FlexRay traffic** Simple postprocessing via LUA dissectors possible.
- * **Aggregate SWO output from STM32 processors** Only for STM3240G-EVAL
+ * **Aggregate CAN traffic** using SocketCAN link layer
+ * **Aggregate ISO9141 traffic via IP RAW link layer** Simple postprocessing via LUA dissectors possible.
+ * **Aggregate ISO15765 traffic via IP RAW link layer** Simple postprocessing via LUA dissectors possible.
+ * **Aggregate FlexRay traffic**
 
 ## How it looks
 Socket CAN read directly from remote target:  
@@ -23,14 +22,14 @@ To replicate screenshots above:
  * **STM3240G-EVAL** use setup described [here](/Setup_STM32.md)
  * **ESP32** use setup described [here](/Setup_ESP32.md)
 
-## Existing devices
+## Existing tools
  * **STM3240G-EVAL** Development kit with a small [Hardware modification](https://github.com/jared52005/Monitor/blob/master/Hardware/Passive_KLine/readme.md) to trace KLINE traffic. I have used [FreeRTOS + LWIP based firmware](https://github.com/jared52005/Monitor/blob/master/Firmware/STM3240G_EVAL/readme.md) to trace CAN @ TCP:19001 and datagram (RAW) packets @ TCP:19000. Tracing should be working in parallel to get raw CAN or preprocessed datagrams or both;
  * **ESP32** Compilable via esp-idf usign their implementation of FreeRTOS + SDK behind it provided by esp-idf. Does not implement KLINE parsing yet.
 
 ## Protocol
-With this approach there are some problems. First I can trace `CAN, DoIP and FlexRay` however **I can't** trace `VWTP20, ISO9141, KW1281 and ISO15765*` For those protocols I was forced to create dummy IPV4 header and then put those packets at a top of it. Adding of those 20 bytes header will give me ability to preprocess data in a some local device and send whole frame into Wireshark via TCP socket
+I can trace `CAN, DoIP and FlexRay` using proper Wireshark link layer, however **I can't** trace `VWTP20, ISO9141, KW1281 and ISO15765*` For those protocols I have created dummy IPV4 header and then put those packets at a top of it. This simplifies subsequent parsing.
 
-**ISO15765** There is ISO15765 dissector in Wireshark, but it is useless crap. It is not grouping multiple packets into one: i.e. you will have 20 CAN messages of conseq. frames. Dissector will just fancy mark them, but not merge them into one line. Second big problem is inability to see errors: i.e. You have SEQ on conseq frame 1,2,4 with mising 3. That is obvious error. But not for this dissector. This dissector just don't care. Previous errors also screws up follow up fancy marking, but sometimes it recovers...  
+**ISO15765** There is ISO15765 protocol in Wireshark, but it is mostly useless. It is not grouping multiple packets into one: i.e. you will have 20 CAN messages of conseq. frames. Dissector will just mark them, but not merge them into one line. Second big problem is inability to see errors: i.e. You have SEQ on conseq frame 1,2,4 with mising 3. That is obvious error. But not for this dissector. This dissector just don't care. Previous errors also screws up follow up frames (makring). That's the reason why I have created pre-processing on dedicated hardware.
 
 ### TCP protocol
 [There is not much information in official wireshark guide on TCP sockets](https://wiki.wireshark.org/CaptureSetup/Pipes) just only this example:  
@@ -50,7 +49,7 @@ Where:
     00-00-00-00 = Thiszone: 0
     00-00-00-00 = Sigfigs: 0
     FF-FF-00-00 = Snaplen: 65535
-    65-00-00-00 = Link layer ID: 101 for RAW packets or 227 for SocketCAN packets
+    65-00-00-00 = Link layer ID: 101 for IP RAW packets or 227 for SocketCAN packets
 ```
 Except Link Layer ID, everything is a constant. It is important to point out that you **CAN NOT** mix SocketCAN data and datagram data. You need to specify format at the start of the trace
 
