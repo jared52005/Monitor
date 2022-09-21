@@ -22,10 +22,6 @@ To replicate screenshots above:
  * **STM3240G-EVAL** use setup described [here](/Setup_STM32.md)
  * **ESP32** use setup described [here](/Setup_ESP32.md)
 
-## Existing tools
- * **STM3240G-EVAL** Development kit with a small [Hardware modification](https://github.com/jared52005/Monitor/blob/master/Hardware/Passive_KLine/readme.md) to trace KLINE traffic. I have used [FreeRTOS + LWIP based firmware](https://github.com/jared52005/Monitor/blob/master/Firmware/STM3240G_EVAL/readme.md) to trace CAN @ TCP:19001 and datagram (RAW) packets @ TCP:19000. Tracing should be working in parallel to get raw CAN or preprocessed datagrams or both;
- * **ESP32** Compilable via esp-idf usign their implementation of FreeRTOS + SDK behind it provided by esp-idf. Does not implement KLINE parsing yet.
-
 ## Protocol
 I can trace `CAN, DoIP and FlexRay` using proper Wireshark link layer, however **I can't** trace `VWTP20, ISO9141, KW1281 and ISO15765*` For those protocols I have created dummy IPV4 header and then put those packets at a top of it. This simplifies subsequent parsing.
 
