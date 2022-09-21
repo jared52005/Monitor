@@ -17,11 +17,6 @@ Parsed KW1281 / KWP2000 (ISO14230) traffic on ME7 ECU
 Parsed UDS traffic on MDG1 ECU  
 ![WS Socket CAN](/Resources/Wireshark_UDS_Example.png)
 
-## Setup
-To replicate screenshots above: 
- * **STM3240G-EVAL** use setup described [here](/Setup_STM32.md)
- * **ESP32** use setup described [here](/Setup_ESP32.md)
-
 ## Protocol
 I can trace `CAN, DoIP and FlexRay` using proper Wireshark link layer, however **I can't** trace `VWTP20, ISO9141, KW1281 and ISO15765*` For those protocols I have created dummy IPV4 header and then put those packets at a top of it. This simplifies subsequent parsing.
 
@@ -32,9 +27,9 @@ I can trace `CAN, DoIP and FlexRay` using proper Wireshark link layer, however *
 ```
 wireshark -k -i TCP@127.0.0.1:19000
 ```
-However using enclosed NamedPipes codes I was able to figure out what kind of bytes Wireshark expects so I can port this knowledge on Monitor Devices.
+Using NamedPipes code I was able to figure out what kind of bytes Wireshark expects so I can port this knowledge on Wireshark Traffic Monitor tools
 
-Any TCP server is waiting on connection from Wireshark. When Wireshark opens TCP connection, server will send start packet:
+TCP server is waiting on connection from Wireshark. When Wireshark opens TCP connection, server will send start packet:
 ```
 D4-C3-B2-A1-02-00-04-00-00-00-00-00-00-00-00-00-FF-FF-00-00-65-00-00-00
 
@@ -47,7 +42,7 @@ Where:
     FF-FF-00-00 = Snaplen: 65535
     65-00-00-00 = Link layer ID: 101 for IP RAW packets or 227 for SocketCAN packets
 ```
-Except Link Layer ID, everything is a constant. It is important to point out that you **CAN NOT** mix SocketCAN data and datagram data. You need to specify format at the start of the trace
+Except Link Layer ID, everything is a constant. It is important to point out that you **CAN NOT** mix SocketCAN data and IP RAW data after you specify link layer in first packet.
 
 ### Packet header
 When we are sending a packet, first we will send a packet header. Then we will send body of packet (depends on Link Layer)
