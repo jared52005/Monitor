@@ -15,7 +15,7 @@ To replicate screenshots below, follow steps for supported devices:
 | Firmware/ESP32         | ESP32, ESP32-S3, ... | [here](/Setup_ESP32.md) | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
 | Firmware/STM3240G-EVAL | STM3240G-EVAL        | [here](/Setup_STM32.md) | Yes TCP:19000  | Yes TCP:19000 | Yes TCP:19001  | No                 |
 | Software/KlineMonitor  | FT232 + MC33660, ... | TBD                     | Yes TCP:19000  | No            | No             | No                 |
-| Software/PcanApi       | PeakCAN USB, etc.    | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
+| Software/PcanApi       | PCAN-USB etc.        | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
 | Software/XLapi         | VN7640, etc.         | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | Yes TCP:19002      |
 
 ## How it looks
