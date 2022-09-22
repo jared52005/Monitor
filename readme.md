@@ -7,6 +7,17 @@ This repository is group of tools for pre-processing, logging and aggreagtion of
  * **Aggregate ISO15765 traffic via IP RAW link layer** Simple postprocessing via LUA dissectors possible.
  * **Aggregate FlexRay traffic**
 
+## Setup
+To replicate screenshots below, follow steps for supported devices: 
+
+| Name                   | Hardware             | Setup                   | Log KLINE PDUs | Log CAN PDUs  | Log CAN frames | Log FlexRay frames |
+| :--------------------- | :------------------- | :---------------------- | :------------- | :-----------  | :------------- | :----------------- |
+| Firmware/ESP32         | ESP32, ESP32-S3, ... | [here](/Setup_ESP32.md) | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
+| Firmware/STM3240G-EVAL | STM3240G-EVAL        | [here](/Setup_STM32.md) | Yes TCP:19000  | Yes TCP:19000 | Yes TCP:19001  | No                 |
+| Software/KlineMonitor  | FT232 + MC33660, ... | TBD                     | Yes TCP:19000  | No            | No             | No                 |
+| Software/PcanApi       | PeakCAN USB, etc.    | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
+| Software/XLapi         | VN7640, etc.         | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | Yes TCP:19002      |
+
 ## How it looks
 Socket CAN read directly from remote target:  
 ![WS Socket CAN](/Resources/Wireshark_SocketCAN_Example.png)
