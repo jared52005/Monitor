@@ -1,4 +1,4 @@
-# Global Coloring Rules
+# Wireshark Coloring Rules
 Monitor devices are using this set of coloring rules:
 
  * **Request** Pink / Black
@@ -13,3 +13,5 @@ Info column formatting
  * **Request** `[22F190] - RDBLI; VIN` = First 3 bytes of request, Service ID (22 = RDBLI) Subfunciton ID (F190 = VIN)
  * **Positive Response** `[62F190] - RDBLI; VIN` = First 3 bytes of request, Service ID (22 = RDBLI) Subfunciton ID (F190 = VIN)
  * **Negative Response** `[7F2233] - RDBLI; Security Requested` = Service ID (22 = RDBLI) Negative Response code (33 = Security)
+ 
+Load thos coloring rules into Wireshark via `View -> Coloring Rules -> Import` and select `monitor` file
