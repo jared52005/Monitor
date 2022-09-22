@@ -49,6 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RawMessage.cs" />
     <Compile Include="RawMessageType.cs" />
+    <Compile Include="Wireshark_Raw.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

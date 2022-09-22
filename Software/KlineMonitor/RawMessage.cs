@@ -12,6 +12,7 @@ namespace KlineMonitor
         public ulong Timestamp { get; set; }
         public byte[] Frame { get; }
 
+        public uint Id { get; set; }
         public RawMessage(int length)
         {
             Frame = new byte[length];

@@ -11,6 +11,7 @@ namespace KlineMonitor
     {
         SerialPort _sp;
         Passive_Kline _pk;
+        Wireshark_Raw _raw;
 
         public void Dispose()
         {
@@ -21,6 +22,7 @@ namespace KlineMonitor
 
         public void Start(string comPort, int baudrate)
         {
+            _raw = new Wireshark_Raw();
             _pk = new Passive_Kline();
             _pk.OnRawFrame += _pk_OnRawFrame;
             //Create VCP
@@ -36,6 +38,7 @@ namespace KlineMonitor
         private void _pk_OnRawFrame(object sender, RawMessage e)
         {
             Console.WriteLine($"{e.MessageType} @ {e.Timestamp}ms [{BitConverter.ToString(e.Frame)}]");
+            _raw.Add(e);
         }
 
         private void _sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
