@@ -7,8 +7,8 @@
     <ProjectGuid>{3635AE78-1D95-4B46-A4D9-AFFFC0DC63CC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WsTrafficMon.Shared</RootNamespace>
-    <AssemblyName>WsTrafficMon.Shared</AssemblyName>
+    <RootNamespace>WTM</RootNamespace>
+    <AssemblyName>WTM.Shared</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>

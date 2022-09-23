@@ -5,7 +5,7 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WsTrafficMon.Shared
+namespace WTM.Shared
 {
     public enum ArgumentTypes
     {

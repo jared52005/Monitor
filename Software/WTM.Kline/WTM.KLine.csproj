@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{5BED8DAB-B15E-4AC7-9A61-6BBD2151AD50}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>KlineMonitor</RootNamespace>
-    <AssemblyName>KlineMonitor</AssemblyName>
+    <RootNamespace>WTM.KLine</RootNamespace>
+    <AssemblyName>WTM.KLine</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

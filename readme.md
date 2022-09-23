@@ -1,5 +1,5 @@
 # Wireshark Traffic Monitor
-This repository is group of tools for pre-processing, logging and aggreagtion of traffic from CAN (and PDUs like ISO15765-2, VW TP2.0) and KLINE (ISO9141, ISO14230) into Wireshark.
+This repository is group of tools for pre-processing, logging and aggreagtion of traffic from CAN (and PDUs like ISO15765-2, VW TP2.0) and KLINE (ISO9141 / ISO14230) into Wireshark.
 
 ## Use Case
  * **Aggregate CAN traffic** using SocketCAN link layer
@@ -9,16 +9,17 @@ This repository is group of tools for pre-processing, logging and aggreagtion of
 
 ## Setup
 To replicate screenshots below, click on the name to get steps for specific tool.  
-**Log KLINE:** Log `ISO9141` and `KW1281` frames on TCP:19000  
-**Log CAN:** Log `ISO15765` and `VWTP2.0` frames on TCP:19000 and `CAN` frames on TCP:19001  
-**Log FlexRay:** Log `FlexRay` frames on TCP:19002  
+**Hardware:** Hardware used for preprocessing of data from CAN or KLINE bus to TCP (Hardware has LAN/WLAN capabilities) or USB (Software is lifting USB traffic to TCP)  
+**Log KLINE:** Wireshark can log `ISO9141 / ISO14230` and `KW1281` frames on TCP:19000  
+**Log CAN:** Wireshark can log `ISO15765` and `VWTP2.0` frames on TCP:19000 and `CAN` frames on TCP:19001  
+**Log FlexRay:** Wireshark can log `FlexRay` frames on TCP:19002  
 
 | Name                                              | Hardware             | Log KLINE | Log CAN  | Log FlexRay |
 | :------------------------------------------------ | :------------------- | :-------- | :------- | :---------- |
 | [Firmware/ESP32](/Firmware/ESP32/readme.md)       | ESP32, ...           |           | Yes      |             |
 | [Firmware/STM3240G](/Firmware/STM3240G/readme.md) | STM3240G             | Yes       | Yes      |             |
 | Software/WTM.J2534                                | J2534 device         |           | Yes      |             |
-| Software/WTM.KLine                                | FT232 + MC33660, ... | Yes       |          |             |
+| [Software/WTM.KLine](/Software/Readme.md)         | FT232 + MC33660, ... | Yes       |          |             |
 | Software/WTM.Pcan                                 | PCAN-USB etc.        |           | Yes      |             |
 | Software/WTM.XL                                   | VN7640, etc.         |           | Yes      | Yes         |
 
