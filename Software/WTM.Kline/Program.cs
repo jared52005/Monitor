@@ -28,10 +28,21 @@ namespace WTM.KLine
                 {
                     Passive_Kline_Manager pkm = new Passive_Kline_Manager();
                     pkm.Start(pargs[ArgumentTypes.ComPort] as string, (int)pargs[ArgumentTypes.Baudrate]);
+                    WaitEsc();
+                    pkm.Dispose();
                     return 0;
                 }
             }
             return -1;
+        }
+
+        static void WaitEsc()
+        {
+            ConsoleKeyInfo key;
+            do
+            {
+                key = Console.ReadKey();
+            } while (key.Key != ConsoleKey.Escape);
         }
     }
 }

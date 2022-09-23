@@ -18,6 +18,7 @@ namespace WTM.KLine
             _sp.Close();
             _sp.Dispose();
             _pk.Dispose();
+            _raw.Dispose();
         }
 
         public void Start(string comPort, int baudrate)

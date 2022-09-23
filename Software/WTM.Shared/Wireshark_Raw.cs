@@ -21,7 +21,7 @@ namespace WTM
         Thread _listenThread;
         Queue<RawMessage> _qRaw;
         bool _cancelThread;
-
+        TcpListener _server;
 
         public TcpClient Client { get; private set; }
 
@@ -51,17 +51,17 @@ namespace WTM
         private void Listen()
         {
             _cancelThread = false;
-            TcpListener server;
+            
             try
             {
-                server = new TcpListener(IPAddress.Any, _port);
+                _server = new TcpListener(IPAddress.Any, _port);
                 // Start listening for client requests.
-                server.Start();
+                _server.Start();
                 Console.WriteLine($"Waiting on connection on {_port}");
 
                 while (!_cancelThread)
                 {
-                    Client = server.AcceptTcpClient();
+                    Client = _server.AcceptTcpClient();
                     Console.WriteLine("Client connected");
                     try
                     {
@@ -193,6 +193,15 @@ namespace WTM
         public void Dispose()
         {
             _cancelThread = true;
+            _server.Stop();
+
+            if(Client != null)
+            {
+                if(Client.Connected)
+                {
+                    Client.Close();
+                }
+            }
         }
     }
 }
