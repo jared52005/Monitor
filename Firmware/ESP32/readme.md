@@ -12,6 +12,11 @@ How to setup Wireshark to work with any ESP32
 #define TX_GPIO_NUM                     (GPIO_NUM_5)
 #define RX_GPIO_NUM                     (GPIO_NUM_4)
 ```
+ * Go into `main/uart.c` and select GPIO where you have connected KLINE transciever
+```
+#define TXD1_PIN                         (GPIO_NUM_38)
+#define RXD1_PIN                         (GPIO_NUM_37)
+```
  * Open esp-idf (Power Shell or CMD) go to Firmware/ESP32
  * Setup device using `idf.py set-target esp32` (or `idf.py set-target esp32s3` etc.)
  * Compile firmware using `idf.py build` 

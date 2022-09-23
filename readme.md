@@ -16,7 +16,7 @@ To replicate screenshots below, click on the name to get steps for specific tool
 
 | Name                                              | Hardware             | Log KLINE | Log CAN  | Log FlexRay |
 | :------------------------------------------------ | :------------------- | :-------- | :------- | :---------- |
-| [Firmware/ESP32](/Firmware/ESP32/readme.md)       | ESP32, ...           |           | Yes      |             |
+| [Firmware/ESP32](/Firmware/ESP32/readme.md)       | ESP32, ...           | Yes       | Yes      |             |
 | [Firmware/STM3240G](/Firmware/STM3240G/readme.md) | STM3240G             | Yes       | Yes      |             |
 | Software/WTM.J2534                                | J2534 device         |           | Yes      |             |
 | [Software/WTM.KLine](/Software/Readme.md)         | FT232 + MC33660, ... | Yes       |          |             |
