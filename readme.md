@@ -3,20 +3,21 @@ This repository is group of tools for pre-processing, logging and aggreagtion of
 
 ## Use Case
  * **Aggregate CAN traffic** using SocketCAN link layer
- * **Aggregate ISO9141 traffic via IP RAW link layer** Simple postprocessing via LUA dissectors possible.
- * **Aggregate ISO15765 traffic via IP RAW link layer** Simple postprocessing via LUA dissectors possible.
+ * **Aggregate ISO9141 traffic via IP RAW link layer** and postprocess it via LUA dissectors
+ * **Aggregate ISO15765 traffic via IP RAW link layer** and postprocess it via LUA dissectors
  * **Aggregate FlexRay traffic**
 
 ## Setup
-To replicate screenshots below, follow steps for supported devices: 
+To replicate screenshots below, click on the name to get steps for specific tool:
 
-| Name                   | Hardware             | Setup                                          | Log KLINE PDUs | Log CAN PDUs  | Log CAN frames | Log FlexRay frames |
-| :--------------------- | :------------------- | :--------------------------------------------- | :------------- | :-----------  | :------------- | :----------------- |
-| Firmware/ESP32         | ESP32, ESP32-S3, ... | [here](/Firmware/ESP32/readme.md)              | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
-| Firmware/STM3240G      | STM3240G             | [here](/Firmware/STM3240G/readme.md)           | Yes TCP:19000  | Yes TCP:19000 | Yes TCP:19001  | No                 |
-| Software/WTM.KLine     | FT232 + MC33660, ... | TBD                     | Yes TCP:19000  | No            | No             | No                 |
-| Software/WTM.Pcan      | PCAN-USB etc.        | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
-| Software/WTM.XL        | VN7640, etc.         | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | Yes TCP:19002      |
+| Name                                              | Hardware             | Log KLINE PDUs | Log CAN PDUs  | Log CAN frames | Log FlexRay frames |
+| :------------------------------------------------ | :------------------- | :------------- | :-----------  | :------------- | :----------------- |
+| [Firmware/ESP32](/Firmware/ESP32/readme.md)       | ESP32, ...           | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
+| [Firmware/STM3240G](/Firmware/STM3240G/readme.md) | STM3240G             | Yes TCP:19000  | Yes TCP:19000 | Yes TCP:19001  | No                 |
+| Software/WTM.J2534                                | J2534 device         | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
+| Software/WTM.KLine                                | FT232 + MC33660, ... | Yes TCP:19000  | No            | No             | No                 |
+| Software/WTM.Pcan                                 | PCAN-USB etc.        | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
+| Software/WTM.XL                                   | VN7640, etc.         | No             | Yes TCP:19000 | Yes TCP:19001  | Yes TCP:19002      |
 
 ## How it looks
 Socket CAN read directly from remote target:  
