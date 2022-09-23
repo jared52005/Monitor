@@ -2,12 +2,12 @@
 How to setup Wireshark to work with any ESP32
 
  * Go into Firmware/ESP32
- * Create `wifi_creds.h` and add there your credentials
+ * Create `main/wifi_creds.h` and add there SSID and Password for you WiFi AP
 ```
 #define EXAMPLE_ESP_WIFI_SSID      "your-ssid"
 #define EXAMPLE_ESP_WIFI_PASS      "your-password"
 ```
- * Go into `CanIf.c` and select GPIO where you have connected CAN transciever
+ * Go into `main/CanIf.c` and select GPIO where you have connected CAN transciever
 ```
 #define TX_GPIO_NUM                     (GPIO_NUM_5)
 #define RX_GPIO_NUM                     (GPIO_NUM_4)
