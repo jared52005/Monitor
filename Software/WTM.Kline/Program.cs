@@ -3,16 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WsTrafficMon.Shared;
 
 namespace WTM.KLine
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
-            Passive_Kline_Manager pkm = new Passive_Kline_Manager();
-            pkm.Start("COM9", 10400);
-            Console.Read();
+            var pargs = Arguments.Parse(args);
+            if (pargs != null)
+            {
+                if (!pargs.ContainsKey(ArgumentTypes.ComPort))
+                {
+                    Console.WriteLine("Missing COM port. Aborting.");
+                    Console.WriteLine("Usage: -c COM1 -b 10400.");
+                }
+                else if (!pargs.ContainsKey(ArgumentTypes.Baudrate))
+                {
+                    Console.WriteLine("Missing Baudrate. Aborting.");
+                    Console.WriteLine("Usage: -c COM1 -b 10400.");
+                }
+                else
+                {
+                    Passive_Kline_Manager pkm = new Passive_Kline_Manager();
+                    pkm.Start(pargs[ArgumentTypes.ComPort] as string, (int)pargs[ArgumentTypes.Baudrate]);
+                    return 0;
+                }
+            }
+            return -1;
         }
     }
 }

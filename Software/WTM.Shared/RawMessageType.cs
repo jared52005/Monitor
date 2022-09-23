@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace WTM
 {
+    /// <summary>
+    /// Type which will select correct Wireshark dissectors
+    /// </summary>
     public enum RawMessageType : byte
     {
         Raw_ISO14230 = 0x91,

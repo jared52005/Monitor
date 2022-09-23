@@ -10,6 +10,9 @@ using System.IO;
 
 namespace WTM
 {
+    /// <summary>
+    /// Send IP RAW data into Wireshark
+    /// </summary>
     public class Wireshark_Raw : IDisposable
     {
         readonly Object _syncObject = new Object();
@@ -31,6 +34,10 @@ namespace WTM
 
         public void Add(RawMessage msg)
         {
+            if (Client == null)
+            {
+                return;
+            }
             if (!Client.Connected)
             {
                 return;
