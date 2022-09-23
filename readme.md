@@ -13,7 +13,7 @@ To replicate screenshots below, follow steps for supported devices:
 | Name                   | Hardware             | Setup                                          | Log KLINE PDUs | Log CAN PDUs  | Log CAN frames | Log FlexRay frames |
 | :--------------------- | :------------------- | :--------------------------------------------- | :------------- | :-----------  | :------------- | :----------------- |
 | Firmware/ESP32         | ESP32, ESP32-S3, ... | [here](/Firmware/ESP32/readme.md)              | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
-| Firmware/STM3240G-EVAL | STM3240G-EVAL        | [here](/Firmware/STM3240G_EVAL/readme.md)      | Yes TCP:19000  | Yes TCP:19000 | Yes TCP:19001  | No                 |
+| Firmware/STM3240G      | STM3240G             | [here](/Firmware/STM3240G/readme.md)           | Yes TCP:19000  | Yes TCP:19000 | Yes TCP:19001  | No                 |
 | Software/WTM.KLine     | FT232 + MC33660, ... | TBD                     | Yes TCP:19000  | No            | No             | No                 |
 | Software/WTM.Pcan      | PCAN-USB etc.        | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
 | Software/WTM.XL        | VN7640, etc.         | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | Yes TCP:19002      |
