@@ -9,6 +9,6 @@
 #include <stdint.h>
 
 /**
-* @brief  Task for reading CAN messages from TWAI interface and writing them into TCP stream
+* @brief  Task for reading bytes from UART interface and writing them into TCP stream
 */
-void Task_CanReconstruct(void* pvParameters);
+void Task_KlineReconstruct(void* pvParameters);

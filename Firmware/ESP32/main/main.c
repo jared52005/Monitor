@@ -19,7 +19,7 @@
 #include "driver/gpio.h"
 
 #include "Task_CanReconstruct.h"
-#include "uart.h"
+#include "Task_KlineReconstruct.h"
 #include "wifi.h"
 
 #define LED_GPIO 27
@@ -34,7 +34,8 @@ void app_main(void)
 
     Wifi_Init();
 
-    xTaskCreatePinnedToCore(Task_CanReconstruct, "Reconstruct", 4096, NULL, 8, NULL, tskNO_AFFINITY);
+    xTaskCreatePinnedToCore(Task_CanReconstruct, "ReconstructCAN", 4096, NULL, 8, NULL, tskNO_AFFINITY);
+    xTaskCreatePinnedToCore(Task_KlineReconstruct, "ReconstructKLINE", 4096, NULL, 8, NULL, tskNO_AFFINITY);
     for(;;)
     {
         //Blink with LED

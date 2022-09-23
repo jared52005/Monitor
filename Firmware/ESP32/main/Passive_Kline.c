@@ -70,13 +70,7 @@ uint32_t kline_last_activity;
 
 void Passive_Kline_PrintBuffer(int start, int length)
 {
-    int i;
-    for(i = start; i < length; i++)
-    {
-        printf("%x ", kline_buffer[i]);
-        kline_buffer[i] = 0x00;
-    }
-    printf("\n");
+    ESP_LOG_BUFFER_HEXDUMP(TAG, kline_buffer + start, length, ESP_LOG_INFO);
 }
 
 void Passive_Kline_UpdateState()

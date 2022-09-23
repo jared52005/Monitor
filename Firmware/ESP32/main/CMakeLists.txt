@@ -8,6 +8,7 @@ idf_component_register(
         "rtos_utils.c"
         "System_stats.c"
         "Task_CanReconstruct.c"
+        "Task_KlineReconstruct.c"
         "Task_Tcp_SocketCAN.c"
         "Task_Tcp_Wireshark_Raw.c"
         "uart.c" 
