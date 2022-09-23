@@ -14,9 +14,9 @@ To replicate screenshots below, follow steps for supported devices:
 | :--------------------- | :------------------- | :--------------------------------------------- | :------------- | :-----------  | :------------- | :----------------- |
 | Firmware/ESP32         | ESP32, ESP32-S3, ... | [here](/Firmware/ESP32/readme.md)              | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
 | Firmware/STM3240G-EVAL | STM3240G-EVAL        | [here](/Firmware/STM3240G_EVAL/readme.md)      | Yes TCP:19000  | Yes TCP:19000 | Yes TCP:19001  | No                 |
-| Software/KlineMonitor  | FT232 + MC33660, ... | TBD                     | Yes TCP:19000  | No            | No             | No                 |
-| Software/PcanApi       | PCAN-USB etc.        | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
-| Software/XLapi         | VN7640, etc.         | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | Yes TCP:19002      |
+| Software/WTM.KLine     | FT232 + MC33660, ... | TBD                     | Yes TCP:19000  | No            | No             | No                 |
+| Software/WTM.Pcan      | PCAN-USB etc.        | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | No                 |
+| Software/WTM.XL        | VN7640, etc.         | TBD                     | No             | Yes TCP:19000 | Yes TCP:19001  | Yes TCP:19002      |
 
 ## How it looks
 Socket CAN read directly from remote target:  
