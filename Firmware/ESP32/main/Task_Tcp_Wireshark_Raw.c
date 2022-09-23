@@ -246,7 +246,7 @@ CLEAN_UP:
 
 void Task_Tcp_Wireshark_Raw_Init(void)
 {
-  xTaskCreate(tcpwsraw_thread, "tcpwsraw_thread", 4096, (void*)AF_INET, 5, NULL);
+  xTaskCreate(tcpwsraw_thread, "tcpwsraw_thread", 4096, (void*)AF_INET, tskIDLE_PRIORITY + 5, NULL);
 }
 
 void Task_Tcp_Wireshark_Raw_AddNewRawMessage(uint8_t* frame, uint32_t length, uint32_t id, uint32_t timestamp, RawMessageType msgType)

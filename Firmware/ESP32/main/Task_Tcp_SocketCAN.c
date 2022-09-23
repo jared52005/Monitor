@@ -230,7 +230,7 @@ CLEAN_UP:
 
 void Task_Tcp_SocketCAN_Init(void)
 {
-  xTaskCreate(tcpwscan_thread, "tcp_server_can", 4096, (void*)AF_INET, 5, NULL);
+  xTaskCreate(tcpwscan_thread, "tcp_server_can", 4096, (void*)AF_INET, tskIDLE_PRIORITY + 5, NULL);
 }
 
 void Task_Tcp_SocketCAN_AddNewCanMessage(CanMessage cmsg)
