@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO.Ports;
 
-namespace KlineMonitor
+namespace WTM.KLine
 {
     internal class Passive_Kline_Manager : IDisposable
     {

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KlineMonitor
+namespace WTM
 {
-    internal class RawMessage
+    public class RawMessage
     {
         public RawMessageType MessageType { get; set; }
         public ulong Timestamp { get; set; }

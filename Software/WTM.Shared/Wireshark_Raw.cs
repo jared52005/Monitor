@@ -1,5 +1,4 @@
-﻿using KlineMonitor;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -9,9 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace KlineMonitor
+namespace WTM
 {
-    internal class Wireshark_Raw : IDisposable
+    public class Wireshark_Raw : IDisposable
     {
         readonly Object _syncObject = new Object();
 

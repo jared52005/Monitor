@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KlineMonitor
+namespace WTM
 {
-    enum RawMessageType : byte
+    public enum RawMessageType : byte
     {
         Raw_ISO14230 = 0x91,
         Raw_KW1281 = 0x92,

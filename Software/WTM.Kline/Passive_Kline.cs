@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KlineMonitor
+namespace WTM.KLine
 {
     /// <summary>
     /// Parsing of KLINE bytes into Key Bytes, ISO14230 or KW1281

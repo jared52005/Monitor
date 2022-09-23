@@ -47,12 +47,15 @@
     <Compile Include="Passive_Kline_Manager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RawMessage.cs" />
-    <Compile Include="RawMessageType.cs" />
-    <Compile Include="Wireshark_Raw.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WTM.Shared\WTM.Shared.csproj">
+      <Project>{3635ae78-1d95-4b46-a4d9-afffc0dc63cc}</Project>
+      <Name>WTM.Shared</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
