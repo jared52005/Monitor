@@ -85,6 +85,10 @@ Where:
     08-00-00-00 = DLC
     01-02-03-04-05-06-07-08 = CAN Data
 ```
+
+### FlexRay Packet
+See https://www.tcpdump.org/linktypes/LINKTYPE_FLEXRAY.html
+
 ### Datagram Packet
 If we are using Link Layer for RAW packets, then we will send IPV4 header (20 bytes) followed by our datagram (N bytes). Then into packet header we will write 20+N bytes to be expected.
 ```
