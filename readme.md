@@ -27,6 +27,9 @@ To replicate screenshots below, click on the name to get steps for specific tool
 Socket CAN read directly from remote target:  
 ![WS Socket CAN](/Resources/Wireshark_SocketCAN_Example.png)
 
+FlexRay data logged directly from VN7640:  
+![WS FlexRay](/Resources/Wireshark_FlexRay_Example.png)
+
 Parsed KW1281 / KWP2000 (ISO14230) traffic on ME7 ECU  
 ![WS Socket CAN](/Resources/Wireshark_KWP2000_Example.png)
 
