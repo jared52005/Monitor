@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WTM.XL
 {
-    internal class XL_CanFlexRay
+    internal class XL_FlexRayIf
     {
     }
 }
