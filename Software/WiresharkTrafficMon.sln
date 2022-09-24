@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WTM.KLine", "WTM.Kline\WTM.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WTM.Shared", "WTM.Shared\WTM.Shared.csproj", "{3635AE78-1D95-4B46-A4D9-AFFFC0DC63CC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WTM.XL", "WTM.XL\WTM.XL.csproj", "{48A18956-D0BE-4862-B0BE-2F1910145355}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{3635AE78-1D95-4B46-A4D9-AFFFC0DC63CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3635AE78-1D95-4B46-A4D9-AFFFC0DC63CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3635AE78-1D95-4B46-A4D9-AFFFC0DC63CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48A18956-D0BE-4862-B0BE-2F1910145355}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48A18956-D0BE-4862-B0BE-2F1910145355}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48A18956-D0BE-4862-B0BE-2F1910145355}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48A18956-D0BE-4862-B0BE-2F1910145355}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
