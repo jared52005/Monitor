@@ -56,7 +56,7 @@ Where:
     00-00-00-00 = Thiszone: 0
     00-00-00-00 = Sigfigs: 0
     FF-FF-00-00 = Snaplen: 65535
-    65-00-00-00 = Link layer ID: 101 for IP RAW packets or 227 for SocketCAN packets
+    65-00-00-00 = Link layer ID: 101 for IP RAW packets, 210 for FlexRay and 227 for SocketCAN packets
 ```
 Except Link Layer ID, everything is a constant. It is important to point out that you **CAN NOT** mix SocketCAN data and IP RAW data after you specify link layer in first packet.
 
