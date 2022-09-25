@@ -92,7 +92,7 @@ namespace WTM.Protocols
             else
             {
                 receivedSN = (cmsg.Data[0] & 0xF);
-                Console.WriteLine("Expected S/N = 0x{0:X}. Provided 0x{1:X}\n", iso15765_frame_expectedSN, receivedSN);
+                Console.WriteLine("Expected S/N = 0x{0:X}. Provided 0x{1:X}", iso15765_frame_expectedSN, receivedSN);
                 iso15765_frame_expectedSN = receivedSN + 1;
             }
 

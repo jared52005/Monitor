@@ -115,7 +115,7 @@ namespace WTM.Protocols
                         }
                         kline_bus_state = KlineBusState.KBS_Idle;
                         _kline_buffer_end = 0;
-                        Console.WriteLine("\nKLINE Reset back to default @ {0} ms", GetTime_ms());
+                        Console.WriteLine("KLINE Reset back to default @ {0} ms", GetTime_ms());
                     }
                 }
                 Thread.Sleep(50);
@@ -222,7 +222,7 @@ namespace WTM.Protocols
                         }
                         else
                         {
-                            //printf("ISO14230: Invalid CS %x vs %x\n", frame_Cs, kline_buffer[i]);
+                            Console.WriteLine("ISO14230: Invalid CS {0:x} vs {1:x}", frame_Cs, _kline_buffer[i]);
                             return KlineIso14230_FrameParseResult.Iso14230_InvalidCs;
                         }
                     default:
@@ -441,7 +441,7 @@ namespace WTM.Protocols
             //Dequeue crap
             if (start != 0)
             {
-                Console.Write("\nISO14230 crap bytes: ");
+                Console.Write("ISO14230 crap bytes: ");
                 Passive_Kline_PrintBuffer(0, start);
             }
 
@@ -457,7 +457,7 @@ namespace WTM.Protocols
             }
             msg.MessageType = RawMessageType.Raw_ISO14230;
             msg.Timestamp = GetTime_ms();
-            //Console.WriteLine("\nISO14230 data: " + BitConverter.ToString(msg.Frame, 0, msg.Frame.Length));
+            //Console.WriteLine("ISO14230 data: " + BitConverter.ToString(msg.Frame, 0, msg.Frame.Length));
             OnRawFrame?.Invoke(this, msg);
             _kline_buffer_end = 0;
         }
@@ -489,12 +489,11 @@ namespace WTM.Protocols
                 if (length % 2 == 0)
                 {
                     msg.Frame[framePos] = _kline_buffer[i];
-                    //printf("%x ", kline_buffer[i]);
                     //Check for End Communication command
                     if ((framePos == 2) && (msg.Frame[framePos] == 0x06))
                     {
                         //If correct, reset kline bus status
-                        Console.WriteLine("KLINE bus reset from KW1281 command\n");
+                        Console.WriteLine("KLINE bus reset from KW1281 command");
                         kline_bus_state = KlineBusState.KBS_Idle;
                     }
                     framePos++;
@@ -504,7 +503,6 @@ namespace WTM.Protocols
             }
             msg.MessageType = RawMessageType.Raw_KW1281;
             msg.Timestamp = GetTime_ms();
-            //Console.WriteLine("\nKW1281 data: " + BitConverter.ToString(msg.Frame, 0, framePos));
             OnRawFrame?.Invoke(this, msg);
             _kline_buffer_end = 0;
         }

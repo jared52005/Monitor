@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using WTM.Protocols;
 using WTM.Wireshark;
 
-namespace WTM.J2534
+namespace WTM.XL
 {
     internal class Passive_Can_Manager : IDisposable
     {
-        J2534_CanIf _can;
+        XL_CanIf _can;
         Passive_ISO15765 _pisotp;
         Passive_VWTP20 _pvwtp20;
         Wireshark_SocketCan _ws_can;
@@ -24,7 +24,7 @@ namespace WTM.J2534
             _ws_raw.Dispose();
         }
 
-        public void Start(string dllName)
+        public void Start()
         {
             _ws_can = new Wireshark_SocketCan();
             _ws_raw = new Wireshark_Raw();
@@ -33,10 +33,10 @@ namespace WTM.J2534
             _pvwtp20 = new Passive_VWTP20();
             _pvwtp20.OnRawFrame += _canPdu_OnRawFrame;
             //Create Create CAN input
-            _can = new J2534_CanIf(dllName);
+            _can = new XL_CanIf();
             //Route CAN messages on passive protocols
             _can.OnReceiveCanFrame += _can_OnReceiveCanFrame;
-            Console.WriteLine($"Ready @ {dllName}");
+            Console.WriteLine($"Ready");
         }
 
 
