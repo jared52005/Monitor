@@ -8,7 +8,6 @@ I have good experience with FT232RL connected together with MC33660 or L9613
 
 **Software** 
  * Open `WiresharkTrafficMon.sln` and compile the solution. 
- * If you are getting errors in WTM.PCAN or WTM.XL projects regarding missing binaries, unload those projects from the solution
  * Go into `Software\WTM.Kline\bin\Debug`
  * Run the monitor using `WTM.KLine.exe -c COMn -b 10400` where COMn is COM port where you have connected USB UART conveter and 10400 is baudrate used
  * Exit the application by pressing `Esc` key
