@@ -1,38 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.IO;
 
-namespace WTM
+namespace WTM.Wireshark
 {
     /// <summary>
-    /// Send IP RAW data into Wireshark
+    /// Send FlexRay data into Wireshark
     /// </summary>
-    public class Wireshark_Raw : IDisposable
+    public class Wireshark_FR : IDisposable
     {
         readonly Object _syncObject = new Object();
 
-        const int _port = 19000;
+        const int _port = 19002;
         Thread _listenThread;
-        Queue<RawMessage> _qRaw;
+        Queue<FlexRayMessage> _qRaw;
         bool _cancelThread;
         TcpListener _server;
 
         public TcpClient Client { get; private set; }
 
-        public Wireshark_Raw()
+        public Wireshark_FR()
         {
-            _qRaw = new Queue<RawMessage>();
+            _qRaw = new Queue<FlexRayMessage>();
             _listenThread = new Thread(Listen);
             _listenThread.Start();
         }
 
-        public void Add(RawMessage msg)
+        public bool IsConnected
+        {
+            get 
+            {
+                if (Client == null)
+                {
+                    return false;
+                }
+                return Client.Connected;
+            }
+        }
+
+        public void Add(FlexRayMessage msg)
         {
             if (Client == null)
             {
@@ -51,7 +62,7 @@ namespace WTM
         private void Listen()
         {
             _cancelThread = false;
-            
+
             try
             {
                 _server = new TcpListener(IPAddress.Any, _port);
@@ -67,7 +78,7 @@ namespace WTM
                     {
                         Send();
                     }
-                    catch(IOException)
+                    catch (IOException)
                     {
                         Console.WriteLine("Client disonnected");
                     }
@@ -95,21 +106,21 @@ namespace WTM
             byte[] fileHeader =
             {
                 0xD4, 0xC3, 0xB2, 0xA1, 0x02, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0xFF, 0xFF, 0x00, 0x00, 0x65, 0x00, 0x00, 0x00
+                0xFF, 0xFF, 0x00, 0x00, 0xD2, 0x00, 0x00, 0x00
             };
             stream.Write(fileHeader, 0, fileHeader.Length);
 
-            while(!_cancelThread)
+            while (!_cancelThread)
             {
                 //Check if we are still connected
-                if(!Client.Connected)
+                if (!Client.Connected)
                 {
                     return;
                 }
                 //If we have more than one element in queue, process it, or wait 20ms
                 if (_qRaw.Count > 0)
                 {
-                    RawMessage rmsg;
+                    FlexRayMessage rmsg;
                     lock (_syncObject)
                     {
                         rmsg = _qRaw.Dequeue();
@@ -127,7 +138,7 @@ namespace WTM
             }
         }
 
-        private byte[] PreapreHeader(RawMessage rmsg)
+        private byte[] PreapreHeader(FlexRayMessage fmsg)
         {
             /* 00-00-00-00 00-00-00-00-10-00-00-00-10-00-00-00
              * Where:
@@ -139,47 +150,55 @@ namespace WTM
 
             byte[] header = new byte[16];
 
-            uint timestamp_seconds = (uint)(rmsg.Timestamp / 1000); //Only second part (I know there should be Unix time, but I am too lazy to get RTC or NTP working)
-            uint timestamp_microseconds = (uint)(rmsg.Timestamp % 1000); //Only remainder from seconds
+            uint timestamp_seconds = (uint)(fmsg.Timestamp / 1000); //Only second part (I know there should be Unix time, but I am too lazy to get RTC or NTP working)
+            uint timestamp_microseconds = (uint)(fmsg.Timestamp % 1000); //Only remainder from seconds
             timestamp_microseconds = timestamp_microseconds * 1000; //Convert milisecond to microseconds
 
             WriteLE(header, timestamp_seconds, 0);
             WriteLE(header, timestamp_microseconds, 4);
-            WriteLE(header, (uint)(rmsg.Frame.Length + 20), 8);
-            WriteLE(header, (uint)(rmsg.Frame.Length + 20), 12);
+            uint packetLength = 7; //FlexRay header size
+            if(fmsg.Data != null)
+            {
+                packetLength = (uint)(fmsg.Data.Length + 7);
+            }
+            WriteLE(header, packetLength, 8);
+            WriteLE(header, packetLength, 12);
 
             return header;
         }
 
-        private byte[] PreparePayload(RawMessage rmsg)
+        private byte[] PreparePayload(FlexRayMessage fmsg)
         {
-            ushort sequence = 0;
+            int length = 7;
+            if (fmsg.Data != null)
+            {
+                length += fmsg.Data.Length;
+            }
+            byte[] wsFrFrame = new byte[length];
 
-            int totalLength = rmsg.Frame.Length + 20;
-            byte[] payload = new byte[totalLength];
-            payload[0] = 0x45; //Version 4, 5 words (5*4=20 bytes)
-            payload[1] = 0x00; //Differential services
-            payload[2] = (byte)(totalLength >> 8); //Total size
-            payload[3] = (byte)(totalLength);
-            payload[4] = (byte)(sequence >> 8); //Identification, should be unique number
-            payload[5] = (byte)(sequence);
-            payload[6] = 0x40; //Don't fragment
-            payload[7] = 0x00;
-            payload[8] = 0x80; //TTL
-            payload[9] = (byte)(rmsg.MessageType); //Undefined protocol. Used together with datagrams
-            payload[10] = 0x00; //Header checksum (disabled)
-            payload[11] = 0x00;
-            payload[12] = 192; //Source
-            payload[13] = 168;
-            payload[14] = 0;
-            payload[15] = 1;
-            payload[16] = (byte)(rmsg.Id >> 24); //Destination
-            payload[17] = (byte)(rmsg.Id >> 16);
-            payload[18] = (byte)(rmsg.Id >> 8);
-            payload[19] = (byte)(rmsg.Id);
-            //Data
-            Buffer.BlockCopy(rmsg.Frame, 0, payload, 20, rmsg.Frame.Length);
-            return payload;
+            //Measurement header
+            wsFrFrame[0] = 1; //FlexRay Frame
+            //Error flags
+            //TBD [1]
+            //FlexRay header has 5 bytes, composed as
+            //Flags-FID-DLC-HCRC-CYC
+            //    5- 11-  7-  11-  6 = 40 bits = 5 bytes
+
+            //Null Frame is active in 0. Invert the bit
+            fmsg.Flags = fmsg.Flags ^ FlexRayFlags.FLAG_NullFrameIndicator;
+
+            wsFrFrame[2] = (byte)((int)fmsg.Flags << 3 | ((fmsg.FrameId >> 8) & 3));
+            wsFrFrame[3] = (byte)(fmsg.FrameId & 0xFF);
+            wsFrFrame[4] = (byte)(fmsg.PayloadLength << 1 | ((fmsg.HeaderCrc >> 10) & 1));
+            wsFrFrame[5] = (byte)((fmsg.HeaderCrc >> 2) & 0xFF);
+            wsFrFrame[6] = (byte)(fmsg.HeaderCrc << 6 | (fmsg.CycleCount & 0x3F));
+
+            //Copy data
+            if (fmsg.Data != null)
+            {
+                Buffer.BlockCopy(fmsg.Data, 0, wsFrFrame, 7, fmsg.Data.Length);
+            }
+            return wsFrFrame;
         }
 
         private void WriteLE(byte[] array, uint data, int offset)
@@ -195,9 +214,9 @@ namespace WTM
             _cancelThread = true;
             _server.Stop();
 
-            if(Client != null)
+            if (Client != null)
             {
-                if(Client.Connected)
+                if (Client.Connected)
                 {
                     Client.Close();
                 }

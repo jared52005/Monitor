@@ -33,7 +33,6 @@ namespace WTM.XL
         AutoResetEvent _mutexWaitOnInit;
 
         public event EventHandler<CanMessage> OnReceiveCanFrame;
-        public event EventHandler<byte[]> OnReceivePduFrame;
 
         public XLDefine.XL_Status Status { get; set; }
 

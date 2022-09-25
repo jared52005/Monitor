@@ -6,12 +6,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WTM.KLine
+namespace WTM.Protocols
 {
     /// <summary>
     /// Parsing of KLINE bytes into Key Bytes, ISO14230 or KW1281
     /// </summary>
-    internal class Passive_Kline : IDisposable
+    public class Passive_Kline : IDisposable
     {
 
         const int KLINE_BUFFER_SIZE = 0x200;
