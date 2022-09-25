@@ -21,12 +21,12 @@ namespace WTM
         /// <summary>
         /// CAN ID of message
         /// </summary>
-        public int ID { get; }
+        public int Id { get; }
 
         /// <summary>
         /// DLC of message
         /// </summary>
-        public int DLC { get { return Data.Length; } }
+        public int Dlc { get { return Data.Length; } }
 
         /// <summary>
         /// Creating CAN message, data field and CAN ID
@@ -35,7 +35,7 @@ namespace WTM
         /// <param name="id">CAN ID of message</param>
         public CanMessage(byte[] data, int id)
         {
-            ID = id;
+            Id = id;
 
             //Check if data is maximally 8 bytes long. If not make them
             if (data.Length > 8)
@@ -56,7 +56,7 @@ namespace WTM
         /// <returns>String like i.e.: 7F1 [0D 3F 0D 2A 0D 4C]</returns>
         public override string ToString()
         {
-            string msg = string.Format("{0:X3} [{1}]", ID, BitConverter.ToString(Data).Replace('-', ' '));
+            string msg = string.Format("{0:X3} [{1}]", Id, BitConverter.ToString(Data).Replace('-', ' '));
             return msg;
         }
     }

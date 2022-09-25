@@ -45,10 +45,12 @@
     <Compile Include="CanMessage.cs" />
     <Compile Include="FlexRayMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protocols\Passive_ISO15765.cs" />
     <Compile Include="Protocols\Passive_Kline.cs" />
     <Compile Include="RawMessage.cs" />
     <Compile Include="RawMessageType.cs" />
-    <Compile Include="Wireshark\Wireshark_FR.cs" />
+    <Compile Include="Wireshark\Wireshark_FlexRay.cs" />
+    <Compile Include="Wireshark\Wireshark_SocketCan.cs" />
     <Compile Include="Wireshark\Wireshark_Raw.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
