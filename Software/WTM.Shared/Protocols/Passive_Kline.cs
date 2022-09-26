@@ -441,7 +441,7 @@ namespace WTM.Protocols
             //Dequeue crap
             if (start != 0)
             {
-                Console.Write("ISO14230 crap bytes: ");
+                Console.Write("\nISO14230 crap bytes: ");
                 Passive_Kline_PrintBuffer(0, start);
             }
 

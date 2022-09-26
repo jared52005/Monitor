@@ -34,8 +34,8 @@ namespace WTM.Protocols
         {
             if (iso15765_frame_position != 0)
             {
-                Console.WriteLine("We are trying to process another datagram, even that we still have datagram with length 0x%x bytes in buffer", iso15765_frame_position);
-                Console.WriteLine("Datagram is still missing 0x%x bytes to be complete", iso15765_frame_expectedLength);
+                Console.WriteLine("We are trying to process another datagram, even that we still have datagram with length 0x{0:x} bytes in buffer", iso15765_frame_position);
+                Console.WriteLine("Datagram is still missing 0x{0:x} bytes to be complete", iso15765_frame_expectedLength);
                 iso15765_frame_position = 0;
             }
         }
