@@ -27,7 +27,7 @@ namespace WTM.KLine
                 else
                 {
                     Passive_Kline_Manager pkm = new Passive_Kline_Manager();
-                    pkm.Start(pargs[ArgumentTypes.ComPort] as string, (int)pargs[ArgumentTypes.Baudrate]);
+                    pkm.Start(pargs[ArgumentTypes.ComPort] as string, (int)pargs[ArgumentTypes.Baudrate], true);
                     WaitEsc();
                     pkm.Dispose();
                     return 0;
