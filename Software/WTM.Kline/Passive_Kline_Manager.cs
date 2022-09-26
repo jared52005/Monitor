@@ -11,6 +11,7 @@ namespace WTM.KLine
 {
     internal class Passive_Kline_Manager : IDisposable
     {
+        bool _verbose;
         SerialPort _sp;
         Passive_Kline _pk;
         Wireshark_Raw _raw;
@@ -23,8 +24,9 @@ namespace WTM.KLine
             _raw.Dispose();
         }
 
-        public void Start(string comPort, int baudrate)
+        public void Start(string comPort, int baudrate, bool verbose = false)
         {
+            _verbose = verbose;
             _raw = new Wireshark_Raw();
             _pk = new Passive_Kline();
             _pk.OnRawFrame += _pk_OnRawFrame;
@@ -40,6 +42,10 @@ namespace WTM.KLine
 
         private void _pk_OnRawFrame(object sender, RawMessage e)
         {
+            if (_verbose)
+            {
+                Console.WriteLine();
+            }
             Console.WriteLine($"{e.MessageType} @ {e.Timestamp}ms [{BitConverter.ToString(e.Frame)}]");
             _raw.Add(e);
         }
@@ -49,7 +55,10 @@ namespace WTM.KLine
             while (_sp.BytesToRead != 0)
             {
                 byte c = (byte)_sp.ReadByte();
-                //Console.Write(" {0:X2}", c);
+                if (_verbose)
+                {
+                    Console.Write(" {0:X2}", c);
+                }
                 _pk.Passive_Kline_Parse(c);
             }
         }
