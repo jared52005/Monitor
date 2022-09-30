@@ -12,4 +12,7 @@ I have good experience with FT232RL connected together with MC33660 or L9613
  * Run the monitor using `WTM.KLine.exe -c COMn -b 10400` where COMn is COM port where you have connected USB UART conveter and 10400 is baudrate used
  * Exit the application by pressing `Esc` key
  
+## WTM.XL
+**Hardware:** VN7610, VN7640 or similar device with support of FlexRay (optional, if you want to log only CAN bus). Does not need to have a License for Vector products installed in the device.  
 
+XL API is described [here](https://cdn.vector.com/cms/content/products/XL_Driver_Library/Docs/XL_Driver_Library_Manual_EN.pdf)
