@@ -482,7 +482,7 @@ namespace WTM.Protocols
             //Dequeue data
             framePos = 0;
             length = 0;
-            RawMessage msg = new RawMessage((end - start) / 2);
+            RawMessage msg = new RawMessage((end - start + 1) / 2);
             for (i = start; i != end; i++)
             {
                 //Write only even positions. Odd positions are complements
