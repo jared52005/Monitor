@@ -54,6 +54,7 @@ function iso14230_dissector.dissector(tvbuf,pktinfo,root)
     end
 
     -- Parse header and LEN byte
+	local length
     local fmt = tvbuf:range(0,1):uint()
     local addressing = bit32.rshift(bit32.band(fmt, 0xC0), 6)
     tree:add(iso_fmt_address, tvbuf:range(0,1))
@@ -73,7 +74,6 @@ function iso14230_dissector.dissector(tvbuf,pktinfo,root)
     end
 
     -- Parse length byte (if included)
-    local length
     if(fmt_len == 0) then
         tree:add(iso_length, tvbuf:range(parserPosition,1))
         length = tvbuf:range(parserPosition,1):uint()
