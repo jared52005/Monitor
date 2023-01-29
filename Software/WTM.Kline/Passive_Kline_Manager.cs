@@ -48,6 +48,7 @@ namespace WTM.KLine
             }
             Console.WriteLine($"{e.MessageType} @ {e.Timestamp}ms [{BitConverter.ToString(e.Frame)}]");
             _raw.Add(e);
+            ParseStartDiagnosticSession(e);
         }
 
         private void _sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -61,6 +62,72 @@ namespace WTM.KLine
                 }
                 _pk.Passive_Kline_Parse(c);
             }
+        }
+
+        private void ParseStartDiagnosticSession(RawMessage e)
+        {
+            if(e.Frame.Length == 0)
+            {
+                return;
+            }
+            int length;
+            int datagramPosition = 1;
+            int fmt = e.Frame[0];
+
+            //Keybytes
+            if(fmt == 0x55)
+            {
+                return;
+            }
+
+            //Parse physical addressing (if included)
+            int addressing = (fmt & 0xC0) >> 6;
+            if (addressing == 0x02)
+            {
+                datagramPosition += 2;
+            }
+
+            //Parse length in byte
+            int fmt_len = fmt & 0x3F;
+            if (fmt_len != 0)
+            {
+                length = fmt_len;
+            }
+            else
+            {
+                length = e.Frame[datagramPosition];
+                datagramPosition++;
+            }
+
+            if(datagramPosition >= e.Frame.Length)
+            {
+                return;
+            }
+
+            //Console.WriteLine($"Datagram: {BitConverter.ToString(e.Frame, datagramPosition, length)}");
+            if (e.Frame[datagramPosition] == 0x50 && length == 3)
+            {
+                uint baudrate = CalculateBaudRateFromByte(e.Frame[datagramPosition + 2]);
+                if (_sp.BaudRate != baudrate)
+                {
+                    Console.WriteLine($"Found new baudrate: {baudrate}");
+                    _sp.BaudRate = (int)baudrate;
+                }
+            }
+        }
+
+        private uint CalculateBaudRateFromByte(byte baudRateByte)
+        {
+            byte xUpper = (byte)(baudRateByte >> 0x5);
+            xUpper &= 0x7;
+
+            byte yLower = (byte)(baudRateByte & 0x1F);
+
+            byte xPow = (byte)(0x1 << xUpper);
+
+            var baudRate = (uint)((xPow * (yLower + 32) * 6400) / 32);
+
+            return baudRate;
         }
     }
 }
