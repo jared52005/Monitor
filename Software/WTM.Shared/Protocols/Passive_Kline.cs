@@ -75,6 +75,10 @@ namespace WTM.Protocols
         Thread _updateThread;
 
         public event EventHandler<RawMessage> OnRawFrame;
+        /// <summary>
+        /// Event is raised when KLINE is switching back to default settings
+        /// </summary>
+        public event EventHandler OnDefault;
 
         public Passive_Kline()
         {
@@ -116,6 +120,7 @@ namespace WTM.Protocols
                         kline_bus_state = KlineBusState.KBS_Idle;
                         _kline_buffer_end = 0;
                         Console.WriteLine("KLINE Reset back to default @ {0} ms", GetTime_ms());
+                        OnDefault?.Invoke(this, null);
                     }
                 }
                 Thread.Sleep(50);

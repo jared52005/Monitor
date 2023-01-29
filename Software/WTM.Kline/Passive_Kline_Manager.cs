@@ -16,6 +16,8 @@ namespace WTM.KLine
         Passive_Kline _pk;
         Wireshark_Raw _raw;
 
+        int _defaultBaudrate;
+
         public void Dispose()
         {
             _sp.Close();
@@ -26,10 +28,12 @@ namespace WTM.KLine
 
         public void Start(string comPort, int baudrate, bool verbose = false)
         {
+            _defaultBaudrate = baudrate;
             _verbose = verbose;
             _raw = new Wireshark_Raw();
             _pk = new Passive_Kline();
             _pk.OnRawFrame += _pk_OnRawFrame;
+            _pk.OnDefault += OnDefault;
             //Create VCP
             _sp = new SerialPort(comPort, baudrate);
             _sp.Open();
@@ -38,6 +42,15 @@ namespace WTM.KLine
             Console.WriteLine($"Ready @ {comPort}:{baudrate}");
             //Route passive KLINE to Wireshark
             //[Optional] Change baudrate when device finds requests to do so.
+        }
+
+        private void OnDefault(object sender, EventArgs e)
+        {
+            if(_sp.BaudRate != _defaultBaudrate)
+            {
+                Console.WriteLine($"Setting baudrate back to {_defaultBaudrate}");
+                _sp.BaudRate = _defaultBaudrate;
+            }
         }
 
         private void _pk_OnRawFrame(object sender, RawMessage e)
