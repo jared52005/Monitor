@@ -11,7 +11,7 @@ using SAE.J2534;
 
 namespace WTM.J2534
 {
-    internal class J2534_CanIf
+    internal class J2534_CanIf : ICanIf
     {
         bool m_endThread;
         Thread _rxThread;

@@ -44,6 +44,8 @@
     <Compile Include="Arguments.cs" />
     <Compile Include="CanMessage.cs" />
     <Compile Include="FlexRayMessage.cs" />
+    <Compile Include="ICanIf.cs" />
+    <Compile Include="A_Passive_Can_Manager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protocols\Passive_ISO15765.cs" />
     <Compile Include="Protocols\Passive_Kline.cs" />

@@ -8,7 +8,7 @@ using vxlapi_NET;
 
 namespace WTM.XL
 {
-    internal class XL_CanIf
+    internal class XL_CanIf : ICanIf
     {
         // Driver access through XLDriver (wrapper)
         private XLDriver _canDriver = new XLDriver();
