@@ -9,19 +9,18 @@ namespace WTM.Protocols
     public class Passive_ISO15765
     {
         // -- Private variables
-        static uint[] valid_CanIds = new uint[]{ 0x700, 0x7E0, 0x7E8, 0x7E1, 0x7E9 };
-        static uint valid_CanIds_Count = 5;
-        static byte[] iso15765_frame = new byte[4096];
-        static int iso15765_frame_position = 0;
-        static int iso15765_frame_expectedLength = 0;
-        static int iso15765_frame_expectedSN;
+        uint[] valid_CanIds = new uint[]{ 0x700, 0x7E0, 0x7E8, 0x7E1, 0x7E9 };
+        byte[] iso15765_frame = new byte[4096];
+        int iso15765_frame_position = 0;
+        int iso15765_frame_expectedLength = 0;
+        int iso15765_frame_expectedSN;
 
         public event EventHandler<RawMessage> OnRawFrame;
 
         bool Passive_Iso15765_Contains(uint id)
         {
             int i;
-            for (i = 0; i < valid_CanIds_Count; i++)
+            for (i = 0; i < valid_CanIds.Length; i++)
             {
                 if (valid_CanIds[i] == id)
                 {
