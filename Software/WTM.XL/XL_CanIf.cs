@@ -36,7 +36,7 @@ namespace WTM.XL
 
         public XLDefine.XL_Status Status { get; set; }
 
-        public XL_CanIf()
+        public XL_CanIf(int baudrate)
         {
             Status = XLDefine.XL_Status.XL_ERROR; //Default setup
             _mutexWaitOnInit = new AutoResetEvent(false);
