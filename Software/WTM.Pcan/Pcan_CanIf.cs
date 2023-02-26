@@ -377,7 +377,7 @@ namespace WTM.Pcan
 
             Buffer.BlockCopy(theMsg.DATA, 0, data, 0, data.Length);
             CanMessage cmsg = new CanMessage(data, (int)theMsg.ID);
-            cmsg.Timestamp = itsTimeStamp.millis * 1000 + itsTimeStamp.micros;
+            cmsg.Timestamp = itsTimeStamp.millis;
             OnReceiveCanFrame?.Invoke(this, cmsg);
         }
     }
