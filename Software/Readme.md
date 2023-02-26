@@ -28,6 +28,15 @@ XL API is described [here](https://cdn.vector.com/cms/content/products/XL_Driver
  * Run the monitor using `WTM.Pcan.exe -b 500000 -f "D:\Path\To\CanIds_Example.xml"` where 500000 is baudrate and `CanIds_Example` is an optional file describing how CAN IDs should be processed
  * Exit the application by pressing `Esc` key
 
+## WTM.J2534
+**Hardware:** Any J2534 compatible device
+
+**Software** 
+ * Open `WiresharkTrafficMon.sln` and compile the solution. 
+ * Go into `Software\WTM.J2534\bin\Debug`
+ * Run the monitor using `WTM.J2534.exe -b 500000 -f "D:\Path\To\CanIds_Example.xml" -dll op20pt32.dll` where 500000 is baudrate and `CanIds_Example` is an optional file describing how CAN IDs should be processed. `op20pt32.dll` is name of DLL which behaves as a driver for J2534 device. If you don't know it, start the application without `-dll` argument and it will write down list of installed J2534 devices on the computer
+ * Exit the application by pressing `Esc` key
+
 ## CAN IDs file
 Optional XML file which is loaded into the program to perform sorting of incomming CAN messages
 
