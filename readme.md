@@ -2,17 +2,17 @@
 This repository is group of tools for pre-processing, logging and aggreagtion of traffic from CAN (and PDUs like ISO15765-2, VW TP2.0) and KLINE (ISO9141 / ISO14230) into Wireshark.
 
 ## Use Case
- * **Aggregate CAN traffic** using SocketCAN link layer
- * **Aggregate ISO9141 traffic** using IP RAW link layer and postprocess it via LUA dissectors
- * **Aggregate ISO15765 traffic** using IP RAW link layer and postprocess it via LUA dissectors
- * **Aggregate FlexRay traffic**
+ * **Aggregate CAN traffic** to Wireshark using SocketCAN link layer
+ * **Aggregate ISO9141 traffic** to Wireshark using IP RAW link layer and postprocess it via LUA dissectors
+ * **Aggregate ISO15765 traffic** to Wireshark using IP RAW link layer and postprocess it via LUA dissectors
+ * **Aggregate FlexRay traffic** to Wireshark using FlexRay link layer
 
 ## Setup
 To replicate screenshots below, click on the name to get steps for specific tool.  
 **Hardware:** Hardware used for preprocessing of data from CAN or KLINE bus to TCP (Hardware has LAN/WLAN capabilities) or USB (Software is lifting USB traffic to TCP)  
 **Log KLINE:** Wireshark can log `ISO9141 / ISO14230` and `KW1281` frames on TCP:19000  
-**Log CAN:** Wireshark can log `ISO15765` and `VWTP2.0` frames on TCP:19000 and `CAN` frames on TCP:19001  
-**Log FlexRay:** Wireshark can log `FlexRay` frames on TCP:19002  
+**Log CAN:** Wireshark can log `ISO15765` and `VWTP2.0` frames on TCP:19000 as IP RAW link layer and `CAN` frames on TCP:19001 as SocketCAN link layer  
+**Log FlexRay:** Wireshark can log `FlexRay` frames on TCP:19002 as FlexRay link layer  
 
 | Name                                              | Hardware             | Log KLINE | Log CAN  | Log FlexRay |
 | :------------------------------------------------ | :------------------- | :-------- | :------- | :---------- |
@@ -39,7 +39,7 @@ Parsed UDS traffic on MDG1 ECU
 ## Protocol
 I can trace `CAN, DoIP and FlexRay` using proper Wireshark link layer, however **I can't** trace `VWTP20, ISO9141, KW1281 and ISO15765*` For those protocols I have created dummy IPV4 header and then put those packets at a top of it. This simplifies subsequent parsing.
 
-**ISO15765** There is ISO15765 protocol in Wireshark, but it is mostly useless. It is not grouping multiple packets into one: i.e. you will have 20 CAN messages of conseq. frames. Dissector will just mark them, but not merge them into one line. Second big problem is inability to see errors: i.e. You have SEQ on conseq frame 1,2,4 with mising 3. That is obvious error. But not for this dissector. This dissector just don't care. Previous errors also screws up follow up frames (makring). That's the reason why I have created pre-processing on dedicated hardware.
+**ISO15765** There is ISO15765 protocol in Wireshark, but it is mostly useless. It is not grouping multiple packets into one: i.e. you will have 20 CAN messages of consequtive frames. Dissector will just mark them, but will not merge them into one line. Second big problem is inability to see errors: i.e. You have SEQ on consequtive frame 1,2,4 with mising 3. That is obvious error. But not for this dissector. This dissector just don't care. Previous errors also screws up follow up frames (marking). This frustration with existing setup on Wireshark is the reason why I have created this project.
 
 ### TCP protocol
 [There is not much information in official wireshark guide on TCP sockets](https://wiki.wireshark.org/CaptureSetup/Pipes) just only this example:  
@@ -81,9 +81,14 @@ If we are using Link Layer for Socket CAN, then we will be sending always 16 byt
 00-00-07-EF-08-00-00-00-01-02-03-04-05-06-07-08
 
 Where:
-    00-00-07-EF = CAN ID (See BE!)
+    00-00-07-EF = 3bit flags + CAN ID (See BE!)
     08-00-00-00 = DLC
     01-02-03-04-05-06-07-08 = CAN Data
+
+    Flags are as follows
+    100 - Extended CAN ID
+    010 - RTR
+    001 - Error Message Flag
 ```
 
 ### FlexRay Packet
