@@ -27,3 +27,17 @@ XL API is described [here](https://cdn.vector.com/cms/content/products/XL_Driver
  * Go into `Software\WTM.Pcan\bin\Debug`
  * Run the monitor using `WTM.Pcan.exe -b 500000 -f "D:\Path\To\CanIds_Example.xml"` where 500000 is baudrate and `CanIds_Example` is an optional file describing how CAN IDs should be processed
  * Exit the application by pressing `Esc` key
+
+## CAN IDs file
+Optional XML file which is loaded into the program to perform sorting of incomming CAN messages
+
+```
+<?xml version="1.0" encoding="utf-8" ?>
+<canids>
+	<canid action="ignore">080</canid>
+	<canid action="iso15765">7E0</canid>
+	<canid action="iso15765">7E8</canid>
+</canids>
+```
+ * `action` = Attribute which says if CAN id should be ignored by `action=ignore` or used to feed into ISO15765 protocol by `action=iso15765`. Keep in mind that ignored group is checked before ISO15765 group.
+ * `080` = Value of ID in hexadecimal format
