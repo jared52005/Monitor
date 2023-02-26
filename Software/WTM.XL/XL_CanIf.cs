@@ -243,7 +243,7 @@ namespace WTM.XL
 
                                     CanMessage frame = new CanMessage(data, id);
                                     //Timestamp value is in nanoseconds, generated with 8us precision per XL Driver Library
-                                    frame.Timestamp = (long)(receivedEvent.timeStamp / 1000);
+                                    frame.Timestamp = (long)(receivedEvent.timeStamp / 1000000);
                                     OnReceiveCanFrame?.Invoke(this, frame);
                                 }
                             }
