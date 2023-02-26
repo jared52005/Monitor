@@ -10,7 +10,7 @@ namespace WTM.Filter
 {
     public class CanIds : IDisposable
     {
-        string _path;
+        FileSystemWatcher _watcher;
         public List<int> IgnoredIds { get; set; }
         public CanIds(string path)
         {
@@ -24,8 +24,30 @@ namespace WTM.Filter
                 Console.WriteLine($"File {path} does not exist");
                 return;
             }
-            _path = path;
             ParseXml(path);
+
+            var directory = Path.GetDirectoryName(path);
+            var filename = Path.GetFileName(path);
+            _watcher = new FileSystemWatcher(directory, filename);
+            _watcher.NotifyFilter = NotifyFilters.LastWrite;
+            _watcher.Changed += Watcher_Changed;
+            _watcher.EnableRaisingEvents = true;
+
+        }
+
+        DateTime _lastWrite;
+        private void Watcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            //Bug - FileSystemEvent is fired twice on one change.
+            DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
+            if (lastWriteTime != _lastWrite)
+            {
+                _lastWrite = lastWriteTime;
+                System.Threading.Thread.Sleep(500); //Give 3rd party application some time to finish writing.
+                                                    //Yes there should be some smarter check. This is lazy, but usually works.
+                Console.WriteLine("CAN ID file changed, update...");
+                ParseXml(e.FullPath);
+            }
         }
 
         private void ParseXml(string path)
@@ -87,7 +109,7 @@ namespace WTM.Filter
 
         public void Dispose()
         {
-            
+            _watcher.Dispose();
         }
     }
 }
