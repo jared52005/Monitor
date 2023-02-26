@@ -30,8 +30,8 @@ namespace WTM.Shared
                         case "-com":
                             pargs.Add(ArgumentTypes.ComPort, args[i + 1]);
                             break;
-                        case "-i":
-                        case "-canid":
+                        case "-f":
+                        case "-file":
                             string canidFilePath = args[i + 1];
                             if (File.Exists(canidFilePath))
                             {

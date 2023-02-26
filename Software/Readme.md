@@ -21,7 +21,7 @@ I have good experience with FT232RL connected together with MC33660 or L9613
 **Software** 
  * Open `WiresharkTrafficMon.sln` and compile the solution. 
  * Go into `Software\WTM.Pcan\bin\Debug`
- * Run the monitor using `WTM.Pcan.exe -b 500000 -i "D:\Path\To\CanIds_Example.xml"` where 500000 is baudrate and `CanIds_Example` is an optional file describing how CAN IDs should be processed
+ * Run the monitor using `WTM.Pcan.exe -b 500000 -f "D:\Path\To\CanIds_Example.xml"` where 500000 is baudrate and `CanIds_Example` is an optional file describing how CAN IDs should be processed
  * Exit the application by pressing `Esc` key
 
 XL API is described [here](https://cdn.vector.com/cms/content/products/XL_Driver_Library/Docs/XL_Driver_Library_Manual_EN.pdf)

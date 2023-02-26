@@ -17,7 +17,7 @@ namespace WTM.Pcan
                 if (!pargs.ContainsKey(ArgumentTypes.Baudrate))
                 {
                     Console.WriteLine("Missing Baudrate. Aborting.");
-                    Console.WriteLine("Usage: -b 500000 [-i canId.xml]");
+                    Console.WriteLine("Usage: -b 500000 [-f canId.xml]");
                 }
                 else
                 {
