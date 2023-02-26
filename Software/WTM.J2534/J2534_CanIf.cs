@@ -97,6 +97,18 @@ namespace WTM.J2534
                     id |= m.Data[3];
 
                     CanMessage msg = new CanMessage(data, id);
+                    if (m.Timestamp == 0)
+                    {
+                        DateTime dtnow = DateTime.Now;
+                        msg.Timestamp += dtnow.Hour * 3600 * 1000;
+                        msg.Timestamp += dtnow.Minute * 60 * 1000;
+                        msg.Timestamp += dtnow.Second * 1000;
+                        msg.Timestamp += dtnow.Millisecond;
+                    }
+                    else
+                    {
+                        msg.Timestamp = m.Timestamp; //Is it in miliseconds?
+                    }
                     OnReceiveCanFrame?.Invoke(this, msg);
                 }
             }
