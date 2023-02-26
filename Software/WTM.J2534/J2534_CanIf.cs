@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Channels;
 using System.Security.Cryptography;
@@ -22,22 +23,26 @@ namespace WTM.J2534
 
         public event EventHandler<CanMessage> OnReceiveCanFrame;
 
-        public J2534_CanIf(string dllName)
+        public J2534_CanIf(string dllName, int baudrate)
         {
             //Get full path to DLL
             var q = APIFactory.GetAPIinfo();
             string fileName = string.Empty;
             foreach(var info in q)
             {
-                if(info.Filename.Contains(dllName))
+                if (string.IsNullOrEmpty(dllName))
+                {
+                    Console.WriteLine($" - Available {info.Name} DllName: {Path.GetFileName(info.Filename)}");
+                }
+                else if (info.Filename.Contains(dllName))
                 {
                     fileName = info.Filename;
                 }
             }
 
-            if(string.IsNullOrEmpty(fileName))
+            if(string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(dllName))
             {
-                Console.WriteLine($"{dllName} not found");
+                Console.WriteLine($"J2534 DLL {dllName} not found. See possible candidates above");
                 return;
             }
 
@@ -49,7 +54,7 @@ namespace WTM.J2534
                 return;
             }
 
-            m_j2534Channel = m_j2534Interface.GetChannel(Protocol.CAN, Baud.CAN_500000, ConnectFlag.NONE);
+            m_j2534Channel = m_j2534Interface.GetChannel(Protocol.CAN, (Baud)baudrate, ConnectFlag.NONE);
             MessageFilter msgPattern = new MessageFilter(UserFilterType.PASSALL, null);
             int filterId = m_j2534Channel.StartMsgFilter(msgPattern);
 

@@ -13,6 +13,7 @@ namespace WTM.Shared
         CanIdsFile,
         ComPort,
         Baudrate,
+        J2534Dll,
     }
 
     public static class Arguments
@@ -29,6 +30,9 @@ namespace WTM.Shared
                         case "-c":
                         case "-com":
                             pargs.Add(ArgumentTypes.ComPort, args[i + 1]);
+                            break;
+                        case "-dll":
+                            pargs.Add(ArgumentTypes.J2534Dll, args[i + 1]);
                             break;
                         case "-f":
                         case "-file":

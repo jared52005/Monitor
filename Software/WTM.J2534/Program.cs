@@ -11,11 +11,34 @@ namespace WTM.J2534
     {
         static int Main(string[] args)
         {
-            Passive_Can_Manager pcm = new Passive_Can_Manager();
-            pcm.Start("op20pt32.dll");
-            WaitEsc();
-            pcm.Dispose();
-            return 0;
+            var pargs = Arguments.Parse(args);
+            if (pargs != null)
+            {
+                if (!pargs.ContainsKey(ArgumentTypes.Baudrate))
+                {
+                    Console.WriteLine("Missing Baudrate. Aborting.");
+                    Console.WriteLine("Usage: -b 500000 [-f canId.xml] [-dll op20pt32.dll]");
+                }
+                else
+                {
+                    string pathCanIds = string.Empty;
+                    string dll = string.Empty;
+                    if (pargs.ContainsKey(ArgumentTypes.CanIdsFile))
+                    {
+                        pathCanIds = pargs[ArgumentTypes.CanIdsFile] as string;
+                    }
+                    if (pargs.ContainsKey(ArgumentTypes.J2534Dll))
+                    {
+                        dll = pargs[ArgumentTypes.J2534Dll] as string;
+                    }
+                    Passive_Can_Manager pcm = new Passive_Can_Manager();
+                    pcm.Start(dll, (int)pargs[ArgumentTypes.Baudrate], pathCanIds);
+                    WaitEsc();
+                    pcm.Dispose();
+                    return 0;
+                }
+            }
+            return -1;
         }
 
         static void WaitEsc()

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<canids>
+	<canid action="ignore">080</canid>
+	<canid action="iso15765">7E0</canid>
+	<canid action="iso15765">7E1</canid>
+	<canid action="iso15765">7E8</canid>
+	<canid action="iso15765">7E9</canid>
+</canids>
