@@ -54,7 +54,7 @@ namespace WTM.J2534
                 return;
             }
 
-            m_j2534Channel = m_j2534Interface.GetChannel(Protocol.CAN, (Baud)baudrate, ConnectFlag.NONE);
+            m_j2534Channel = m_j2534Interface.GetChannel(Protocol.CAN, (Baud)baudrate, ConnectFlag.CAN_ID_BOTH);
             MessageFilter msgPattern = new MessageFilter(UserFilterType.PASSALL, null);
             int filterId = m_j2534Channel.StartMsgFilter(msgPattern);
 
