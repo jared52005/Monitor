@@ -159,6 +159,11 @@ namespace WTM.Wireshark
             payload[1] = (byte)(rmsg.Id >> 16);
             payload[2] = (byte)(rmsg.Id >> 8);
             payload[3] = (byte)rmsg.Id;
+            if(rmsg.Id > 0x7FF)
+            {
+                //Flag extended CAN messages
+                payload[0] |= 0x80;
+            }
             //DLC
             payload[4] = (byte)rmsg.Dlc;
             //Data
