@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
@@ -9,6 +10,7 @@ namespace WTM.Shared
 {
     public enum ArgumentTypes
     {
+        CanIdsFile,
         ComPort,
         Baudrate,
     }
@@ -27,6 +29,18 @@ namespace WTM.Shared
                         case "-c":
                         case "-com":
                             pargs.Add(ArgumentTypes.ComPort, args[i + 1]);
+                            break;
+                        case "-i":
+                        case "-canid":
+                            string canidFilePath = args[i + 1];
+                            if (File.Exists(canidFilePath))
+                            {
+                                pargs.Add(ArgumentTypes.CanIdsFile, canidFilePath);
+                            }
+                            else
+                            {
+                                throw new Exception($"Invalid path to CanIDs file: {canidFilePath}");
+                            }
                             break;
                         case "-b":
                         case "-baudrate":

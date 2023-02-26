@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WTM.Filter;
 using WTM.Protocols;
 using WTM.Wireshark;
 
@@ -11,6 +12,7 @@ namespace WTM
     public abstract class A_Passive_Can_Manager : IDisposable
     {
         ICanIf _can;
+        CanIds _canIds;
         Passive_ISO15765 _pisotp;
         Passive_VWTP20 _pvwtp20;
         Wireshark_SocketCan _ws_can;
@@ -21,10 +23,13 @@ namespace WTM
             _can.Dispose();
             _ws_can.Dispose();
             _ws_raw.Dispose();
+            _canIds.Dispose();
         }
 
-        public void Start(ICanIf can)
+        public void Start(ICanIf can, string canidsPath = null)
         {
+            _canIds = new CanIds(canidsPath);
+
             _ws_can = new Wireshark_SocketCan();
             _ws_raw = new Wireshark_Raw();
             _pisotp = new Passive_ISO15765();
@@ -47,6 +52,11 @@ namespace WTM
 
         private void _can_OnReceiveCanFrame(object sender, CanMessage e)
         {
+            if(_canIds.Ignore(e))
+            {
+                return;
+            }
+
             //Console.WriteLine(e);
             _ws_can.Add(e);
 

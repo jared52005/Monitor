@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Arguments.cs" />
     <Compile Include="CanMessage.cs" />
+    <Compile Include="Filter\CanIds.cs" />
     <Compile Include="FlexRayMessage.cs" />
     <Compile Include="ICanIf.cs" />
     <Compile Include="A_Passive_Can_Manager.cs" />
