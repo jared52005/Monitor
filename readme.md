@@ -20,7 +20,7 @@ To replicate screenshots below, click on the name to get steps for specific tool
 | [Firmware/STM3240G](/Firmware/STM3240G/readme.md) | STM3240G             | Yes       | Yes      |             |
 | [Software/WTM.J2534](/Software/Readme.md)         | J2534 device         |           | Yes      |             |
 | [Software/WTM.KLine](/Software/Readme.md)         | FT232 + MC33660, ... | Yes       |          |             |
-| Software/WTM.Pcan                                 | PCAN-USB etc.        |           | Yes      |             |
+| [Software/WTM.Pcan](/Software/Readme.md)          | PCAN-USB etc.        |           | Yes      |             |
 | [Software/WTM.XL](/Software/Readme.md)            | VN7640, etc.         |           | Yes      | Yes         |
 
 ## How it looks
