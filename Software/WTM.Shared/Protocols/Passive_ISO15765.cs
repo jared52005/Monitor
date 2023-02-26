@@ -9,7 +9,6 @@ namespace WTM.Protocols
     public class Passive_ISO15765
     {
         // -- Private variables
-        uint[] valid_CanIds = new uint[]{ 0x700, 0x7E0, 0x7E8, 0x7E1, 0x7E9 };
         byte[] iso15765_frame = new byte[4096];
         int iso15765_frame_position = 0;
         int iso15765_frame_expectedLength = 0;
@@ -17,18 +16,6 @@ namespace WTM.Protocols
 
         public event EventHandler<RawMessage> OnRawFrame;
 
-        bool Passive_Iso15765_Contains(uint id)
-        {
-            int i;
-            for (i = 0; i < valid_CanIds.Length; i++)
-            {
-                if (valid_CanIds[i] == id)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
         void Passive_Iso15765_VerifyPreviousDatagram()
         {
             if (iso15765_frame_position != 0)
@@ -128,12 +115,6 @@ namespace WTM.Protocols
         public bool Passive_Iso15765_Parse(CanMessage cmsg)
         {
             int NPCI;
-            //Check if we have this ID on list of allowed IDs to parse
-            if (Passive_Iso15765_Contains((uint)cmsg.Id) == false)
-            {
-                //Use only target IDs
-                return false;
-            }
             if (cmsg.Dlc == 0)
             {
                 //Only non-zero lengths

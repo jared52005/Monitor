@@ -60,9 +60,12 @@ namespace WTM
             //Console.WriteLine(e);
             _ws_can.Add(e);
 
-            if (_pisotp.Passive_Iso15765_Parse(e))
+            if (_canIds.IsIso15765(e))
             {
-                return;
+                if (_pisotp.Passive_Iso15765_Parse(e))
+                {
+                    return;
+                }
             }
             if (_pvwtp20.Passive_Vwtp20_Parse(e))
             {
