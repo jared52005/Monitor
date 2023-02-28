@@ -9,5 +9,7 @@ namespace WTM
     public interface ICanIf : IDisposable
     {
         event EventHandler<CanMessage> OnReceiveCanFrame;
+
+        int Baudrate { get; }
     }
 }

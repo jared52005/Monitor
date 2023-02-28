@@ -59,6 +59,8 @@ namespace WTM.Pcan
         /// </summary>
         private TPCANHandle[] m_HandlesArray;
 
+        public int Baudrate { get; }
+
         /// <summary>
         /// Initialize PeakCAN Driver
         /// </summary>
@@ -95,6 +97,7 @@ namespace WTM.Pcan
                 throw new Exception("Cannot continue, unable to enable PeakCAN device");
             }
             _enabled = true;
+            Baudrate = baudrate;
 
             //Start thread for reading of data
             ThreadStart threadDelegate = new ThreadStart(this.CANReadThreadFunc);

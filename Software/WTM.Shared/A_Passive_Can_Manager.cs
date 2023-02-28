@@ -40,7 +40,7 @@ namespace WTM
             _can = can;
             //Route CAN messages on passive protocols
             _can.OnReceiveCanFrame += _can_OnReceiveCanFrame;
-            Console.WriteLine($"Ready");
+            Console.WriteLine($"CAN Ready @ {can.Baudrate}");
         }
 
 

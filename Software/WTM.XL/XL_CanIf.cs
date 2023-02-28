@@ -32,12 +32,15 @@ namespace WTM.XL
         private bool _killRxThread;
         AutoResetEvent _mutexWaitOnInit;
 
+        public int Baudrate { get; }
+
         public event EventHandler<CanMessage> OnReceiveCanFrame;
 
         public XLDefine.XL_Status Status { get; set; }
 
         public XL_CanIf(int baudrate)
         {
+            Baudrate = 0; //TODO - Figure out how to change baudrate for Vector via API instead of HW Config
             Status = XLDefine.XL_Status.XL_ERROR; //Default setup
             _mutexWaitOnInit = new AutoResetEvent(false);
 

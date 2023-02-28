@@ -23,6 +23,8 @@ namespace WTM.J2534
 
         public event EventHandler<CanMessage> OnReceiveCanFrame;
 
+        public int Baudrate { get; }
+
         public J2534_CanIf(string dllName, int baudrate)
         {
             //Get full path to DLL
@@ -53,7 +55,7 @@ namespace WTM.J2534
                 Console.WriteLine("Unable to open device");
                 return;
             }
-
+            Baudrate = baudrate;
             m_j2534Channel = m_j2534Interface.GetChannel(Protocol.CAN, (Baud)baudrate, ConnectFlag.CAN_ID_BOTH);
             MessageFilter msgPattern = new MessageFilter(UserFilterType.PASSALL, null);
             int filterId = m_j2534Channel.StartMsgFilter(msgPattern);
