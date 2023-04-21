@@ -234,6 +234,22 @@ function EDS_InfoColumn(tvbuf, pktinfo)
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x20]
 end
 
+--KWP 23
+function RMBA_InfoColumn(tvbuf, pktinfo)
+    -- `[23] - Read Memory By Address
+    -- 23 00 e1 b0 04
+    sid = tvbuf:range(0,1):uint()
+    if(sid == 0x23 ) then
+        local preview = tostring(tvbuf:range(0,1))
+        local address = tostring(tvbuf:range(1,3))
+        local length = tostring(tvbuf:range(4,1))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x23] .. " @ " .. string.upper(address) .. " [" .. string.upper(length) .. "]"
+    else
+        local preview = tostring(tvbuf:range(0,1))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x23]
+    end
+end
+
 --KWP 27
 function SA_InfoColumn(tvbuf, pktinfo)
     -- `[2701] - Seceurity access`
@@ -311,6 +327,20 @@ function RTE_InfoColumn(tvbuf, pktinfo)
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x37]
 end
 
+--KWP 3D
+function WMBA_InfoColumn(tvbuf, pktinfo)
+    -- `[3D] - Write memory by address`
+    sid = tvbuf:range(0,1):uint()
+    if(sid == 0x3D ) then
+        local preview = tostring(tvbuf:range(0,1))
+        local address = tostring(tvbuf:range(1,3))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x3D] .. " @ " .. string.upper(address)
+    else
+        local preview = tostring(tvbuf:range(0,1))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x3D]
+    end
+end
+
 --KWP 3E
 function TP_InfoColumn(tvbuf, pktinfo)
     -- `[3E] - Tester Present; Default`
@@ -332,10 +362,18 @@ function EC_InfoColumn(tvbuf, pktinfo)
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x82]
 end
 
+--KWP 83
+function ATP_InfoColumn(tvbuf, pktinfo)
+    -- `[83] - Access Timing Paramters
+    local preview = tostring(tvbuf:range(0,1))
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x83]
+end
+
 local sid_dict_methods = {
     [0x10] = SDS_InfoColumn,
     [0x1A] = RDBCI_InfoColumn,
     [0x20] = EDS_InfoColumn,
+    [0x23] = RMBA_InfoColumn,
     [0x27] = SA_InfoColumn,
     [0x31] = RC_InfoColumn,
     [0x33] = RRRBLID_InfoColumn,
@@ -343,9 +381,11 @@ local sid_dict_methods = {
     [0x35] = RU_InfoColumn,
     [0x36] = T_InfoColumn,
     [0x37] = RTE_InfoColumn,
+    [0x3D] = WMBA_InfoColumn,
     [0x3E] = TP_InfoColumn,
     [0x81] = SC_InfoColumn,
     [0x82] = EC_InfoColumn,
+    [0x83] = ATP_InfoColumn,
 }
 
 local positive_response_mask = 0x40
