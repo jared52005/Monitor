@@ -234,6 +234,12 @@ function EDS_InfoColumn(tvbuf, pktinfo)
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x20]
 end
 
+function RDBLI_InfoColumn(tvbuf, pktinfo)
+    -- `[21F0] - RDBLI; 
+    local preview = tostring(tvbuf:range(0,2))
+    pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x21]
+end
+
 --KWP 23
 function RMBA_InfoColumn(tvbuf, pktinfo)
     -- `[23] - Read Memory By Address
@@ -256,6 +262,22 @@ function SA_InfoColumn(tvbuf, pktinfo)
     local preview = tostring(tvbuf:range(0,2))
     local type = "Level: " .. tostring(tvbuf:range(1,1))
     pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x27] .. "; " .. type
+end
+
+--KWP 2C
+function DDLI_InfoColumn(tvbuf, pktinfo)
+    -- `[2C F0 03 01 FF 00 00 00] - Define Dynamic Local Identifier`
+    sid = tvbuf:range(0,1):uint()
+    if(sid == 0x2C) then
+        local preview = tostring(tvbuf:range(0,1))
+        local id = tostring(tvbuf:range(1,1))
+        local address = tostring(tvbuf:range(5,3))
+        local length = tostring(tvbuf:range(4,1))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x2C] .. " " .. string.upper(id) .. " @ " .. string.upper(address) .. " [" .. string.upper(length) .. "]"
+    else
+        local preview = tostring(tvbuf:range(0,1))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x2C]
+    end
 end
 
 --KWP 31
@@ -373,8 +395,10 @@ local sid_dict_methods = {
     [0x10] = SDS_InfoColumn,
     [0x1A] = RDBCI_InfoColumn,
     [0x20] = EDS_InfoColumn,
+    [0x21] = RDBLI_InfoColumn,
     [0x23] = RMBA_InfoColumn,
     [0x27] = SA_InfoColumn,
+    [0x2C] = DDLI_InfoColumn,
     [0x31] = RC_InfoColumn,
     [0x33] = RRRBLID_InfoColumn,
     [0x34] = RD_InfoColumn,
