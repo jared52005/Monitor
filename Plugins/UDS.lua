@@ -274,6 +274,26 @@ function RD_InfoColumn(tvbuf, pktinfo)
     end
 end
 
+--UDS 35
+function RU_InfoColumn(tvbuf, pktinfo)
+    sid = tvbuf:range(0,1):uint()
+    if(sid == 0x35 ) then
+        -- `[35 1e c0 00 01 01 3e 00] - Request Upload <address> [<length>]`
+        local preview = tostring(tvbuf:range(0,1))
+
+        local fmt = tvbuf:range(2,1):uint()
+        local fmt_length = bit32.rshift(bit32.band(fmt, 0xF0), 4)
+        local fmt_address = bit32.band(fmt, 0xF)
+
+        local address = tostring(tvbuf:range(3, fmt_address))
+        local length = tostring(tvbuf:range(3 + fmt_address,fmt_length))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x35] .. "; " .. string.upper(address) .. " [" .. string.upper(length) .. "]"
+    else
+        local preview = tostring(tvbuf:range(0,1))
+        pktinfo.cols.info = "[" .. string.upper(preview) .. "] - " ..  sid_dict_description[0x35]
+    end
+end
+
 --UDS 36
 function T_InfoColumn(tvbuf, pktinfo)
     -- `[36] - Data transfer
@@ -334,6 +354,7 @@ local sid_dict_methods = {
     [0x2E] = WDBLI_InfoColumn,
     [0x31] = RC_InfoColumn,
     [0x34] = RD_InfoColumn,
+	[0x35] = RU_InfoColumn,
     [0x36] = T_InfoColumn,
     [0x37] = RTE_InfoColumn,
     [0x3E] = TP_InfoColumn,
