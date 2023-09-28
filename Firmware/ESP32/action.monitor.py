@@ -7,7 +7,7 @@ def Read(serialPort):
 		c = serialPort.read()
 		if c == '\r':
 			c = ' '
-		sys.stdout.write(c)
+		sys.stdout.write(c.decode("ASCII"))
 	return
 
 def Main():
