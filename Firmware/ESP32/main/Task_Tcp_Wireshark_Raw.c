@@ -257,7 +257,7 @@ void Task_Tcp_Wireshark_Raw_AddNewRawMessage(uint8_t* frame, uint32_t length, ui
   }
   //Alocate data for message
   RawMessage* qRawMessage = (RawMessage*)pvPortMalloc(sizeof(RawMessage));
-  qRawMessage->Frame = pvPortMalloc(sizeof(length));
+  qRawMessage->Frame = pvPortMalloc(length);
 
   //Write down data into ring buffer for sending
 	qRawMessage->MessageType = msgType;
