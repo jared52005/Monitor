@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "systemif.h": "c",
+        "can.h": "c",
+        "stm32f4xx_can.h": "c",
+        "canif.h": "c",
+        "slcan.h": "c",
+        "usbd_usr.h": "c",
+        "usbd_core.h": "c",
+        "usbd_def.h": "c",
+        "usbif.h": "c",
+        "defines.h": "c"
+    }
+}

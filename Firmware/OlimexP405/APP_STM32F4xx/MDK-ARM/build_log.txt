@@ -1,0 +1,2 @@
+Load "D:\\Git\\Monitor\\Firmware\\OlimexP405\\APP_STM32F4xx\\MDK-ARM\\bin\\bin.axf" 
+Erase Done.Programming Done.Verify OK.Flash Load finished at 00:55:15
