@@ -62,42 +62,7 @@ void taskMainThread(void* argument)
 {
 	//Init timer (port.c has some retarded init, which does not work correctly)
 	SysTick_Config(configCPU_CLOCK_HZ / configTICK_RATE_HZ);
-	
-	//Enable 100us timer
-	Gpt_100us_Init();
-
-	//2) Start thread which is behaving as SysTick
-	xTaskCreate(taskSysTick, (const char*)"SysTick task", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
 	Application();
-}
-
-void taskSysTick(void *pvParameters)
-{
-	uint32_t miliseconds;
-	uint32_t lastFtdiKeepAlive = 0;
-	uint32_t lastSecondIndicator = 0;
-	for(;;)
-	{
-		miliseconds = GetTime_ms();
-		if(miliseconds % 2 == 0)
-		{
-			if(miliseconds != lastFtdiKeepAlive)
-			{
-				//Send KeepAlive packet ever second milisecond
-				//Usb_SysTick_Refresh();
-				lastFtdiKeepAlive = miliseconds;
-			}
-		}
-		if(miliseconds % 1000 == 0)
-		{
-			if(miliseconds != lastSecondIndicator)
-			{
-				printf("  %d s\n", miliseconds / 1000);
-				lastSecondIndicator = miliseconds;
-			}
-		}
-		taskYIELD();
-	}
 }
 
 struct __FILE { int handle; /* Add whatever you need here */ };
