@@ -60,6 +60,11 @@ void Application(void)
     Can_Mode_Set(CAN_ACTIVE);
     can_speed = CAN_BITRATE_500K;
     Can_Baudrate_Set(can_speed);
+    // Set power pins (Optional)
+    GPIO_InitPin(GPIO_VBAT);
+    GPIO_InitPin(GPIO_IGN);
+    GPIO_WritePin(GPIO_VBAT, GPIO_PIN_SET_);
+    GPIO_WritePin(GPIO_IGN, GPIO_PIN_SET_);
 
     // blink red LED for test
     GPIO_WritePin(LED_RED, GPIO_PIN_SET_);

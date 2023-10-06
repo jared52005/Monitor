@@ -18,7 +18,7 @@
 #include "stm32f4xx_gpio.h"
 
 /* Private defintions -------------------------------------------------------*/
-#define LEDn                             7
+#define LEDn                             9
 #ifdef STM32F40GEVAL
 #define LED_RED_PIN                         GPIO_Pin_9
 #define LED_RED_GPIO_PORT                   GPIOI
@@ -69,6 +69,14 @@
 #define KLINE_L_PIN                         NULL
 #define KLINE_L_GPIO_PORT                   NULL
 #define KLINE_L_GPIO_CLK                    NULL
+
+#define GPIO_VBAT_PIN                       GPIO_Pin_5
+#define GPIO_VBAT_GPIO_PORT                 GPIOB
+#define GPIO_VBAT_GPIO_CLK                  RCC_AHB1Periph_GPIOB
+
+#define GPIO_IGN_PIN                        GPIO_Pin_2
+#define GPIO_IGN_GPIO_PORT                  GPIOB
+#define GPIO_IGN_GPIO_CLK                   RCC_AHB1Periph_GPIOB
 #endif
 
 /* Private prototypes -------------------------------------------------------*/
@@ -87,6 +95,8 @@ GPIO_TypeDef* GPIO_PORT[LEDn] = {
 	KLINE_K_GPIO_PORT,
 	KLINE_L_GPIO_PORT,
 	LED_BLUE_GPIO_PORT,
+	GPIO_VBAT_GPIO_PORT,
+	GPIO_IGN_GPIO_PORT,
 };
 const uint16_t GPIO_PIN[LEDn] = {
 	LED_RED_PIN,
@@ -96,6 +106,8 @@ const uint16_t GPIO_PIN[LEDn] = {
 	KLINE_K_PIN,
 	KLINE_L_PIN,
 	LED_BLUE_PIN, 
+	GPIO_VBAT_PIN,
+	GPIO_IGN_PIN,
 };
 const uint32_t GPIO_CLK[LEDn] = {
 	LED_RED_GPIO_CLK,
@@ -105,6 +117,8 @@ const uint32_t GPIO_CLK[LEDn] = {
 	KLINE_K_GPIO_CLK,
 	KLINE_L_GPIO_CLK,
 	LED_BLUE_GPIO_CLK,
+	GPIO_VBAT_GPIO_CLK,
+	GPIO_IGN_GPIO_CLK,
 };
 
 void GPIO_WritePin(GpioPin_Name pin, GpioPin_State newVal)

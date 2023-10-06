@@ -22,6 +22,8 @@ typedef enum
   KLINE_K = 4,
   KLINE_L = 5,
   LED_BLUE = 6,
+  GPIO_VBAT = 7,
+  GPIO_IGN = 8,
 }GpioPin_Name;
 
 /** 
