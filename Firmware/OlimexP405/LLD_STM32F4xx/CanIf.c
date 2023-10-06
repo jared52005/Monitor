@@ -500,6 +500,7 @@ void CAN1_RX0_IRQHandler (void)
     CanRxMsg RxMessage;
     int i;
     uint32_t canId;
+    CanIdType cIdType;
     
     //Check if message is pending for FIFO0
     if(CAN_GetITStatus(BOARD_CAN_IF, CAN_IT_FMP0) == RESET) 
@@ -521,15 +522,18 @@ void CAN1_RX0_IRQHandler (void)
     if(RxMessage.IDE == CAN_Id_Standard)
     {
         canId = RxMessage.StdId;
+        cIdType = CAN_ID_TYPE_STD;
     }
     else
     {
         canId = RxMessage.ExtId;
+        cIdType = CAN_ID_TYPE_EXT;
     }
     
     //Add message to the buffer
     canMessageFifo0[canFifo0_writePtr].Dlc = RxMessage.DLC;
     canMessageFifo0[canFifo0_writePtr].Id = canId;
+    canMessageFifo0[canFifo0_writePtr].ID_Type = cIdType;
     for (i = 0; i < RxMessage.DLC; i++)
     {
         canMessageFifo0[canFifo0_writePtr].Frame[i] = RxMessage.Data[i];

@@ -44,6 +44,8 @@ void CanDriver_Task(void* arg)
     		canRxMsg_Queue = (CanMessage*)pvPortMalloc(sizeof(CanMessage));
     		canRxMsg_Queue->Dlc = canRxMsg.Dlc;
     		canRxMsg_Queue->Id = canRxMsg.Id;
+			canRxMsg_Queue->ID_Type = canRxMsg.ID_Type;
+			canRxMsg_Queue->RTR = CAN_TYPE_DATA;
     		canRxMsg_Queue->Timestamp = canRxMsg.Timestamp;
     		memcpy(canRxMsg_Queue->Frame, canRxMsg.Frame, canRxMsg.Dlc);
     		xQueueSend(canMessage_RxQueue, ( void * ) &canRxMsg_Queue, (TickType_t)0);
@@ -85,6 +87,7 @@ void CanDriver_Transmit(CanMessage cmsg)
     qCanMessage = (CanMessage*)pvPortMalloc(sizeof(CanMessage));
     qCanMessage->Dlc = cmsg.Dlc;
     qCanMessage->Id = cmsg.Id;
+	qCanMessage->ID_Type = cmsg.ID_Type;
     qCanMessage->Timestamp = cmsg.Timestamp;
     memcpy(qCanMessage->Frame, cmsg.Frame, cmsg.Dlc);
     xQueueSend(canMessage_TxQueue, ( void * ) &qCanMessage, (TickType_t)0);
@@ -103,6 +106,7 @@ bool CanDriver_Receive(CanMessage* cmsg)
 		//Copy allocated xcmsg into user's cmsg, and free it
 		cmsg->Dlc = xcmsg->Dlc;
     	cmsg->Id = xcmsg->Id;
+		cmsg->ID_Type = xcmsg->ID_Type;
     	memcpy(cmsg->Frame, xcmsg->Frame, cmsg->Dlc);
 		//printf("Dequeued %x - %x [%x]", cmsg->Id, cmsg->Dlc, cmsg->Frame[0]);
       	vPortFree(xcmsg);
