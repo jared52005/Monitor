@@ -26,7 +26,7 @@ void CanDriver_Task(void* arg)
 	CanMessage* canTxMsg;
 	_stop = false;
 	
-	printf("CAN Driver task has started\n");
+	//printf("CAN Driver task has started\n");
     if (Can_Enable() != ERROR_OK)
 	{
         printf("ERROR: Init of CAN peripheral has failed\r\n");
