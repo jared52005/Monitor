@@ -42,6 +42,8 @@ static char command[32];
 void pars_slcancmd(char *buf, uint16_t bufSize);
 void send_canmsg(char *buf, bool rtr, bool ext);
 void transfer_can2tty(void);
+void slcan_mask(char *buf);
+void slcan_filter(char *buf);
 
 /**
  * @brief Common method which is running main loop for all existing devices
@@ -60,6 +62,9 @@ void Application(void)
     Can_Mode_Set(CAN_PASSIVE);
     can_speed = CAN_BITRATE_500K;
     Can_Baudrate_Set(can_speed);
+    Can_Mask(0);
+    Can_Filter(0);
+
     // Set power pins (Optional)
     GPIO_InitPin(GPIO_VBAT);
     GPIO_InitPin(GPIO_IGN);
@@ -181,9 +186,11 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
       }
       break;
     case 'M':               ///set ACCEPTANCE CODE ACn REG
+      slcan_filter(buf);
       slcan_ack();
       break;
-    case 'm':               // set ACCEPTANCE CODE AMn REG
+    case 'm':               // set ACCEPTANCE MASK AMn REG
+      slcan_mask(buf);
       slcan_ack();
       break;
     case 's':               // CUSTOM CAN bit-rate
@@ -472,5 +479,26 @@ void send_canmsg(char *buf, bool rtr, bool ext)
         msg_cnt_out++;
     }
 } // send_canmsg()
+
+void slcan_mask(char *buf)
+{
+    uint32_t mask;
+    uint32_t maskM;
+    uint32_t maskL;
+    sscanf(&buf[1], "%04x%04x", &maskM, &maskL);
+    mask = (maskM << 16) + maskL;
+    printf("Set Mask to %x", mask);
+    Can_Mask(mask);
+}
+void slcan_filter(char *buf)
+{
+    uint32_t filter;
+    uint32_t filterM;
+    uint32_t filterL;
+    sscanf(&buf[1], "%04x%04x", &filterM, &filterL);
+    filter = (filterM << 16) + filterL;
+    printf("Set Filter to %x", filter);
+    Can_Filter(filter);
+}
 
 //----------------------------------------------------------------

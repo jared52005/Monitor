@@ -139,4 +139,12 @@ ErrorCodes Can_Mode_Set(CanMode mode);
 * @brief  Disable CAN peripheral
 */
 ErrorCodes Can_Disable(void);
+/**
+ * @brief Set Mask/Filter
+*/
+void Can_Mask(uint32_t mask);
+/**
+ * @brief Set Mask/Filter
+*/
+void Can_Filter(uint32_t filter);
 #endif

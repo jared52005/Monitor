@@ -30,9 +30,27 @@ ErrorCodes canLastError;
 can_bitrate _canBaudrate = CAN_BITRATE_500K;
 CanMode _canMode = CAN_ACTIVE;
 
+uint32_t _mask;
+uint32_t _filter;
+
 /* Private methods -----------------------------------------------------------*/
 static ErrorCodes Can_ResetFifo_0(void);
 static void Can_WaitReady (CAN_TypeDef* CANx);
+
+/**
+ * @brief Set Mask/Filter
+*/
+void Can_Mask(uint32_t mask)
+{
+    _mask = mask;
+}
+/**
+ * @brief Set Mask/Filter
+*/
+void Can_Filter(uint32_t filter)
+{
+    _filter = filter;
+}
 
 /**
 * @brief  Receive one CAN message from buffer
@@ -528,6 +546,11 @@ void CAN1_RX0_IRQHandler (void)
     {
         canId = RxMessage.ExtId;
         cIdType = CAN_ID_TYPE_EXT;
+    }
+
+    if((canId & _mask) != _filter)
+    {
+        goto CanIsrEnd;
     }
     
     //Add message to the buffer
