@@ -53,15 +53,11 @@ void Application(void)
     /* Initialize all configured peripherals */
     TM_USB_VCP_Init();
     led_init();
+
+    //Default CAN settings
     Can_Mode_Set(CAN_ACTIVE);
-	Can_Baudrate_Set(CAN_BITRATE_500K);
-    if (Can_Enable() != ERROR_OK)
-	{
-        printf("ERROR: Init of CAN peripheral has failed\r\n");
-    }
-	
-    //Initialize CAN Raw Loopback
-    xTaskCreate(CanDriver_Task, (const char*)"CAN Driver", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL);
+    can_speed = CAN_BITRATE_500K;
+    Can_Baudrate_Set(can_speed);
 
     // blink red LED for test
     GPIO_WritePin(LED_RED, GPIO_PIN_SET_);
@@ -106,6 +102,10 @@ void Application(void)
                 cmdSize = 0;
             }
         }
+        else
+        {
+            //Deque RX queue and send data over VCP
+        }
     }
 }
 
@@ -131,14 +131,14 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
   {
     case 'O':               // OPEN CAN
       working=true;
-      //ESP32Can.CANInit();
+      CanDriver_Start();
       msg_cnt_in = 0;
       msg_cnt_out = 0;
       slcan_ack();
       break;
     case 'C':               // CLOSE CAN
       working=false;
-      //ESP32Can.CANStop();
+      CanDriver_Stop();
       slcan_ack();
       break;
     case 't':               // SEND STD FRAME
@@ -190,28 +190,38 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
       switch (buf[1]) 
       {
         case '0':           // 10k  
+          can_speed = CAN_BITRATE_10K;
+          Can_Baudrate_Set(can_speed);
           slcan_nack();
           break;
         case '1':           // 20k
+          can_speed = CAN_BITRATE_20K;
+          Can_Baudrate_Set(can_speed);
           slcan_nack();
           break;
         case '2':           // 50k
+          can_speed = CAN_BITRATE_50K;
+          Can_Baudrate_Set(can_speed);
           slcan_nack();
           break;
         case '3':           // 100k
           can_speed = CAN_BITRATE_100K;
+          Can_Baudrate_Set(can_speed);
           slcan_ack();
           break;
         case '4':           // 125k
           can_speed = CAN_BITRATE_125K;
+          Can_Baudrate_Set(can_speed);
           slcan_ack();
           break;
         case '5':           // 250k
           can_speed = CAN_BITRATE_250K;
-         slcan_ack();
+          Can_Baudrate_Set(can_speed);
+          slcan_ack();
           break;
         case '6':           // 500k
           can_speed = CAN_BITRATE_500K;
+          Can_Baudrate_Set(can_speed);
           slcan_ack();
           break;
         case '7':           // 800k
@@ -219,6 +229,7 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
           break;
         case '8':           // 1000k
           can_speed = CAN_BITRATE_1000K;
+	      Can_Baudrate_Set(can_speed);
           slcan_ack();
           break;
         default:
