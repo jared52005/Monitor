@@ -193,3 +193,4 @@ Firmware/STM3240G_EVAL/Projects/STM324xG_EVAL/Applications/LwIP/LwIP_UDPTCP_Echo
 Firmware/ESP32/sdkconfig
 Firmware/ESP32/main/wifi_creds.h
 Firmware/OlimexP405/APP_STM32F4xx/MDK-ARM/build_log.txt
+Firmware/OlimexP405/APP_STM32F4xx/MDK-ARM/APP_STM32F4xx.uvgui.jarda
