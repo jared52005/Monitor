@@ -21,7 +21,8 @@ static bool _stop;
 void CanDriver_Task(void* arg)
 {
 	ErrorCodes canResult;
-	CanMessage* canRxMsg;
+	CanMessage canRxMsg;
+	CanMessage* canRxMsg_Queue;
 	CanMessage* canTxMsg;
 	_stop = false;
 	
@@ -36,11 +37,18 @@ void CanDriver_Task(void* arg)
     while(_stop == false)
     {
 		//Check RX messages
-        canResult = Can_Rx(canRxMsg);
+        canResult = Can_Rx(&canRxMsg);
 	    if (canResult == ERROR_OK)
 	    {
+			//Copy cmsg into allocated qCanMessage and queue it
+    		canRxMsg_Queue = (CanMessage*)pvPortMalloc(sizeof(CanMessage));
+    		canRxMsg_Queue->Dlc = canRxMsg.Dlc;
+    		canRxMsg_Queue->Id = canRxMsg.Id;
+    		canRxMsg_Queue->Timestamp = canRxMsg.Timestamp;
+    		memcpy(canRxMsg_Queue->Frame, canRxMsg.Frame, canRxMsg.Dlc);
+    		xQueueSend(canMessage_RxQueue, ( void * ) &canRxMsg_Queue, (TickType_t)0);
 			//print received CAN message on USB
-			//printf("Received CAN data\n");
+			//printf("Received %x - %x [%x]\n", canRxMsg.Id, canRxMsg.Dlc, canRxMsg.Frame[0]);
 	    }
 		
 		//Check TX Queue
@@ -95,8 +103,8 @@ bool CanDriver_Receive(CanMessage* cmsg)
 		//Copy allocated xcmsg into user's cmsg, and free it
 		cmsg->Dlc = xcmsg->Dlc;
     	cmsg->Id = xcmsg->Id;
-    	cmsg->Timestamp = xcmsg->Timestamp;
     	memcpy(cmsg->Frame, xcmsg->Frame, cmsg->Dlc);
+		//printf("Dequeued %x - %x [%x]", cmsg->Id, cmsg->Dlc, cmsg->Frame[0]);
       	vPortFree(xcmsg);
 	  	return true;
     }

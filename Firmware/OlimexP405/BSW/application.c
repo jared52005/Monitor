@@ -37,9 +37,11 @@ uint32_t msg_cnt_in     = 0;
 uint32_t msg_cnt_out    = 0;
 
 static uint8_t hexval[17] = "0123456789ABCDEF";
+static char command[32];
 
 void pars_slcancmd(char *buf, uint16_t bufSize);
 void send_canmsg(char *buf, bool rtr, bool ext);
+void transfer_can2tty(void);
 
 /**
  * @brief Common method which is running main loop for all existing devices
@@ -105,6 +107,7 @@ void Application(void)
         else
         {
             //Deque RX queue and send data over VCP
+            transfer_can2tty();
         }
     }
 }
@@ -322,108 +325,74 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
 } // pars_slcancmd()
 
 //----------------------------------------------------------------
-/*
-void transfer_tty2can()
-{
-  int ser_length;
-  static char cmdbuf[32];
-  static int cmdidx = 0;
-  if (bluetooth) {
-    if ((ser_length = SerialBT.available()) > 0) {
-      for (int i = 0; i < ser_length; i++) {
-        char val = SerialBT.read();
-        cmdbuf[cmdidx++] = val;
-        if (cmdidx == 32)
-        {
-          slcan_nack();
-          cmdidx = 0;
-        } else if (val == '\r')
-        {
-          cmdbuf[cmdidx] = '\0';
-          pars_slcancmd(cmdbuf);
-          cmdidx = 0;
-        }
-      }
-    }
-  } else {
-    if ((ser_length = Serial.available()) > 0) {
-      for (int i = 0; i < ser_length; i++) {
-        char val = Serial.read();
-        cmdbuf[cmdidx++] = val;
-        if (cmdidx == 32)
-        {
-          slcan_nack();
-          cmdidx = 0;
-        } else if (val == '\r')
-        {
-          cmdbuf[cmdidx] = '\0';
-          pars_slcancmd(cmdbuf);
-          cmdidx = 0;
-        }
-      }
-    }
-  }
-} // transfer_tty2can()
-*/
-//----------------------------------------------------------------
 
-/*
-void transfer_can2tty()
+void transfer_can2tty(void)
 {
-  CAN_frame_t rx_frame;
-  String command = "";
+  int i;
+  CanMessage rx_frame;
+  int cOff;
   long time_now = 0;
   //receive next CAN frame from queue
-  if(xQueueReceive(CAN_cfg.rx_queue,&rx_frame, 3*portTICK_PERIOD_MS)==pdTRUE) {
+  if(CanDriver_Receive(&rx_frame)==true) 
+  {
     //do stuff!
-    if(working) {
-      if(rx_frame.FIR.B.FF==CAN_frame_ext) {
-        if (rx_frame.FIR.B.RTR==CAN_RTR) {
-          command = command + "R";
-        } else {
-          command = command + "T";
+    if(working) 
+    {
+        cOff = 0;
+        if(rx_frame.ID_Type==CAN_ID_TYPE_EXT) 
+        {
+            if (rx_frame.RTR==CAN_TYPE_REMOTE) 
+            {
+                command[cOff++] = 'R';
+            }
+            else 
+            {
+                command[cOff++] = 'T';
+            }   
+            command[cOff++] = hexval[ (rx_frame.Id>>28)&1];
+            command[cOff++] = hexval[ (rx_frame.Id>>24)&15];
+            command[cOff++] = hexval[ (rx_frame.Id>>20)&15];
+            command[cOff++] = hexval[ (rx_frame.Id>>16)&15];
+            command[cOff++] = hexval[ (rx_frame.Id>>12)&15];
+            command[cOff++] = hexval[ (rx_frame.Id>>8)&15];
+            command[cOff++] = hexval[ (rx_frame.Id>>4)&15];
+            command[cOff++] = hexval[ rx_frame.Id&15];
+            command[cOff++] = hexval[ rx_frame.Dlc];
         }
-        command = command + char(hexval[ (rx_frame.MsgID>>28)&1]);
-        command = command + char(hexval[ (rx_frame.MsgID>>24)&15]);
-        command = command + char(hexval[ (rx_frame.MsgID>>20)&15]);
-        command = command + char(hexval[ (rx_frame.MsgID>>16)&15]);
-        command = command + char(hexval[ (rx_frame.MsgID>>12)&15]);
-        command = command + char(hexval[ (rx_frame.MsgID>>8)&15]);
-        command = command + char(hexval[ (rx_frame.MsgID>>4)&15]);
-        command = command + char(hexval[ rx_frame.MsgID&15]);
-        command = command + char(hexval[ rx_frame.FIR.B.DLC ]);
-      } else {
-        if (rx_frame.FIR.B.RTR==CAN_RTR) {
-          command = command + "r";
-        } else {
-          command = command + "t";
+        else 
+        {
+            if (rx_frame.RTR==CAN_TYPE_REMOTE) 
+            {
+            command[cOff++] = 'r';
+            } 
+            else 
+            {
+                command[cOff++] = 't';
+            }
+            command[cOff++] = hexval[ (rx_frame.Id>>8)&15];
+            command[cOff++] = hexval[ (rx_frame.Id>>4)&15];
+            command[cOff++] = hexval[ rx_frame.Id&15];
+            command[cOff++] = hexval[ rx_frame.Dlc ];
         }
-        command = command + char(hexval[ (rx_frame.MsgID>>8)&15]);
-        command = command + char(hexval[ (rx_frame.MsgID>>4)&15]);
-        command = command + char(hexval[ rx_frame.MsgID&15]);
-        command = command + char(hexval[ rx_frame.FIR.B.DLC ]);
-      }
-      for(int i = 0; i < rx_frame.FIR.B.DLC; i++){
-        command = command + char(hexval[ rx_frame.data.u8[i]>>4 ]);
-        command = command + char(hexval[ rx_frame.data.u8[i]&15 ]);
-        //printf("%c\t", (char)rx_frame.data.u8[i]);
-      }
-    if (timestamp) {
-      time_now = millis() % 60000;
-      command = command + char(hexval[ (time_now>>12)&15 ]);
-      command = command + char(hexval[ (time_now>>8)&15 ]);
-      command = command + char(hexval[ (time_now>>4)&15 ]);
-      command = command + char(hexval[ time_now&15 ]);
+        for(i = 0; i < rx_frame.Dlc; i++)
+        {
+            command[cOff++] = hexval[ rx_frame.Frame[i]>>4 ];
+            command[cOff++] = hexval[ rx_frame.Frame[i]&15 ];
+        }
+        if (timestamp) 
+        {
+            time_now =  GetTime_ms() % 60000;
+            command[cOff++] = hexval[ (time_now>>12)&15 ];
+            command[cOff++] = hexval[ (time_now>>8)&15 ];
+            command[cOff++] = hexval[ (time_now>>4)&15 ];
+            command[cOff++] = hexval[ time_now&15 ];
+        }
+        command[cOff++] = '\r';
+        printf(command);
+        msg_cnt_in++;
     }
-    command = command + '\r';
-    if (bluetooth) SerialBT.print(command);
-    else printf(command);
-    if (cr) printfln("");
-    }
-    msg_cnt_in++;
   }
 } // transfer_can2tty()
-*/
 
 //----------------------------------------------------------------
 
