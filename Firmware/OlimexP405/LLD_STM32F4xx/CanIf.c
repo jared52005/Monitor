@@ -25,50 +25,14 @@ int canFifo0_writePtr = 0;  //Pointer where we are starting with writing
 bool flagOverflow0 = false; //Overflow flag
 struct CanMessage canMessageFifo0[CAN_BUFFER_ITEMS]; //FIFO buffer with received CAN messages for user
 
-int canFifo1_readPtr = 0;   //Pointer where we are starting with reading
-int canFifo1_writePtr = 0;  //Pointer where we are starting with writing
-bool flagOverflow1 = false; //Overflow flag
-struct CanMessage canMessageFifo1[CAN_BUFFER_ITEMS]; //FIFO buffer with received CAN messages for user
-
-int canFifo2_readPtr = 0;   //Pointer where we are starting with reading
-int canFifo2_writePtr = 0;  //Pointer where we are starting with writing
-bool flagOverflow2 = false; //Overflow flag
-struct CanMessage canMessageFifo2[CAN_BUFFER_ITEMS]; //FIFO buffer with received CAN messages for user
-
 ErrorCodes canLastError;
 
 can_bitrate _canBaudrate = CAN_BITRATE_500K;
 CanMode _canMode = CAN_ACTIVE;
 
-ErrorCodes Can_Rx_0(CanMessage *canMsg);
-ErrorCodes Can_Rx_1(CanMessage *canMsg);
-ErrorCodes Can_Rx_2(CanMessage *canMsg);
-
 /* Private methods -----------------------------------------------------------*/
 static ErrorCodes Can_ResetFifo_0(void);
-static ErrorCodes Can_ResetFifo_1(void);
-static ErrorCodes Can_ResetFifo_2(void);
 static void Can_WaitReady (CAN_TypeDef* CANx);
-
-ErrorCodes Can_Rx(CanMessage *canMsg, uint8_t fifoNum)
-{
-	if(fifoNum == 0)
-	{
-		return Can_Rx_0(canMsg);
-	}
-    else if(fifoNum == 1)
-	{
-		return Can_Rx_1(canMsg);
-	}
-    else if(fifoNum == 2)
-	{
-		return Can_Rx_2(canMsg);
-	}
-	else
-	{
-		return ERROR_GENERAL;
-	}
-}
 
 /**
 * @brief  Receive one CAN message from buffer
@@ -77,7 +41,7 @@ ErrorCodes Can_Rx(CanMessage *canMsg, uint8_t fifoNum)
 *         CAN_ERROR_DATA_EMPTY: In buffer are no data available
 *         CAN_ERROR_DATA_OVERFLOW: No data in buffer because pointers were reset
 */
-ErrorCodes Can_Rx_0(CanMessage *canMsg)
+ErrorCodes Can_Rx(CanMessage *canMsg)
 {
     //If buffer has overflow, reset pointers in FIFO
     if (flagOverflow0 == true)
@@ -105,97 +69,11 @@ ErrorCodes Can_Rx_0(CanMessage *canMsg)
     return ERROR_OK;
 }
 
-/**
-* @brief  Receive one CAN message from buffer
-* @param  canMsg: Strucutre, where received CAN message will be written
-* @retval ERROR_OK: Received data are written in provided variables
-*         CAN_ERROR_DATA_EMPTY: In buffer are no data available
-*         CAN_ERROR_DATA_OVERFLOW: No data in buffer because pointers were reset
-*/
-ErrorCodes Can_Rx_1(CanMessage *canMsg)
-{
-    //If buffer has overflow, reset pointers in FIFO
-    if (flagOverflow1 == true)
-    {
-        Can_ResetFifo_1();
-        return ERROR_DATA_OVERFLOW;
-    }
-
-    //If pointers are same before reading and without buffer overflow flag, then buffer is empty
-    if (canFifo1_writePtr == canFifo1_readPtr)
-    {
-        return ERROR_DATA_EMPTY;
-    }
-
-    //Read next message from buffer and copy it
-    *canMsg = canMessageFifo1[canFifo1_readPtr];
-
-    //Move read pointer, if we are on the end of ring buffer, reset pointer
-    canFifo1_readPtr++;
-    if (canFifo1_readPtr >= CAN_BUFFER_ITEMS)
-    {
-        canFifo1_readPtr = 0;
-    }
-
-    return ERROR_OK;
-}
-
-/**
-* @brief  Receive one CAN message from buffer
-* @param  canMsg: Strucutre, where received CAN message will be written
-* @retval ERROR_OK: Received data are written in provided variables
-*         CAN_ERROR_DATA_EMPTY: In buffer are no data available
-*         CAN_ERROR_DATA_OVERFLOW: No data in buffer because pointers were reset
-*/
-ErrorCodes Can_Rx_2(CanMessage *canMsg)
-{
-    //If buffer has overflow, reset pointers in FIFO
-    if (flagOverflow2 == true)
-    {
-        Can_ResetFifo_2();
-        return ERROR_DATA_OVERFLOW;
-    }
-
-    //If pointers are same before reading and without buffer overflow flag, then buffer is empty
-    if (canFifo2_writePtr == canFifo2_readPtr)
-    {
-        return ERROR_DATA_EMPTY;
-    }
-
-    //Read next message from buffer and copy it
-    *canMsg = canMessageFifo2[canFifo2_readPtr];
-
-    //Move read pointer, if we are on the end of ring buffer, reset pointer
-    canFifo2_readPtr++;
-    if (canFifo2_readPtr >= CAN_BUFFER_ITEMS)
-    {
-        canFifo2_readPtr = 0;
-    }
-
-    return ERROR_OK;
-}
-
 ErrorCodes Can_ResetFifo_0()
 {
     canFifo0_readPtr = 0;
     canFifo0_writePtr = 0;
     flagOverflow0 = false;
-    return ERROR_OK;
-}
-
-ErrorCodes Can_ResetFifo_1()
-{
-    canFifo1_readPtr = 0;
-    canFifo1_writePtr = 0;
-    flagOverflow1 = false;
-    return ERROR_OK;
-}
-
-ErrorCodes Can_ResetFifo_2()
-{
-    canFifo2_readPtr = 0;
-    canFifo2_writePtr = 0;
-    flagOverflow2 = false;
     return ERROR_OK;
 }
 
@@ -344,7 +222,6 @@ ErrorCodes Can_Enable(void)
     // CAN register init 
     CAN_DeInit(CAN1);
     Can_ResetFifo_0();
-		Can_ResetFifo_1();
     //Load default data from CAN HAL driver
     CAN_StructInit(&CAN_InitStructure);
 
@@ -502,7 +379,6 @@ ErrorCodes Can_Enable(void)
     // CAN register init 
     CAN_DeInit(CAN1);
     Can_ResetFifo_0();
-	Can_ResetFifo_1();
     //Load default data from CAN HAL driver
     CAN_StructInit(&CAN_InitStructure);
 
@@ -636,7 +512,7 @@ void CAN1_RX0_IRQHandler (void)
     
     //Save received CAN message to FIFO buffer
     //Ignore any new message when buffer has overflown
-    if (flagOverflow0 == true || flagOverflow1 == true)
+    if (flagOverflow0 == true)
     {
         goto CanIsrEnd;
     }
@@ -651,75 +527,25 @@ void CAN1_RX0_IRQHandler (void)
         canId = RxMessage.ExtId;
     }
     
-    //Filter only specific messages
-    switch(canId)
+    //Add message to the buffer
+    canMessageFifo0[canFifo0_writePtr].Dlc = RxMessage.DLC;
+    canMessageFifo0[canFifo0_writePtr].Id = canId;
+    for (i = 0; i < RxMessage.DLC; i++)
     {
-        case 0x700:
-        case 0x7E0:
-        case 0x7E1:
-            //Add message to the buffer
-            canMessageFifo1[canFifo1_writePtr].Dlc = RxMessage.DLC;
-            canMessageFifo1[canFifo1_writePtr].Id = canId;
-            for (i = 0; i < RxMessage.DLC; i++)
-            {
-                canMessageFifo1[canFifo1_writePtr].Frame[i] = RxMessage.Data[i];
-            }
-            //Move write pointer, if we are on the end of ring buffer, reset pointer
-            canFifo1_writePtr++;
-            if (canFifo1_writePtr >= CAN_BUFFER_ITEMS)
-            {
-                canFifo1_writePtr = 0;
-            }
-            //If pointer are same after writing, then we made a buffer overflow of RX FIFO
-            if (canFifo1_writePtr == canFifo1_readPtr)
-            {
-                flagOverflow1 = true;
-            }
-		    break;
-        case 0x740:
-        case 0x200:
-            //Add message to the buffer
-            canMessageFifo0[canFifo0_writePtr].Dlc = RxMessage.DLC;
-            canMessageFifo0[canFifo0_writePtr].Id = canId;
-            for (i = 0; i < RxMessage.DLC; i++)
-            {
-                canMessageFifo0[canFifo0_writePtr].Frame[i] = RxMessage.Data[i];
-            }
-            //Move write pointer, if we are on the end of ring buffer, reset pointer
-            canFifo0_writePtr++;
-            if (canFifo0_writePtr >= CAN_BUFFER_ITEMS)
-            {
-                canFifo0_writePtr = 0;
-            }
-            //If pointer are same after writing, then we made a buffer overflow of RX FIFO
-            if (canFifo0_writePtr == canFifo0_readPtr)
-            {
-                flagOverflow0 = true;
-            }
-            break;
-        case 0x7FE:
-            //Add message to the buffer
-            canMessageFifo2[canFifo2_writePtr].Dlc = RxMessage.DLC;
-            canMessageFifo2[canFifo2_writePtr].Id = canId;
-            for (i = 0; i < RxMessage.DLC; i++)
-            {
-                canMessageFifo2[canFifo2_writePtr].Frame[i] = RxMessage.Data[i];
-            }
-            //Move write pointer, if we are on the end of ring buffer, reset pointer
-            canFifo2_writePtr++;
-            if (canFifo2_writePtr >= CAN_BUFFER_ITEMS)
-            {
-                canFifo2_writePtr = 0;
-            }
-            //If pointer are same after writing, then we made a buffer overflow of RX FIFO
-            if (canFifo2_writePtr == canFifo2_readPtr)
-            {
-                flagOverflow2 = true;
-            }
-            break;
-        default:
-            break;
+        canMessageFifo0[canFifo0_writePtr].Frame[i] = RxMessage.Data[i];
     }
+    //Move write pointer, if we are on the end of ring buffer, reset pointer
+    canFifo0_writePtr++;
+    if (canFifo0_writePtr >= CAN_BUFFER_ITEMS)
+    {
+        canFifo0_writePtr = 0;
+    }
+    //If pointer are same after writing, then we made a buffer overflow of RX FIFO
+    if (canFifo0_writePtr == canFifo0_readPtr)
+    {
+        flagOverflow0 = true;
+    }
+    
 CanIsrEnd:
     CAN_ClearITPendingBit(BOARD_CAN_IF,CAN_IT_FMP0);
     return;    

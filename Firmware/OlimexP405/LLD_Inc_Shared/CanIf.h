@@ -65,13 +65,11 @@ typedef enum {
 /**
 * @brief  Receive one CAN message from buffer
 * @param  canMsg: Strucutre, where received CAN message will be written
-* @param  fifoNum: 0 = FIFO for VWTP2.0 (CAN IDs 200, 740)
-                   1 = FIFO for ISO15765 (CAN IDs 7E0, 7E1, 700)
 * @retval CAN_ERROR_OK: Received data are written in provided variables
 *         CAN_ERROR_DATA_EMPTY: In buffer are no data available
 *         CAN_ERROR_DATA_OVERFLOW: No data in buffer because pointers were reset
 */
-ErrorCodes Can_Rx(CanMessage *canMsg, uint8_t fifoNum);
+ErrorCodes Can_Rx(CanMessage *canMsg);
 
 /**
 * @brief  Transmit message onto CAN bus
