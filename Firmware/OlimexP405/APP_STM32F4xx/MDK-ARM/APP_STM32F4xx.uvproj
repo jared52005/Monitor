@@ -630,9 +630,9 @@
               <FilePath>..\..\BSW\application.c</FilePath>
             </File>
             <File>
-              <FileName>CanRawLoopback.c</FileName>
+              <FileName>CanDriver.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\BSW\CanRawLoopback.c</FilePath>
+              <FilePath>..\..\BSW\CanDriver.c</FilePath>
             </File>
           </Files>
         </Group>

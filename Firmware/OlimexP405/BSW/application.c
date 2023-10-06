@@ -8,7 +8,7 @@
 #include "GpioIf.h"
 #include "GptIf.h"
 
-#include "CanRawLoopback.h"
+#include "CanDriver.h"
 
 #include "string.h"
 #include "stdbool.h"

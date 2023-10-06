@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "ErrorCodes.h"
-#include "CanRawLoopback.h"
+#include "CanDriver.h"
 #include "CanIf.h"
 //******************************************************************************
 #include "FreeRTOS.h"
@@ -15,14 +15,14 @@
 /**
 * @brief  Thread in which we are refreshing CAN state machine
 */
-void CanRawLoopback_Task(void* arg)
+void CanDriver_Task(void* arg)
 {
 	ErrorCodes canResult;
 	CanMessage canRxMsg;
 	int i;
     for(;;)
     {
-        canResult = Can_Rx(&canRxMsg, 2);
+        canResult = Can_Rx(&canRxMsg);
 	    if (canResult == ERROR_OK)
 	    {  
 			printf("CAN Raw - [");

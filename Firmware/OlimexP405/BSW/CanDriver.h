@@ -4,4 +4,4 @@
 /**
 * @brief  Thread in which we are refreshing CAN state machine
 */
-void CanRawLoopback_Task(void* arg);
+void CanDriver_Task(void* arg);
