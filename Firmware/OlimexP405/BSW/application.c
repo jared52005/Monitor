@@ -400,6 +400,7 @@ void transfer_can2tty(void)
             command[cOff++] = hexval[ time_now&15 ];
         }
         command[cOff++] = '\r';
+        command[cOff++] = '\0';
         printf(command);
         msg_cnt_in++;
     }
