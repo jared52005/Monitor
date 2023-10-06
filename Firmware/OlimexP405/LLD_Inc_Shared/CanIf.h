@@ -21,7 +21,7 @@
 *        512 * 13 =  6656 bytes
 *        CAN buffer is a structure array, which is being written as ring buffer
 */
-#define CAN_BUFFER_ITEMS 512
+#define CAN_BUFFER_ITEMS 128
 
 typedef enum
 {
@@ -38,6 +38,7 @@ typedef struct CanMessage
 	uint8_t   Frame[8]; //1-8 received bytes in CAN message
 	uint8_t   Dlc;      //Length of received frame
 	uint32_t  Id;       //ID of received frame
+    uint64_t  Timestamp; //Timestamp in miliseconds
 }CanMessage;
 
 /**
