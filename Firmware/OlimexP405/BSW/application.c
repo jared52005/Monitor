@@ -57,7 +57,7 @@ void Application(void)
     led_init();
 
     //Default CAN settings
-    Can_Mode_Set(CAN_ACTIVE);
+    Can_Mode_Set(CAN_PASSIVE);
     can_speed = CAN_BITRATE_500K;
     Can_Baudrate_Set(can_speed);
     // Set power pins (Optional)
