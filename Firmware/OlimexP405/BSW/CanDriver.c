@@ -21,8 +21,8 @@ static bool _stop;
 void CanDriver_Task(void* arg)
 {
 	ErrorCodes canResult;
-	CanMessage canRxMsg;
-	CanMessage canTxMsg;
+	CanMessage* canRxMsg;
+	CanMessage* canTxMsg;
 	_stop = false;
 	
 	printf("CAN Driver task has started\n");
@@ -36,20 +36,18 @@ void CanDriver_Task(void* arg)
     while(_stop == false)
     {
 		//Check RX messages
-        canResult = Can_Rx(&canRxMsg);
+        canResult = Can_Rx(canRxMsg);
 	    if (canResult == ERROR_OK)
 	    {
 			//print received CAN message on USB
-			printf("Received CAN data\n");
-
+			//printf("Received CAN data\n");
 	    }
 		
 		//Check TX Queue
-    	if(xQueueReceive( canMessage_RxQueue, &(canTxMsg), ( TickType_t ) 0 ) == pdPASS)
+    	if(xQueueReceive( canMessage_TxQueue, &(canTxMsg), ( TickType_t ) 0 ) == pdPASS)
     	{
-			//Copy allocated xcmsg into user's cmsg, and free it
-			Can_Tx(&canTxMsg);
-      		vPortFree(&canTxMsg);
+			Can_Tx(canTxMsg);
+      		vPortFree(canTxMsg);
     	}
 		taskYIELD();
     }

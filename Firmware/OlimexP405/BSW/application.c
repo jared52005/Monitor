@@ -141,7 +141,7 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
       CanDriver_Stop();
       slcan_ack();
       break;
-    case 't':               // SEND STD FRAME
+    case 't':               // SEND STD FRAME - i.e. t12323E00 = 0x123 [3E 00]
       send_canmsg(buf,false,false);
       slcan_ack();
       break;
@@ -429,95 +429,74 @@ void transfer_can2tty()
 
 void send_canmsg(char *buf, bool rtr, bool ext) 
 {
-  /*if (!working) {
-    print_error(0);
-    print_status();
-  } else {
-    CAN_frame_t tx_frame;
-    int msg_id = 0;
-    int msg_ide = 0;
-    if (rtr) {
-      if (ext) {
-        sscanf(&buf[1], "%04x%04x", &msg_ide, &msg_id);
-        tx_frame.FIR.B.RTR = CAN_RTR;
-        tx_frame.FIR.B.FF = CAN_frame_ext;
-      } else {
-        sscanf(&buf[1], "%03x", &msg_id);
-        tx_frame.FIR.B.RTR = CAN_RTR;
-        tx_frame.FIR.B.FF = CAN_frame_std;
-      }
-    } else {
-      if (ext) {
-        sscanf(&buf[1], "%04x%04x", &msg_ide, &msg_id);
-        tx_frame.FIR.B.RTR = CAN_no_RTR;
-        tx_frame.FIR.B.FF = CAN_frame_ext;
-      } else {
-        sscanf(&buf[1], "%03x", &msg_id);
-        tx_frame.FIR.B.RTR = CAN_no_RTR;
-        tx_frame.FIR.B.FF = CAN_frame_std;
-      }
+    int i;
+    uint32_t msg_id = 0;
+    uint32_t msg_ide = 0;
+    uint32_t msg_len = 0;
+    uint32_t candata = 0;
+    CanMessage tx_frame;
+    if (working) 
+    {
+        if (rtr) 
+        {
+            if (ext) 
+            {
+                sscanf(&buf[1], "%04x%04x", &msg_ide, &msg_id);
+                tx_frame.RTR = CAN_TYPE_REMOTE;
+                tx_frame.ID_Type = CAN_ID_TYPE_EXT;
+            }
+            else 
+            {
+                sscanf(&buf[1], "%03x", &msg_id);
+                tx_frame.RTR = CAN_TYPE_REMOTE;
+                tx_frame.ID_Type = CAN_ID_TYPE_STD;
+            }
+        }
+        else 
+        {
+            if (ext) 
+            {
+                sscanf(&buf[1], "%04x%04x", &msg_ide, &msg_id);
+
+                tx_frame.RTR = CAN_TYPE_DATA;
+                tx_frame.ID_Type = CAN_ID_TYPE_EXT;
+            }
+            else 
+            {
+                sscanf(&buf[1], "%03x", &msg_id);
+                tx_frame.RTR = CAN_TYPE_DATA;
+                tx_frame.ID_Type = CAN_ID_TYPE_STD;
+            }
+        }
+        tx_frame.Id = (msg_ide << 16) + msg_id;
+        if (ext) 
+        {
+            sscanf(&buf[9], "%01x", &msg_len);
+        }
+        else 
+        {
+            sscanf(&buf[4], "%01x", &msg_len);
+        }
+        tx_frame.Dlc = msg_len;        
+        if (ext) 
+        {
+            for (i = 0; i < msg_len; i++) 
+            {
+                sscanf(&buf[10 + (i*2)], "%02x", &candata);
+                tx_frame.Frame[i] = (uint8_t)candata;
+            }
+        }
+        else 
+        {
+            for (i = 0; i < msg_len; i++) 
+            {
+                sscanf(&buf[5 + (i*2)], "%02x", &candata);
+                tx_frame.Frame[i] = (uint8_t)candata;
+            }
+        }
+        CanDriver_Transmit(tx_frame);
+        msg_cnt_out++;
     }
-    tx_frame.MsgID = msg_ide*65536 + msg_id;
-    int msg_len = 0;
-    if (ext) {
-      sscanf(&buf[9], "%01x", &msg_len);
-    } else {
-      sscanf(&buf[4], "%01x", &msg_len);
-    }
-    tx_frame.FIR.B.DLC = msg_len;
-    int candata = 0;
-    if (ext) {
-      for (int i = 0; i < msg_len; i++) {
-        sscanf(&buf[10 + (i*2)], "%02x", &candata);
-        tx_frame.data.u8[i] = candata;
-      }
-    } else {
-      for (int i = 0; i < msg_len; i++) {
-        sscanf(&buf[5 + (i*2)], "%02x", &candata);
-        tx_frame.data.u8[i] = candata;
-      }
-    }
-    ESP32Can.CANWriteFrame(&tx_frame);
-    msg_cnt_out++;
-  }*/
 } // send_canmsg()
-
-//----------------------------------------------------------------
-
-/*
-void setup() {
-  //Wire.begin(21,22);
-  pinMode(SWITCH_PIN_A,INPUT_PULLUP);
-  pinMode(SWITCH_PIN_B,INPUT_PULLUP);
-  delay(3000);
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
-  display.setRotation(2);
-  Serial.begin(ser_speed);
-  delay(100);
-  //printfln("CAN demo");
-  CAN_cfg.speed=CAN_SPEED_500KBPS;
-  CAN_cfg.tx_pin_id = GPIO_NUM_4;
-  CAN_cfg.rx_pin_id = GPIO_NUM_5;
-  CAN_cfg.rx_queue = xQueueCreate(10,sizeof(CAN_frame_t));
-  display.setTextSize(2);
-  display.setTextColor(WHITE);
-  display.setCursor(15,10);
-  display.clearDisplay();
-  display.println("mintynet");
-  display.display();
-  delay(2000);
-  boolean switchA = digitalRead(SWITCH_PIN_A);
-  if (!switchA) {
-    SerialBT.begin("SLCAN");
-    bluetooth = true;
-    printfln("BT Switch ON");
-  } else {
-    bluetooth = false;
-    printfln("BT Switch OFF");
-  }
-  if (bluetooth) printfln("BLUETOOTH ON");
-  print_status();
-} // setup()
-*/
 
 //----------------------------------------------------------------

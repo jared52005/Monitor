@@ -29,12 +29,19 @@ typedef enum
     CAN_TYPE_REMOTE, //Remote frame
 }CanMessageType;
 
+typedef enum
+{
+    CAN_ID_TYPE_STD, //Standard frame
+    CAN_ID_TYPE_EXT, //Extended frame
+}CanIdType;
+
 /**
 * @brief  One row of CAN message FIFO buffer
 */
 typedef struct CanMessage
 {
     CanMessageType RTR;
+    CanIdType ID_Type;
 	uint8_t   Frame[8]; //1-8 received bytes in CAN message
 	uint8_t   Dlc;      //Length of received frame
 	uint32_t  Id;       //ID of received frame
