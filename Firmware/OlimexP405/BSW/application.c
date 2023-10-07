@@ -83,7 +83,7 @@ void Application(void)
     GPIO_WritePin(LED_RED, GPIO_PIN_SET_); //Let red LED on
 
 #ifdef DEBUG_TRACE
-    printf("SLCAN - Boot finished\r\n");
+    //printf("SLCAN - Boot finished\r\n");
 #endif
     cmdSize = 0;
     for(;;)
@@ -488,7 +488,7 @@ void slcan_mask(char *buf)
     uint32_t maskL;
     sscanf(&buf[1], "%04x%04x", &maskM, &maskL);
     mask = (maskM << 16) + maskL;
-    printf("Set Mask to %x", mask);
+    //printf("Set Mask to %x", mask);
     Can_Mask(mask);
 }
 void slcan_filter(char *buf)
@@ -498,7 +498,7 @@ void slcan_filter(char *buf)
     uint32_t filterL;
     sscanf(&buf[1], "%04x%04x", &filterM, &filterL);
     filter = (filterM << 16) + filterL;
-    printf("Set Filter to %x", filter);
+    //printf("Set Filter to %x", filter);
     Can_Filter(filter);
 }
 
