@@ -128,6 +128,13 @@ void TIM1_Init(int freq, int ch1_dc, int ch2_dc)
   ----------------------------------------------------------------------- */  
   
   /* Compute the value to be set in ARR register to generate signal frequency at "freq" Khz */
+  uint16_t prescaler = 0;
+  if(freq < 5000)
+  {
+    //TIM_Period is 16 bit value, so freq < 2600Hz would overflow it. Use prescaller
+    prescaler = 64;
+    freq = freq * prescaler;
+  }
   TimerPeriod = (SystemCoreClock / freq) - 1;
 
   /* Compute CCR2 value to generate a duty cycle for channel 2 */
@@ -137,7 +144,7 @@ void TIM1_Init(int freq, int ch1_dc, int ch2_dc)
   Channe2Pulse = (uint16_t) (((uint32_t) ch2_dc * (TimerPeriod - 1)) / 1000);
 
   /* Time Base configuration */
-  TIM_TimeBaseStructure.TIM_Prescaler = 0;
+  TIM_TimeBaseStructure.TIM_Prescaler = prescaler;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Down;
   TIM_TimeBaseStructure.TIM_Period = TimerPeriod;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
