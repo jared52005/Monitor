@@ -489,6 +489,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\LLD_STM32F4xx\GptIf.c</FilePath>
             </File>
+            <File>
+              <FileName>PwmIf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\LLD_STM32F4xx\PwmIf.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
