@@ -304,6 +304,7 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
       printf("-----NOT SPEC-----\n");
       printf("Gn\t=\tSet GPIO n\n");
       printf("gn\t=\tReset GPIO n\n");
+      printf("P1f00005555d44 = PWM Channel 1, 5555Hz, 44 percent DC\n");
       printf("h\t=\tHelp\n");
       printf("CAN_SPEED:\t");
       switch(can_speed) 
@@ -401,7 +402,7 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
       switch (buf[1]) 
       {
         case '1':
-          slcan_pwm(buf, 0);
+          slcan_pwm(buf, 1);
           slcan_ack();
           break;
         default:
