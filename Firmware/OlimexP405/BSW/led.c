@@ -12,9 +12,9 @@ static uint32_t led_lastoff = 0;
  */
 void led_init(void)
 {
-    GPIO_InitPin(LED_RED);
-    GPIO_InitPin(LED_GREEN);
-    GPIO_InitPin(LED_BLUE);
+    GPIO_InitPin(GPIO_LED_RED);
+    GPIO_InitPin(GPIO_LED_GREEN);
+    GPIO_InitPin(GPIO_LED_BLUE);
 }
 
 /**
@@ -26,7 +26,7 @@ void led_on(void)
     // This prevents a solid status LED on a busy canbus
     if(led_laston == 0 && GetTime_ms() - led_lastoff > LED_DURATION)
     {
-       GPIO_WritePin(LED_RED, GPIO_PIN_SET_);
+       GPIO_WritePin(GPIO_LED_RED, GPIO_PIN_SET_);
        led_laston = GetTime_ms();
     }
 }

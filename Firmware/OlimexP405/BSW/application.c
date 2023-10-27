@@ -72,15 +72,15 @@ void Application(void)
     GPIO_WritePin(GPIO_IGN, GPIO_PIN_SET_);
 
     // blink red LED for test
-    GPIO_WritePin(LED_RED, GPIO_PIN_SET_);
+    GPIO_WritePin(GPIO_LED_RED, GPIO_PIN_SET_);
     Wait_ms(100);
-    GPIO_WritePin(LED_RED, GPIO_PIN_RESET_);
+    GPIO_WritePin(GPIO_LED_RED, GPIO_PIN_RESET_);
     Wait_ms(100);
-    GPIO_WritePin(LED_RED, GPIO_PIN_SET_);
+    GPIO_WritePin(GPIO_LED_RED, GPIO_PIN_SET_);
     Wait_ms(100);
-    GPIO_WritePin(LED_RED, GPIO_PIN_RESET_);
-	Wait_ms(100);
-    GPIO_WritePin(LED_RED, GPIO_PIN_SET_); //Let red LED on
+    GPIO_WritePin(GPIO_LED_RED, GPIO_PIN_RESET_);
+	  Wait_ms(100);
+    GPIO_WritePin(GPIO_LED_RED, GPIO_PIN_SET_); //Let red LED on
 
 #ifdef DEBUG_TRACE
     //printf("SLCAN - Boot finished\r\n");

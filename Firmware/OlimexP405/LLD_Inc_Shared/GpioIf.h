@@ -15,15 +15,13 @@
 */
 typedef enum
 {
-	LED_RED = 0,
-	LED_GREEN = 1,
-  CAN_LBK_GPIO = 2,
-  CAN_RS_GPIO = 3,
-  KLINE_K = 4,
-  KLINE_L = 5,
-  LED_BLUE = 6,
-  GPIO_VBAT = 7,
-  GPIO_IGN = 8,
+	GPIO_LED_RED,
+	GPIO_LED_GREEN,
+  GPIO_KLINE_K,
+  GPIO_LED_BLUE,
+  GPIO_VBAT,
+  GPIO_IGN,
+  GPIO_Unknown
 }GpioPin_Name;
 
 /** 
