@@ -9,6 +9,7 @@
 #include "application.h"
 #include "GpioIf.h"
 #include "GptIf.h"
+#include "PwmIf.h"
 
 #include "CanDriver.h"
 
@@ -44,6 +45,7 @@ void send_canmsg(char *buf, bool rtr, bool ext);
 void transfer_can2tty(void);
 void slcan_mask(char *buf);
 void slcan_filter(char *buf);
+void slcan_pwm(char *buf, int pwmChannel);
 
 /**
  * @brief Common method which is running main loop for all existing devices
@@ -253,7 +255,7 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
           break;
         case '8':           // 1000k
           can_speed = CAN_BITRATE_1000K;
-	      Can_Baudrate_Set(can_speed);
+	        Can_Baudrate_Set(can_speed);
           slcan_ack();
           break;
         default:
@@ -300,6 +302,8 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
       printf("N\t=\tSerial No\n");
       printf("V\t=\tVersion\n");
       printf("-----NOT SPEC-----\n");
+      printf("Gn\t=\tSet GPIO n\n");
+      printf("gn\t=\tReset GPIO n\n");
       printf("h\t=\tHelp\n");
       printf("CAN_SPEED:\t");
       switch(can_speed) 
@@ -333,7 +337,7 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
       } else {
         printf("\tOFF");
       }
-      slcan_nack();
+      slcan_ack();
       break;
     case 'D':
         //Setup bootflag and request reset
@@ -384,6 +388,20 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
           break;
         case '3':
           GPIO_WritePin(GPIO_4, GPIO_PIN_RESET_);
+          slcan_ack();
+          break;
+        default:
+          slcan_nack();
+          break;
+      }
+      break;
+    }
+    case 'P': //PWM activation - P1f00005555d44 = PWM Channel 1, 5555Hz, 44% DC
+    {
+      switch (buf[1]) 
+      {
+        case '1':
+          slcan_pwm(buf, 0);
           slcan_ack();
           break;
         default:
@@ -564,4 +582,18 @@ void slcan_filter(char *buf)
     Can_Filter(filter);
 }
 
+void slcan_pwm(char *buf, int pwmChannel)
+{
+  //PWM activation - P1f00005555d44 = PWM Channel 1, 5555Hz, 44% DC
+  uint32_t freq;
+  uint32_t dc;
+  uint32_t valM;
+  uint32_t valL;
+  sscanf(&buf[3], "%04d%04d", &valM, &valL);
+  freq = (valM * 10000) + valL;
+  sscanf(&buf[12], "%02d", &valM);
+  dc = valM * 10;
+  printf("Set PWM ch%d %dHz %d DC", pwmChannel, freq, dc);
+  Pwm_Enable(PWM_CHANNEL_01, freq, dc, dc);
+}
 //----------------------------------------------------------------
