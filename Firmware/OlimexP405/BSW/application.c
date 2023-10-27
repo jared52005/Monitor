@@ -68,8 +68,17 @@ void Application(void)
     // Set power pins (Optional)
     GPIO_InitPin(GPIO_VBAT);
     GPIO_InitPin(GPIO_IGN);
+    GPIO_InitPin(GPIO_1);
+    GPIO_InitPin(GPIO_2);
+    GPIO_InitPin(GPIO_3);
+    GPIO_InitPin(GPIO_4);
+
     GPIO_WritePin(GPIO_VBAT, GPIO_PIN_SET_);
     GPIO_WritePin(GPIO_IGN, GPIO_PIN_SET_);
+    GPIO_WritePin(GPIO_1, GPIO_PIN_RESET_);
+    GPIO_WritePin(GPIO_2, GPIO_PIN_RESET_);
+    GPIO_WritePin(GPIO_3, GPIO_PIN_RESET_);
+    GPIO_WritePin(GPIO_4, GPIO_PIN_RESET_);
 
     // blink red LED for test
     GPIO_WritePin(GPIO_LED_RED, GPIO_PIN_SET_);
@@ -330,6 +339,59 @@ void pars_slcancmd(char *buf, uint16_t bufSize)
         //Setup bootflag and request reset
         *((uint32_t*)0x20000000) = 0x44465542; //"DFUB"
         System_Reset();
+        break;
+    case 'G': //Set pin N
+    {
+      switch (buf[1]) 
+      {
+        case '0':
+          GPIO_WritePin(GPIO_1, GPIO_PIN_SET_);
+          slcan_ack();
+          break;
+        case '1':
+          GPIO_WritePin(GPIO_2, GPIO_PIN_SET_);
+          slcan_ack();
+          break;
+        case '2':
+          GPIO_WritePin(GPIO_3, GPIO_PIN_SET_);
+          slcan_ack();
+          break;
+        case '3':
+          GPIO_WritePin(GPIO_4, GPIO_PIN_SET_);
+          slcan_ack();
+          break;
+        default:
+          slcan_nack();
+          break;
+      }
+      break;
+    }
+    case 'g': //Reset pin N
+    {
+      switch (buf[1]) 
+      {
+        case '0':
+          GPIO_WritePin(GPIO_1, GPIO_PIN_RESET_);
+          slcan_ack();
+          break;
+        case '1':
+          GPIO_WritePin(GPIO_2, GPIO_PIN_RESET_);
+          slcan_ack();
+          break;
+        case '2':
+          GPIO_WritePin(GPIO_3, GPIO_PIN_RESET_);
+          slcan_ack();
+          break;
+        case '3':
+          GPIO_WritePin(GPIO_4, GPIO_PIN_RESET_);
+          slcan_ack();
+          break;
+        default:
+          slcan_nack();
+          break;
+      }
+      break;
+    }
     default:
       slcan_nack();
       break;

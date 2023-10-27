@@ -39,11 +39,7 @@
 #endif
 
 #if defined(OLIMEXP405_Cv10)
-#define GPIOn                               3
-#define KLINE_K_PIN                         GPIO_Pin_10
-#define KLINE_K_GPIO_PORT                   GPIOB
-#define KLINE_K_GPIO_CLK                    RCC_AHB1Periph_GPIOB
-
+#define GPIOn                               6
 #define GPIO_VBAT_PIN                       GPIO_Pin_5
 #define GPIO_VBAT_GPIO_PORT                 GPIOB
 #define GPIO_VBAT_GPIO_CLK                  RCC_AHB1Periph_GPIOB
@@ -51,22 +47,47 @@
 #define GPIO_IGN_PIN                        GPIO_Pin_2
 #define GPIO_IGN_GPIO_PORT                  GPIOB
 #define GPIO_IGN_GPIO_CLK                   RCC_AHB1Periph_GPIOB
+
+#define GPIO_1_PIN                          GPIO_Pin_8
+#define GPIO_1_GPIO_PORT                    GPIOA
+#define GPIO_1_GPIO_CLK                     RCC_AHB1Periph_GPIOA
+
+#define GPIO_2_PIN                          GPIO_Pin_1
+#define GPIO_2_GPIO_PORT                    GPIOA
+#define GPIO_2_GPIO_CLK                     RCC_AHB1Periph_GPIOA
+
+#define GPIO_3_PIN                          GPIO_Pin_8
+#define GPIO_3_GPIO_PORT                    GPIOC
+#define GPIO_3_GPIO_CLK                     RCC_AHB1Periph_GPIOC
+
+#define GPIO_4_PIN                          GPIO_Pin_9
+#define GPIO_4_GPIO_PORT                    GPIOC
+#define GPIO_4_GPIO_CLK                     RCC_AHB1Periph_GPIOC
 /* Private variables --------------------------------------------------------*/
 
 GPIO_TypeDef* GPIO_PORT[GPIOn] = {
-	KLINE_K_GPIO_PORT,
 	GPIO_VBAT_GPIO_PORT,
 	GPIO_IGN_GPIO_PORT,
+	GPIO_1_GPIO_PORT,
+	GPIO_2_GPIO_PORT,
+	GPIO_3_GPIO_PORT,
+	GPIO_4_GPIO_PORT,
 };
 const uint16_t GPIO_PIN[GPIOn] = {
-	KLINE_K_PIN,
 	GPIO_VBAT_PIN,
 	GPIO_IGN_PIN,
+	GPIO_1_PIN,
+	GPIO_2_PIN,
+	GPIO_3_PIN,
+	GPIO_4_PIN,
 };
 const uint32_t GPIO_CLK[GPIOn] = {
-	KLINE_K_GPIO_CLK,
 	GPIO_VBAT_GPIO_CLK,
 	GPIO_IGN_GPIO_CLK,
+	GPIO_1_GPIO_CLK,
+	GPIO_2_GPIO_CLK,
+	GPIO_3_GPIO_CLK,
+	GPIO_4_GPIO_CLK,
 };
 
 /**
@@ -78,6 +99,24 @@ int32_t GPIO_GetPinPosition(GpioPin_Name pin)
 	int32_t pos;
 	switch (pin)
 	{
+	case GPIO_VBAT:
+		pos = 0;
+		break;
+	case GPIO_IGN:
+		pos = 1;
+		break;
+  	case GPIO_1:
+		pos = 2;
+		break;
+  	case GPIO_2:
+		pos = 3;
+		break;
+  	case GPIO_3:
+		pos = 4;
+		break;
+  	case GPIO_4:
+		pos = 5;
+		break;
 	default:
 		pos = -1;
 		break;

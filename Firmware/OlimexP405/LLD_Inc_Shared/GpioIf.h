@@ -11,17 +11,19 @@
 #include <stdint.h>
 
 /**
- * @brief Abstract definition of GPIO pins (usually LEDs)
+ * @brief Abstract definition of GPIO pins
 */
 typedef enum
 {
 	GPIO_LED_RED,
 	GPIO_LED_GREEN,
-  GPIO_KLINE_K,
   GPIO_LED_BLUE,
   GPIO_VBAT,
   GPIO_IGN,
-  GPIO_Unknown
+  GPIO_1,
+  GPIO_2,
+  GPIO_3,
+  GPIO_4
 }GpioPin_Name;
 
 /** 
